@@ -839,7 +839,7 @@ The table below is the live status box for the plan.
 | 0.2 | Establish shared conventions and guardrails | done | Canonical constants, agent guardrails, error handling, and path conventions documented for frontend and backend. |
 | 1.1 | Implement account schema and repository layer | done | Account schema and repository added; backend unit tests, typecheck, and lint passed. |
 | 1.2 | Implement authentication endpoints | done | Register, login, logout, and me JWT flow implemented; backend/frontend auth tests, typecheck, and lint passed. |
-| 1.3 | Implement Hugging Face token storage | pending |  |
+| 1.3 | Implement Hugging Face token storage | done | Save/delete token endpoints, encryption at rest, safe status responses, frontend status actions, tests, typecheck, and lint passed. |
 | 2.1 | Build workspace shell and upload flow | pending |  |
 | 2.2 | Implement browser manual editing tools | pending |  |
 | 2.3 | Implement browser filters and export | pending |  |

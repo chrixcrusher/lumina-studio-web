@@ -17,29 +17,53 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
 import { AppHeader } from "@/shared/components/AppHeader";
+import { accountApi } from "../services/account-api";
 
 export function AccountSettingsPage() {
   const [displayName, setDisplayName] = useState("Guest User");
   const [email, setEmail] = useState("guest@example.com");
   const [tokenDraft, setTokenDraft] = useState("");
   const [tokenConfigured, setTokenConfigured] = useState(false);
+  const [tokenActionPending, setTokenActionPending] = useState(false);
   const [message, setMessage] = useState("Plain Hugging Face tokens are never displayed after saving.");
 
-  const handleSaveToken = () => {
-    if (!tokenDraft.trim()) {
+  const handleSaveToken = async () => {
+    const huggingFaceToken = tokenDraft.trim();
+
+    if (!huggingFaceToken) {
       setMessage("Enter a Hugging Face token before saving or replacing it.");
       return;
     }
 
-    setTokenConfigured(true);
-    setTokenDraft("");
-    setMessage("Ready to call PUT /api/v1/account/hugging-face-token and display only status.");
+    setTokenActionPending(true);
+
+    try {
+      const status = await accountApi.saveHuggingFaceToken({ huggingFaceToken });
+
+      setTokenConfigured(status.huggingFaceTokenConfigured);
+      setTokenDraft("");
+      setMessage(status.message);
+    } catch (error) {
+      setMessage(toTokenActionMessage(error));
+    } finally {
+      setTokenActionPending(false);
+    }
   };
 
-  const handleDeleteToken = () => {
-    setTokenConfigured(false);
-    setTokenDraft("");
-    setMessage("Ready to call DELETE /api/v1/account/hugging-face-token.");
+  const handleDeleteToken = async () => {
+    setTokenActionPending(true);
+
+    try {
+      const status = await accountApi.deleteHuggingFaceToken();
+
+      setTokenConfigured(status.huggingFaceTokenConfigured);
+      setTokenDraft("");
+      setMessage(status.message);
+    } catch (error) {
+      setMessage(toTokenActionMessage(error));
+    } finally {
+      setTokenActionPending(false);
+    }
   };
 
   return (
@@ -121,6 +145,7 @@ export function AccountSettingsPage() {
                         variant="contained"
                         startIcon={<SaveIcon />}
                         onClick={handleSaveToken}
+                        disabled={tokenActionPending}
                       >
                         Save
                       </Button>
@@ -130,6 +155,7 @@ export function AccountSettingsPage() {
                         color="error"
                         startIcon={<DeleteIcon />}
                         onClick={handleDeleteToken}
+                        disabled={tokenActionPending}
                       >
                         Delete
                       </Button>
@@ -143,4 +169,12 @@ export function AccountSettingsPage() {
       </Container>
     </Box>
   );
+}
+
+function toTokenActionMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "Unable to update Hugging Face token status.";
 }
