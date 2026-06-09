@@ -850,7 +850,7 @@ The table below is the live status box for the plan.
 | 4.1 | Implement Hugging Face integration layer | done | Hugging Face client, CodeFormer provider, token helper, and mocked integration unit tests added. |
 | 4.2 | Implement AI restore API and workflow | done | Canonical restore-face API, guest/auth token modes, saved-token use, success history metadata, frontend workflow, API/UI/E2E coverage, typecheck, and tests passed. |
 | 5.1 | Add frontend and backend test coverage | done | Added frontend/backend API contract coverage and metadata-only history E2E coverage; unit tests, E2E tests, lint, and typecheck passed. |
-| 5.2 | Add security and deployment hardening | pending |  |
+| 5.2 | Add security and deployment hardening | done | Env-driven upload limits and frontend origins, CORS hardening, auth/AI rate limiting, safe log redaction, health smoke checks, backend typecheck, tests, and lint passed. |
 
 Status values:
 

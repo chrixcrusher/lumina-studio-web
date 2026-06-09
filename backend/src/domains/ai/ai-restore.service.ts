@@ -6,6 +6,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { OPERATION_TYPES, PROCESSING_MODES } from "../../contracts/lumina";
+import { getMaxUploadSizeBytes } from "../../common/deployment-config";
 import { CodeFormerProvider } from "../../integrations/huggingface/codeformer.provider";
 import { HuggingFaceTokenService } from "../../integrations/huggingface/hugging-face-token.service";
 import { AccountRepository } from "../../persistence/repositories/account.repository";
@@ -17,7 +18,6 @@ import type {
   RestoreFaceResponseDto,
 } from "./ai-restore.types";
 
-const MAX_AI_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
 const SUPPORTED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 interface ValidatedImage {
@@ -113,8 +113,13 @@ export class AiRestoreService {
       throw new BadRequestException("Invalid field: image.");
     }
 
-    if (imageBytes.length > MAX_AI_IMAGE_SIZE_BYTES) {
-      throw new HttpException("Invalid field: image exceeds the 10 MB limit.", HttpStatus.PAYLOAD_TOO_LARGE);
+    const maxUploadSizeBytes = getMaxUploadSizeBytes();
+
+    if (imageBytes.length > maxUploadSizeBytes) {
+      throw new HttpException(
+        `Invalid field: image exceeds the ${Math.round(maxUploadSizeBytes / 1024 / 1024)} MB limit.`,
+        HttpStatus.PAYLOAD_TOO_LARGE,
+      );
     }
 
     const detectedContentType = this.detectImageType(imageBytes);
