@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactElement } from "react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { AccountSettingsPage } from "@/domains/account/components/AccountSettingsPage";
 import { AuthForm } from "@/domains/authentication/components/AuthForm";
 import { EditorWorkspace } from "@/domains/editor/components/EditorWorkspace";
@@ -95,7 +95,82 @@ describe("MVP UI alignment", () => {
     await user.click(screen.getByRole("button", { name: "Text" }));
     await user.type(screen.getByLabelText(/text overlay content/i), "Studio note");
     expect(screen.getByTestId("text-overlay")).toHaveTextContent("Studio note");
-  });
+  }, 10000);
+
+  it("applies browser filters, shows the original preview, and exports a download", async () => {
+    const user = userEvent.setup();
+    const originalImage = window.Image;
+    const context = {
+      save: vi.fn(),
+      translate: vi.fn(),
+      rotate: vi.fn(),
+      scale: vi.fn(),
+      drawImage: vi.fn(),
+      fillText: vi.fn(),
+      restore: vi.fn(),
+      filter: "none",
+      fillStyle: "",
+      font: "",
+      textAlign: "",
+      textBaseline: "",
+      shadowColor: "",
+      shadowBlur: 0,
+      shadowOffsetY: 0,
+    };
+    const getContext = vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(context as unknown as CanvasRenderingContext2D);
+    const toDataUrl = vi.spyOn(HTMLCanvasElement.prototype, "toDataURL").mockReturnValue("data:image/png;base64,exported");
+    const clickDownload = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => undefined);
+
+    class MockImage {
+      onload: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      crossOrigin = "";
+      naturalWidth = 120;
+      naturalHeight = 80;
+      width = 120;
+      height = 80;
+
+      set src(_value: string) {
+        queueMicrotask(() => this.onload?.());
+      }
+    }
+
+    vi.stubGlobal("Image", MockImage);
+
+    try {
+      renderWithProviders(<EditorWorkspace />);
+      await uploadWorkspaceImage(user);
+
+      await user.click(screen.getByRole("button", { name: "Vivid" }));
+      expect(screen.getByTestId("workspace-image")).toHaveAttribute("data-filter", expect.stringContaining("saturate(1.380)"));
+
+      await user.click(screen.getByRole("button", { name: "Black and White" }));
+      expect(screen.getByTestId("workspace-image")).toHaveAttribute("data-filter", expect.stringContaining("saturate(0.000)"));
+
+      fireEvent.mouseDown(screen.getByRole("button", { name: /before \/ after/i }));
+      expect(screen.getByTestId("workspace-image")).toHaveAttribute("data-filter", "none");
+      fireEvent.mouseUp(screen.getByRole("button", { name: /before \/ after/i }));
+
+      await user.click(screen.getByRole("button", { name: "Text" }));
+      await user.type(screen.getByLabelText(/text overlay content/i), "Export note");
+      await user.click(screen.getByRole("button", { name: /^export$/i }));
+
+      await waitFor(() => {
+        expect(clickDownload).toHaveBeenCalled();
+      });
+
+      expect(getContext).toHaveBeenCalledWith("2d");
+      expect(context.drawImage).toHaveBeenCalled();
+      expect(context.fillText).toHaveBeenCalledWith("Export note", expect.any(Number), expect.any(Number), expect.any(Number));
+      expect(toDataUrl).toHaveBeenCalledWith("image/png");
+      expect(screen.getByText("Exported")).toBeInTheDocument();
+    } finally {
+      vi.stubGlobal("Image", originalImage);
+      getContext.mockRestore();
+      toDataUrl.mockRestore();
+      clickDownload.mockRestore();
+    }
+  }, 10000);
 
   it("rejects invalid upload files clearly", () => {
     renderWithProviders(<EditorWorkspace />);

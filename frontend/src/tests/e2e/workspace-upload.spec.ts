@@ -56,3 +56,22 @@ test("guest manual edits update the browser preview", async ({ page }) => {
   await page.getByLabel(/text overlay content/i).fill("Studio note");
   await expect(page.getByTestId("text-overlay")).toHaveText("Studio note");
 });
+
+test("guest can apply a browser filter and export the current image", async ({ page }) => {
+  await page.goto("/editor");
+
+  await page.getByLabel(/upload image/i).first().setInputFiles({
+    name: "valid-transparent.png",
+    mimeType: "image/png",
+    buffer: transparentPng,
+  });
+
+  await page.getByRole("button", { name: "Vivid" }).click();
+  await expect(page.getByTestId("workspace-image")).toHaveAttribute("data-filter", /saturate\(1\.380\)/);
+
+  const downloadPromise = page.waitForEvent("download");
+  await page.getByRole("button", { name: /^export$/i }).click();
+  const download = await downloadPromise;
+
+  expect(download.suggestedFilename()).toBe("valid-transparent-edited.png");
+});

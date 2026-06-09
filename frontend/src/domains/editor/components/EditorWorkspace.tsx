@@ -55,6 +55,13 @@ interface FilterPreset {
   adj: Partial<Adjustments>;
 }
 
+interface CropPreset {
+  id: string;
+  label: string;
+  ratio: string | null;
+  exportRatio: number | null;
+}
+
 interface TextOverlayState {
   text: string;
   color: string;
@@ -83,11 +90,11 @@ const DEFAULT_TEXT_OVERLAY: TextOverlayState = {
 };
 
 const CROP_PRESETS = [
-  { id: "free", label: "Free", ratio: null },
-  { id: "square", label: "1:1", ratio: "1 / 1" },
-  { id: "portrait", label: "4:5", ratio: "4 / 5" },
-  { id: "wide", label: "16:9", ratio: "16 / 9" },
-] as const;
+  { id: "free", label: "Free", ratio: null, exportRatio: null },
+  { id: "square", label: "1:1", ratio: "1 / 1", exportRatio: 1 },
+  { id: "portrait", label: "4:5", ratio: "4 / 5", exportRatio: 4 / 5 },
+  { id: "wide", label: "16:9", ratio: "16 / 9", exportRatio: 16 / 9 },
+] as const satisfies readonly CropPreset[];
 
 const GUEST_SESSION_STORAGE_KEY = "luminaStudio.guestSessionId";
 const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024;
@@ -110,7 +117,7 @@ const PHOTOS = [
 const FILTER_PRESETS: FilterPreset[] = [
   { id: "original", name: "Original", adj: {} },
   { id: "vivid", name: "Vivid", adj: { exposure: 5, contrast: 28, saturation: 38 } },
-  { id: "bw", name: "Black & White", adj: { contrast: 18, saturation: -100 } },
+  { id: "bw", name: "Black and White", adj: { contrast: 18, saturation: -100 } },
   { id: "vintage", name: "Vintage", adj: { warmth: 28, saturation: -24, contrast: 6 } },
   { id: "warm", name: "Warm", adj: { warmth: 35, saturation: 10, exposure: 8 } },
   { id: "cool", name: "Cool", adj: { warmth: -30, saturation: 5, contrast: 12 } },
@@ -175,6 +182,36 @@ function buildCSSFilter(adjustments: Adjustments, preset: FilterPreset, showOrig
 
 function buildPreviewTransform(rotation: number, flipHorizontal: boolean, flipVertical: boolean) {
   return `rotate(${rotation}deg) scaleX(${flipHorizontal ? -1 : 1}) scaleY(${flipVertical ? -1 : 1})`;
+}
+
+function getCenteredCrop(width: number, height: number, ratio: number | null) {
+  if (!ratio) {
+    return { sourceX: 0, sourceY: 0, sourceWidth: width, sourceHeight: height };
+  }
+
+  const imageRatio = width / height;
+  if (imageRatio > ratio) {
+    const sourceWidth = Math.round(height * ratio);
+    return {
+      sourceX: Math.round((width - sourceWidth) / 2),
+      sourceY: 0,
+      sourceWidth,
+      sourceHeight: height,
+    };
+  }
+
+  const sourceHeight = Math.round(width / ratio);
+  return {
+    sourceX: 0,
+    sourceY: Math.round((height - sourceHeight) / 2),
+    sourceWidth: width,
+    sourceHeight,
+  };
+}
+
+function makeExportFileName(fileName: string | null) {
+  const baseName = fileName?.replace(/\.[^.]+$/, "").replace(/[^a-z0-9-_]+/gi, "-").replace(/^-+|-+$/g, "");
+  return `${baseName || "lumina-studio-image"}-edited.png`;
 }
 
 function Brand() {
@@ -420,6 +457,7 @@ export function EditorWorkspace() {
   const [zoom, setZoom] = useState(100);
   const [hfToken, setHfToken] = useState("");
   const [aiStatus, setAiStatus] = useState("Ready");
+  const [exportStatus, setExportStatus] = useState("Ready");
   const [expanded, setExpanded] = useState({
     ai: true,
     light: false,
@@ -518,6 +556,98 @@ export function EditorWorkspace() {
     setAiStatus("Processing...");
     window.setTimeout(() => setAiStatus(hfToken.trim() ? "Restoration Complete" : "Token Required"), 650);
     window.setTimeout(() => setAiStatus("Ready"), 3000);
+  };
+
+  const handleExport = () => {
+    if (!imageUrl) {
+      setExportStatus("Image Required");
+      return;
+    }
+
+    setExportStatus("Exporting...");
+    const sourceImage = new Image();
+
+    if (/^https?:/i.test(imageUrl)) {
+      sourceImage.crossOrigin = "anonymous";
+    }
+
+    sourceImage.onload = () => {
+      const sourceWidth = sourceImage.naturalWidth || sourceImage.width;
+      const sourceHeight = sourceImage.naturalHeight || sourceImage.height;
+
+      if (!sourceWidth || !sourceHeight) {
+        setExportStatus("Export failed");
+        return;
+      }
+
+      const crop = getCenteredCrop(sourceWidth, sourceHeight, cropPreset.exportRatio);
+      const normalizedRotation = ((rotation % 360) + 360) % 360;
+      const swapsAxis = normalizedRotation === 90 || normalizedRotation === 270;
+      const canvas = document.createElement("canvas");
+      canvas.width = swapsAxis ? crop.sourceHeight : crop.sourceWidth;
+      canvas.height = swapsAxis ? crop.sourceWidth : crop.sourceHeight;
+
+      const context = canvas.getContext("2d");
+      if (!context) {
+        setExportStatus("Export failed");
+        return;
+      }
+
+      context.save();
+      context.translate(canvas.width / 2, canvas.height / 2);
+      context.rotate((normalizedRotation * Math.PI) / 180);
+      context.scale(flipHorizontal ? -1 : 1, flipVertical ? -1 : 1);
+      context.filter = buildCSSFilter(adjustments, selectedPreset, false);
+      context.drawImage(
+        sourceImage,
+        crop.sourceX,
+        crop.sourceY,
+        crop.sourceWidth,
+        crop.sourceHeight,
+        -crop.sourceWidth / 2,
+        -crop.sourceHeight / 2,
+        crop.sourceWidth,
+        crop.sourceHeight,
+      );
+
+      const overlayText = textOverlay.text.trim();
+      if (overlayText) {
+        context.filter = "none";
+        context.fillStyle = textOverlay.color;
+        context.font = `800 ${textOverlay.size}px sans-serif`;
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.shadowColor = "rgba(0,0,0,0.72)";
+        context.shadowBlur = 12;
+        context.shadowOffsetY = 2;
+        context.fillText(
+          overlayText,
+          -crop.sourceWidth / 2 + (crop.sourceWidth * textOverlay.x) / 100,
+          -crop.sourceHeight / 2 + (crop.sourceHeight * textOverlay.y) / 100,
+          crop.sourceWidth * 0.86,
+        );
+      }
+
+      context.restore();
+
+      try {
+        const downloadLink = document.createElement("a");
+        downloadLink.href = canvas.toDataURL("image/png");
+        downloadLink.download = makeExportFileName(uploadedFileName);
+        document.body.append(downloadLink);
+        downloadLink.click();
+        downloadLink.remove();
+        setExportStatus("Exported");
+      } catch {
+        setExportStatus("Export failed");
+      }
+    };
+
+    sourceImage.onerror = () => {
+      setExportStatus("Export failed");
+    };
+
+    sourceImage.src = imageUrl;
   };
 
   return (
@@ -644,6 +774,7 @@ export function EditorWorkspace() {
             startIcon={<DownloadIcon sx={{ fontSize: 17 }} />}
             variant="contained"
             disabled={!imageUrl}
+            onClick={handleExport}
             sx={{
               color: "#fff",
               background: "linear-gradient(135deg, #7c66ff, #9333ea)",
@@ -653,6 +784,18 @@ export function EditorWorkspace() {
           >
             Export
           </Button>
+          <Typography
+            aria-live="polite"
+            sx={{
+              minWidth: 76,
+              color: exportStatus === "Export failed" ? "#fecaca" : "#6868a0",
+              fontSize: 11,
+              fontFamily: '"JetBrains Mono", monospace',
+              whiteSpace: "nowrap",
+            }}
+          >
+            {exportStatus}
+          </Typography>
           <IconButton component={Link} href={APP_ROUTES.landing} title="Exit to Landing" sx={{ color: "#8888b8" }}>
             <ChevronRightIcon />
           </IconButton>
@@ -933,7 +1076,7 @@ export function EditorWorkspace() {
                 <Box
                   component="button"
                   key={preset.id}
-                  aria-label={preset.name === "Black & White" ? "Black and White" : preset.name}
+                  aria-label={preset.name}
                   onClick={() => setSelectedPreset(preset)}
                   sx={{
                     p: 0,
