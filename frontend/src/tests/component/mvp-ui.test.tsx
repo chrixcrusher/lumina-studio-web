@@ -75,6 +75,67 @@ describe("MVP UI alignment", () => {
     expect(screen.getByRole("button", { name: /ai restore/i })).toBeEnabled();
   });
 
+  it("calls AI restore, displays the restored image, and preserves state on failure", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn().mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          success: true,
+          message: "Face restored successfully",
+          restoredImage: "cmVzdG9yZWQ=",
+          historyId: "history-1",
+          operationType: "restore_face",
+          processingMode: "cloud_ai",
+          settingsUsed: {
+            model: "CodeFormer",
+          },
+          outputFormat: "jpeg",
+          processingTimeMs: 1200,
+        }),
+        {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      ),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    renderWithProviders(<EditorWorkspace />);
+
+    await uploadWorkspaceImage(user);
+    await user.type(screen.getByLabelText(/hugging face api token/i), "hf_guest_token_123456");
+    await user.click(screen.getByRole("button", { name: /ai restore/i }));
+
+    await waitFor(() => {
+      expect(screen.getByAltText("Uploaded workspace image")).toHaveAttribute("src", "data:image/jpeg;base64,cmVzdG9yZWQ=");
+    });
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/ai/restore-face",
+      expect.objectContaining({
+        method: "POST",
+      }),
+    );
+
+    const restoredImage = screen.getByAltText("Uploaded workspace image");
+    const restoredImageUrl = restoredImage.getAttribute("src");
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ message: "AI restore failed while contacting Hugging Face." }), {
+        status: 502,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }),
+    );
+
+    await user.click(screen.getByRole("button", { name: /ai restore/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/ai restore failed while contacting hugging face/i)).toBeInTheDocument();
+    });
+    expect(screen.getByAltText("Uploaded workspace image")).toHaveAttribute("src", restoredImageUrl ?? "");
+  }, 10000);
+
   it("updates browser preview state for manual editing tools", async () => {
     const user = userEvent.setup();
     renderWithProviders(<EditorWorkspace />);

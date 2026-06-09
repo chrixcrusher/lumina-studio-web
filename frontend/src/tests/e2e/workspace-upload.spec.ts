@@ -75,3 +75,42 @@ test("guest can apply a browser filter and export the current image", async ({ p
 
   expect(download.suggestedFilename()).toBe("valid-transparent-edited.png");
 });
+
+test("guest AI restore displays the restored image through the canonical endpoint", async ({ page }) => {
+  await page.route("**/api/v1/ai/restore-face", async (route) => {
+    const request = route.request();
+    expect(request.method()).toBe("POST");
+    expect(request.headers()["x-session-id"]).toBeTruthy();
+
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        success: true,
+        message: "Face restored successfully",
+        restoredImage: transparentPng.toString("base64"),
+        historyId: "history-1",
+        operationType: "restore_face",
+        processingMode: "cloud_ai",
+        settingsUsed: {
+          model: "CodeFormer",
+        },
+        outputFormat: "jpeg",
+        processingTimeMs: 1200,
+      }),
+    });
+  });
+
+  await page.goto("/editor");
+
+  await page.getByLabel(/upload image/i).first().setInputFiles({
+    name: "valid-transparent.png",
+    mimeType: "image/png",
+    buffer: transparentPng,
+  });
+  await page.getByLabel(/hugging face api token/i).fill("hf_guest_token_123456");
+  await page.getByRole("button", { name: /ai restore/i }).click();
+
+  await expect(page.getByText(/restoration complete/i)).toBeVisible();
+  await expect(page.getByAltText("Uploaded workspace image")).toHaveAttribute("src", /data:image\/jpeg;base64,/);
+});

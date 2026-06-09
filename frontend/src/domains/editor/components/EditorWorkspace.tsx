@@ -36,6 +36,8 @@ import Typography from "@mui/material/Typography";
 import Link from "next/link";
 import type { ChangeEvent, ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
+import { restoreFace } from "@/domains/enhancement/services/restore-face-api";
+import { ApiError } from "@/infrastructure/api/api-client";
 import { APP_ROUTES } from "@/shared/constants/routes";
 import { getOrCreateGuestSessionId } from "@/shared/guest-session";
 
@@ -204,6 +206,56 @@ function getCenteredCrop(width: number, height: number, ratio: number | null) {
 function makeExportFileName(fileName: string | null) {
   const baseName = fileName?.replace(/\.[^.]+$/, "").replace(/[^a-z0-9-_]+/gi, "-").replace(/^-+|-+$/g, "");
   return `${baseName || "lumina-studio-image"}-edited.png`;
+}
+
+function normalizeOutputFormat(value: string | undefined) {
+  if (value === "png" || value === "webp") {
+    return value;
+  }
+
+  return "jpeg";
+}
+
+function toRestoredDataUrl(imageBase64: string, outputFormat: string | undefined) {
+  return `data:image/${normalizeOutputFormat(outputFormat)};base64,${imageBase64}`;
+}
+
+async function loadImageAsBase64(imageUrl: string) {
+  if (imageUrl.startsWith("data:")) {
+    return imageUrl;
+  }
+
+  const response = await fetch(imageUrl);
+
+  if (!response.ok) {
+    throw new Error("Image could not be prepared for AI restore.");
+  }
+
+  return readBlobAsDataUrl(await response.blob());
+}
+
+function readBlobAsDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        resolve(reader.result);
+        return;
+      }
+
+      reject(new Error("Image could not be prepared for AI restore."));
+    };
+    reader.onerror = () => reject(new Error("Image could not be prepared for AI restore."));
+    reader.readAsDataURL(blob);
+  });
+}
+
+function getApiErrorMessage(error: unknown) {
+  if (error instanceof ApiError || error instanceof Error) {
+    return error.message;
+  }
+
+  return "AI face restoration failed.";
 }
 
 function Brand() {
@@ -448,6 +500,8 @@ export function EditorWorkspace() {
   const [showOriginal, setShowOriginal] = useState(false);
   const [zoom, setZoom] = useState(100);
   const [hfToken, setHfToken] = useState("");
+  const [useSavedHfToken, setUseSavedHfToken] = useState(false);
+  const [aiRestoring, setAiRestoring] = useState(false);
   const [aiStatus, setAiStatus] = useState("Ready");
   const [exportStatus, setExportStatus] = useState("Ready");
   const [expanded, setExpanded] = useState({
@@ -532,15 +586,40 @@ export function EditorWorkspace() {
     window.setTimeout(() => reader.readAsDataURL(file), 0);
   };
 
-  const handleAiRestore = () => {
+  const handleAiRestore = async () => {
     if (!imageUrl) {
       setAiStatus("Image Required");
       return;
     }
 
+    if (!useSavedHfToken && hfToken.trim().length === 0) {
+      setAiStatus("Token Required");
+      return;
+    }
+
+    setAiRestoring(true);
     setAiStatus("Processing...");
-    window.setTimeout(() => setAiStatus(hfToken.trim() ? "Restoration Complete" : "Token Required"), 650);
-    window.setTimeout(() => setAiStatus("Ready"), 3000);
+
+    try {
+      const response = await restoreFace({
+        image: await loadImageAsBase64(imageUrl),
+        huggingFaceToken: useSavedHfToken ? undefined : hfToken.trim(),
+        useSavedToken: useSavedHfToken,
+        sessionId: guestSessionId ?? undefined,
+        outputFormat: "jpeg",
+      });
+
+      setUploadedImage(toRestoredDataUrl(response.restoredImage, response.outputFormat));
+      setUploadedFileName(makeExportFileName(uploadedFileName ?? activePhoto?.id ?? "restored-image"));
+      setActivePhoto(null);
+      resetManualEdits();
+      setAiStatus("Restoration Complete");
+      window.setTimeout(() => setAiStatus("Ready"), 3000);
+    } catch (error) {
+      setAiStatus(getApiErrorMessage(error));
+    } finally {
+      setAiRestoring(false);
+    }
   };
 
   const handleExport = () => {
@@ -1161,6 +1240,7 @@ export function EditorWorkspace() {
                       type="password"
                       value={hfToken}
                       onChange={(event) => setHfToken(event.target.value)}
+                      disabled={useSavedHfToken || aiRestoring}
                       placeholder="hf_..."
                       inputProps={{ "aria-label": "Hugging Face API Token" }}
                       InputProps={{
@@ -1190,19 +1270,22 @@ export function EditorWorkspace() {
                   <Stack direction="row" spacing={1} alignItems="center">
                     <Checkbox
                       size="small"
+                      checked={useSavedHfToken}
+                      onChange={(event) => setUseSavedHfToken(event.target.checked)}
+                      inputProps={{ "aria-label": "Use saved Hugging Face token" }}
                       sx={{
                         p: 0,
                         color: "#6868a0",
                         "&.Mui-checked": { color: "#7c66ff" },
                       }}
                     />
-                    <Typography sx={{ color: "#8888d8", fontSize: 12 }}>Save token for future use</Typography>
+                    <Typography sx={{ color: "#8888d8", fontSize: 12 }}>Use saved token</Typography>
                   </Stack>
 
                   <Button
                     fullWidth
                     onClick={handleAiRestore}
-                    disabled={!imageUrl}
+                    disabled={!imageUrl || aiRestoring}
                     startIcon={<AutoFixHighIcon />}
                     sx={{
                       py: 1.5,
