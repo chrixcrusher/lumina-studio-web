@@ -845,7 +845,7 @@ The table below is the live status box for the plan.
 | 2.3 | Implement browser filters and export | done | Browser filters, before/after preview, canvas export/download, component coverage, and E2E export flow completed. |
 | 3.1 | Implement preset schema and repository | done | Preset schema, account-scoped repository, ownership tests, typecheck, and lint passed. |
 | 3.2 | Implement preset APIs | done | Preset CRUD, import/export endpoints, ownership checks, frontend client alignment, tests, typecheck, and lint passed. |
-| 3.3 | Implement history schema and repository | pending |  |
+| 3.3 | Implement history schema and repository | done | History schema, account/session-scoped repository, metadata-only ownership tests, typecheck, and lint passed. |
 | 3.4 | Implement history APIs and UI | pending |  |
 | 4.1 | Implement Hugging Face integration layer | pending |  |
 | 4.2 | Implement AI restore API and workflow | pending |  |
