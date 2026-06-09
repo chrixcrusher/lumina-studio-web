@@ -23,6 +23,7 @@ import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
+import CircularProgress from "@mui/material/CircularProgress";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
@@ -34,7 +35,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Link from "next/link";
 import type { ChangeEvent, ReactNode } from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { APP_ROUTES } from "@/shared/constants/routes";
 
 interface Adjustments {
@@ -62,6 +63,11 @@ const DEFAULT_ADJUSTMENTS: Adjustments = {
   vibrance: 0,
   warmth: 0,
 };
+
+const GUEST_SESSION_STORAGE_KEY = "luminaStudio.guestSessionId";
+const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024;
+const MAX_UPLOAD_SIZE_MB = MAX_UPLOAD_SIZE_BYTES / (1024 * 1024);
+const SUPPORTED_UPLOAD_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 const PHOTOS = [
   {
@@ -98,6 +104,26 @@ function thumbUrl(url: string, w: number, h: number) {
 
 function fmtVal(value: number) {
   return value > 0 ? `+${value}` : `${value}`;
+}
+
+function createGuestSessionId() {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+
+  return `guest-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function validateImageUpload(file: File) {
+  if (!SUPPORTED_UPLOAD_TYPES.has(file.type)) {
+    return "Unsupported file type. Upload a JPEG, PNG, or WebP image.";
+  }
+
+  if (file.size > MAX_UPLOAD_SIZE_BYTES) {
+    return `Image is too large. Upload an image up to ${MAX_UPLOAD_SIZE_MB} MB.`;
+  }
+
+  return null;
 }
 
 function buildCSSFilter(adjustments: Adjustments, preset: FilterPreset, showOriginal: boolean) {
@@ -340,8 +366,12 @@ function Histogram({ adjustments }: { adjustments: Adjustments }) {
 }
 
 export function EditorWorkspace() {
-  const [activePhoto, setActivePhoto] = useState(PHOTOS[0]);
+  const [activePhoto, setActivePhoto] = useState<(typeof PHOTOS)[number] | null>(null);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [imageLoading, setImageLoading] = useState(false);
+  const [guestSessionId, setGuestSessionId] = useState<string | null>(null);
   const [selectedTool, setSelectedTool] = useState("crop");
   const [selectedPreset, setSelectedPreset] = useState(FILTER_PRESETS[0]);
   const [adjustments, setAdjustments] = useState<Adjustments>({ ...DEFAULT_ADJUSTMENTS });
@@ -356,8 +386,20 @@ export function EditorWorkspace() {
     presets: false,
   });
 
-  const imageUrl = uploadedImage ?? activePhoto.url;
-  const imageAlt = uploadedImage ? "Uploaded workspace image" : activePhoto.alt;
+  useEffect(() => {
+    const existingSessionId = window.sessionStorage.getItem(GUEST_SESSION_STORAGE_KEY);
+    const nextSessionId = existingSessionId ?? createGuestSessionId();
+
+    if (!existingSessionId) {
+      window.sessionStorage.setItem(GUEST_SESSION_STORAGE_KEY, nextSessionId);
+    }
+
+    setGuestSessionId(nextSessionId);
+  }, []);
+
+  const imageUrl = uploadedImage ?? activePhoto?.url ?? null;
+  const filterPreviewUrl = imageUrl ?? PHOTOS[0].url;
+  const imageAlt = uploadedImage ? "Uploaded workspace image" : activePhoto?.alt ?? "";
   const cssFilter = useMemo(
     () => buildCSSFilter(adjustments, selectedPreset, showOriginal),
     [adjustments, selectedPreset, showOriginal],
@@ -374,11 +416,51 @@ export function EditorWorkspace() {
 
   const handleUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !file.type.startsWith("image/")) return;
-    setUploadedImage(URL.createObjectURL(file));
+    event.target.value = "";
+
+    if (!file) return;
+
+    const validationError = validateImageUpload(file);
+    if (validationError) {
+      setUploadError(validationError);
+      setImageLoading(false);
+      return;
+    }
+
+    const reader = new FileReader();
+    setImageLoading(true);
+    setUploadError(null);
+
+    reader.onload = () => {
+      if (typeof reader.result !== "string") {
+        setUploadError("The selected file could not be loaded as an image.");
+        setImageLoading(false);
+        return;
+      }
+
+      setUploadedImage(reader.result);
+      setUploadedFileName(file.name);
+      setActivePhoto(null);
+      setSelectedPreset(FILTER_PRESETS[0]);
+      setAdjustments({ ...DEFAULT_ADJUSTMENTS });
+      setShowOriginal(false);
+      setImageLoading(false);
+    };
+
+    reader.onerror = () => {
+      setUploadError("The selected file could not be loaded as an image.");
+      setImageLoading(false);
+    };
+
+    window.setTimeout(() => reader.readAsDataURL(file), 0);
   };
 
   const handleAiRestore = () => {
+    if (!imageUrl) {
+      setAiStatus("Image Required");
+      return;
+    }
+
     setAiStatus("Processing...");
     window.setTimeout(() => setAiStatus(hfToken.trim() ? "Restoration Complete" : "Token Required"), 650);
     window.setTimeout(() => setAiStatus("Ready"), 3000);
@@ -417,6 +499,10 @@ export function EditorWorkspace() {
               onClick={() => {
                 setActivePhoto(photo);
                 setUploadedImage(null);
+                setUploadedFileName(photo.alt);
+                setUploadError(null);
+                setImageLoading(false);
+                setShowOriginal(false);
               }}
               sx={{
                 width: 60,
@@ -425,9 +511,9 @@ export function EditorWorkspace() {
                 border: 0,
                 borderRadius: 1,
                 overflow: "hidden",
-                outline: activePhoto.id === photo.id && !uploadedImage ? "2px solid #7c66ff" : "2px solid rgba(255,255,255,0.08)",
+                outline: activePhoto?.id === photo.id && !uploadedImage ? "2px solid #7c66ff" : "2px solid rgba(255,255,255,0.08)",
                 outlineOffset: 1,
-                opacity: activePhoto.id === photo.id && !uploadedImage ? 1 : 0.58,
+                opacity: activePhoto?.id === photo.id && !uploadedImage ? 1 : 0.58,
                 bgcolor: "transparent",
                 cursor: "pointer",
               }}
@@ -453,8 +539,26 @@ export function EditorWorkspace() {
             }}
           >
             Upload
-            <input hidden type="file" accept="image/*" onChange={handleUpload} />
+            <input
+              hidden
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              aria-label="Upload image"
+              onChange={handleUpload}
+            />
           </Button>
+          <Typography
+            aria-live="polite"
+            sx={{
+              display: { xs: "none", lg: "block" },
+              color: "#52527a",
+              fontSize: 11,
+              fontFamily: '"JetBrains Mono", monospace',
+              whiteSpace: "nowrap",
+            }}
+          >
+            {guestSessionId ? `Guest workspace ${guestSessionId.slice(0, 8)}` : "Guest workspace"}
+          </Typography>
         </Stack>
 
         <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="center">
@@ -468,6 +572,7 @@ export function EditorWorkspace() {
           <Button
             size="small"
             startIcon={<VisibilityOffOutlinedIcon sx={{ fontSize: 14 }} />}
+            disabled={!imageUrl}
             onMouseDown={() => setShowOriginal(true)}
             onMouseUp={() => setShowOriginal(false)}
             onMouseLeave={() => setShowOriginal(false)}
@@ -484,6 +589,7 @@ export function EditorWorkspace() {
           <Button
             startIcon={<DownloadIcon sx={{ fontSize: 17 }} />}
             variant="contained"
+            disabled={!imageUrl}
             sx={{
               color: "#fff",
               background: "linear-gradient(135deg, #7c66ff, #9333ea)",
@@ -565,30 +671,130 @@ export function EditorWorkspace() {
                 background: "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(124,102,255,0.04) 0%, transparent 70%)",
               }}
             />
-            <Box
-              sx={{
-                transform: `scale(${zoom / 100})`,
-                transformOrigin: "center center",
-                transition: "transform 0.15s ease",
-                position: "relative",
-                maxWidth: "calc(100% - 80px)",
-              }}
-            >
+            {uploadError && (
               <Box
-                component="img"
-                src={imageUrl}
-                alt={imageAlt}
+                role="alert"
                 sx={{
-                  display: "block",
-                  maxHeight: "calc(100vh - 255px)",
-                  maxWidth: "100%",
-                  objectFit: "contain",
-                  filter: cssFilter,
-                  transition: "filter 0.08s linear",
-                  boxShadow: "0 32px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.04)",
+                  position: "absolute",
+                  top: 18,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  zIndex: 2,
+                  maxWidth: "min(560px, calc(100% - 32px))",
+                  px: 1.5,
+                  py: 1,
+                  borderRadius: 1.5,
+                  color: "#fecaca",
+                  bgcolor: "rgba(127,29,29,0.78)",
+                  border: "1px solid rgba(248,113,113,0.38)",
+                  fontSize: 13,
+                  textAlign: "center",
                 }}
-              />
-              {showOriginal && (
+              >
+                {uploadError}
+              </Box>
+            )}
+
+            {imageLoading && (
+              <Stack role="status" spacing={1.5} alignItems="center" sx={{ color: "#a78bfa", zIndex: 1 }}>
+                <CircularProgress size={26} sx={{ color: "#a78bfa" }} />
+                <Typography sx={{ color: "#c8c8e4", fontSize: 14 }}>Loading image...</Typography>
+              </Stack>
+            )}
+
+            {!imageLoading && !imageUrl && (
+              <Stack
+                spacing={2}
+                alignItems="center"
+                sx={{
+                  zIndex: 1,
+                  width: "min(520px, calc(100% - 32px))",
+                  p: { xs: 2.5, md: 4 },
+                  border: "1px dashed rgba(167,139,250,0.42)",
+                  borderRadius: 2,
+                  bgcolor: "rgba(13,13,24,0.82)",
+                  textAlign: "center",
+                }}
+              >
+                <UploadFileIcon sx={{ color: "#a78bfa", fontSize: 38 }} />
+                <Box>
+                  <Typography sx={{ color: "#e4e4f2", fontSize: 22, fontWeight: 700 }}>
+                    Upload an image to start
+                  </Typography>
+                  <Typography sx={{ color: "#8888b8", fontSize: 14, mt: 0.7 }}>
+                    JPEG, PNG, or WebP up to {MAX_UPLOAD_SIZE_MB} MB.
+                  </Typography>
+                </Box>
+                <Button
+                  component="label"
+                  variant="contained"
+                  startIcon={<UploadFileIcon />}
+                  sx={{
+                    color: "#ffffff",
+                    background: "linear-gradient(135deg, #7c66ff, #9333ea)",
+                    boxShadow: "0 0 22px rgba(124,102,255,0.3)",
+                    px: 2.5,
+                  }}
+                >
+                  Upload Image
+                  <input
+                    hidden
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    aria-label="Upload image"
+                    onChange={handleUpload}
+                  />
+                </Button>
+              </Stack>
+            )}
+
+            {!imageLoading && imageUrl && (
+              <Box
+                sx={{
+                  transform: `scale(${zoom / 100})`,
+                  transformOrigin: "center center",
+                  transition: "transform 0.15s ease",
+                  position: "relative",
+                  maxWidth: "calc(100% - 80px)",
+                }}
+              >
+                <Box
+                  component="img"
+                  src={imageUrl}
+                  alt={imageAlt}
+                  sx={{
+                    display: "block",
+                    maxHeight: "calc(100vh - 255px)",
+                    maxWidth: "100%",
+                    objectFit: "contain",
+                    filter: cssFilter,
+                    transition: "filter 0.08s linear",
+                    boxShadow: "0 32px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.04)",
+                  }}
+                />
+                <Box
+                  sx={{
+                    position: "absolute",
+                    left: 12,
+                    bottom: 12,
+                    px: 1,
+                    py: 0.35,
+                    bgcolor: "rgba(0,0,0,0.72)",
+                    color: "#c8c8e4",
+                    fontSize: 11,
+                    fontWeight: 600,
+                    letterSpacing: "0.04em",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: 1,
+                    maxWidth: "calc(100% - 24px)",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {uploadedFileName ?? "Workspace image"}
+                </Box>
+                {showOriginal && (
                 <Box
                   sx={{
                     position: "absolute",
@@ -608,7 +814,8 @@ export function EditorWorkspace() {
                   ORIGINAL
                 </Box>
               )}
-            </Box>
+              </Box>
+            )}
           </Box>
 
           <Stack
@@ -656,7 +863,7 @@ export function EditorWorkspace() {
                   >
                     <Box
                       component="img"
-                      src={thumbUrl(imageUrl, 164, 112)}
+                      src={thumbUrl(filterPreviewUrl, 164, 112)}
                       alt=""
                       aria-hidden="true"
                       sx={{
@@ -770,6 +977,7 @@ export function EditorWorkspace() {
                   <Button
                     fullWidth
                     onClick={handleAiRestore}
+                    disabled={!imageUrl}
                     startIcon={<AutoFixHighIcon />}
                     sx={{
                       py: 1.5,

@@ -13,5 +13,8 @@
     "lint": "npm run lint --workspace frontend && npm run lint --workspace backend",
     "typecheck": "npm run typecheck --workspace frontend && npm run typecheck --workspace backend",
     "test": "npm run test --workspace frontend && npm run test --workspace backend"
+  },
+  "devDependencies": {
+    "jsdom": "^25.0.1"
   }
 }

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactElement } from "react";
 import { describe, expect, it } from "vitest";
@@ -37,6 +37,9 @@ describe("MVP UI alignment", () => {
   it("renders editor tools, filters, and AI restore controls", () => {
     renderWithProviders(<EditorWorkspace />);
 
+    expect(screen.getByText(/upload an image to start/i)).toBeInTheDocument();
+    expect(screen.getByText(/guest workspace/i)).toBeInTheDocument();
+
     for (const tool of ["Crop", "Rotate", "Flip", "Text"]) {
       expect(screen.getByRole("button", { name: tool })).toBeInTheDocument();
     }
@@ -46,7 +49,45 @@ describe("MVP UI alignment", () => {
     }
 
     expect(screen.getByLabelText(/hugging face api token/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /ai restore/i })).toBeDisabled();
+  });
+
+  it("loads a valid uploaded image into the workspace", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<EditorWorkspace />);
+
+    const file = new File(["valid image"], "valid-transparent.png", { type: "image/png" });
+    await user.upload(screen.getAllByLabelText(/upload image/i)[0], file);
+
+    await waitFor(() => {
+      expect(screen.getByAltText("Uploaded workspace image")).toBeInTheDocument();
+    });
+
+    expect(screen.getByText("valid-transparent.png")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /ai restore/i })).toBeEnabled();
+  });
+
+  it("rejects invalid upload files clearly", () => {
+    renderWithProviders(<EditorWorkspace />);
+
+    const uploadInput = screen.getAllByLabelText(/upload image/i)[0];
+
+    fireEvent.change(uploadInput, {
+      target: {
+        files: [new File(["not an image"], "invalid-text-file.txt", { type: "text/plain" })],
+      },
+    });
+
+    expect(screen.getByRole("alert")).toHaveTextContent(/unsupported file type/i);
+
+    fireEvent.change(uploadInput, {
+      target: {
+        files: [new File([new Uint8Array(11 * 1024 * 1024)], "oversized-image.jpg", { type: "image/jpeg" })],
+      },
+    });
+
+    expect(screen.getByRole("alert")).toHaveTextContent(/too large/i);
+    expect(screen.queryByAltText("Uploaded workspace image")).not.toBeInTheDocument();
   });
 
   it("shows metadata-only history with canonical values", () => {
