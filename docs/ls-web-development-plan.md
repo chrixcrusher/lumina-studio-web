@@ -846,8 +846,8 @@ The table below is the live status box for the plan.
 | 3.1 | Implement preset schema and repository | done | Preset schema, account-scoped repository, ownership tests, typecheck, and lint passed. |
 | 3.2 | Implement preset APIs | done | Preset CRUD, import/export endpoints, ownership checks, frontend client alignment, tests, typecheck, and lint passed. |
 | 3.3 | Implement history schema and repository | done | History schema, account/session-scoped repository, metadata-only ownership tests, typecheck, and lint passed. |
-| 3.4 | Implement history APIs and UI | pending |  |
-| 4.1 | Implement Hugging Face integration layer | pending |  |
+| 3.4 | Implement history APIs and UI | done | History list/create/delete APIs, metadata-only UI, guest session ownership, API/UI tests, typecheck, and lint passed. |
+| 4.1 | Implement Hugging Face integration layer | done | Hugging Face client, CodeFormer provider, token helper, and mocked integration unit tests added. |
 | 4.2 | Implement AI restore API and workflow | pending |  |
 | 5.1 | Add frontend and backend test coverage | pending |  |
 | 5.2 | Add security and deployment hardening | pending |  |
