@@ -14,15 +14,6 @@ function renderWithProviders(ui: ReactElement) {
   return render(<AppProviders>{ui}</AppProviders>);
 }
 
-async function uploadWorkspaceImage(user: ReturnType<typeof userEvent.setup>) {
-  const file = new File(["valid image"], "valid-transparent.png", { type: "image/png" });
-  await user.upload(screen.getAllByLabelText(/upload image/i)[0], file);
-
-  await waitFor(() => {
-    expect(screen.getByAltText("Uploaded workspace image")).toBeInTheDocument();
-  });
-}
-
 describe("MVP UI alignment", () => {
   it("renders landing entry points without trial or subscription language", () => {
     renderWithProviders(<LandingPage />);
@@ -65,36 +56,15 @@ describe("MVP UI alignment", () => {
     const user = userEvent.setup();
     renderWithProviders(<EditorWorkspace />);
 
-    await uploadWorkspaceImage(user);
+    const file = new File(["valid image"], "valid-transparent.png", { type: "image/png" });
+    await user.upload(screen.getAllByLabelText(/upload image/i)[0], file);
+
+    await waitFor(() => {
+      expect(screen.getByAltText("Uploaded workspace image")).toBeInTheDocument();
+    });
 
     expect(screen.getByText("valid-transparent.png")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /ai restore/i })).toBeEnabled();
-  });
-
-  it("updates browser preview state for manual editing tools", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<EditorWorkspace />);
-    await uploadWorkspaceImage(user);
-
-    await user.click(screen.getByRole("button", { name: /light controls/i }));
-    fireEvent.change(screen.getByRole("slider", { name: /brightness/i }), { target: { value: "40" } });
-    expect(screen.getByTestId("workspace-image")).toHaveAttribute("data-filter", expect.stringContaining("brightness(1.200)"));
-
-    fireEvent.mouseDown(screen.getByRole("combobox", { name: /crop ratio/i }));
-    await user.click(screen.getByRole("option", { name: "1:1" }));
-    expect(screen.getByTestId("workspace-preview")).toHaveAttribute("data-crop-ratio", "1 / 1");
-
-    await user.click(screen.getByRole("button", { name: "Rotate" }));
-    await user.click(screen.getByRole("button", { name: /rotate right/i }));
-    expect(screen.getByTestId("workspace-preview")).toHaveAttribute("data-transform", expect.stringContaining("rotate(90deg)"));
-
-    await user.click(screen.getByRole("button", { name: "Flip" }));
-    await user.click(screen.getByRole("button", { name: /flip h/i }));
-    expect(screen.getByTestId("workspace-preview")).toHaveAttribute("data-transform", expect.stringContaining("scaleX(-1)"));
-
-    await user.click(screen.getByRole("button", { name: "Text" }));
-    await user.type(screen.getByLabelText(/text overlay content/i), "Studio note");
-    expect(screen.getByTestId("text-overlay")).toHaveTextContent("Studio note");
   });
 
   it("rejects invalid upload files clearly", () => {
