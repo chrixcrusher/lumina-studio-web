@@ -841,7 +841,7 @@ The table below is the live status box for the plan.
 | 1.2 | Implement authentication endpoints | done | Register, login, logout, and me JWT flow implemented; backend/frontend auth tests, typecheck, and lint passed. |
 | 1.3 | Implement Hugging Face token storage | done | Save/delete token endpoints, encryption at rest, safe status responses, frontend status actions, tests, typecheck, and lint passed. |
 | 2.1 | Build workspace shell and upload flow | done | Guest workspace shell, upload validation/loading states, and component coverage completed. |
-| 2.2 | Implement browser manual editing tools | pending |  |
+| 2.2 | Implement browser manual editing tools | done | Browser-side adjustments, crop, rotate, flip, text overlay, preview state, component coverage, and E2E manual-edit flow completed. |
 | 2.3 | Implement browser filters and export | pending |  |
 | 3.1 | Implement preset schema and repository | pending |  |
 | 3.2 | Implement preset APIs | pending |  |
