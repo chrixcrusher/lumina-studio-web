@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactElement } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { AccountSettingsPage } from "@/domains/account/components/AccountSettingsPage";
 import { AuthForm } from "@/domains/authentication/components/AuthForm";
 import { EditorWorkspace } from "@/domains/editor/components/EditorWorkspace";
@@ -13,6 +13,10 @@ import { AppProviders } from "@/app/providers";
 function renderWithProviders(ui: ReactElement) {
   return render(<AppProviders>{ui}</AppProviders>);
 }
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 async function uploadWorkspaceImage(user: ReturnType<typeof userEvent.setup>) {
   const file = new File(["valid image"], "valid-transparent.png", { type: "image/png" });
@@ -195,11 +199,46 @@ describe("MVP UI alignment", () => {
     expect(screen.queryByAltText("Uploaded workspace image")).not.toBeInTheDocument();
   });
 
-  it("shows metadata-only history with canonical values", () => {
+  it("shows metadata-only history with canonical values", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            success: true,
+            history: [
+              {
+                id: "history-1",
+                operationType: OPERATION_TYPES.restoreFace,
+                processingMode: PROCESSING_MODES.cloudAi,
+                settingsUsed: {
+                  model: "CodeFormer",
+                },
+                outputFormat: "image/png",
+                processingTimeMs: 1840,
+                status: "success",
+                originalImageUrl: null,
+                enhancedImageUrl: null,
+                createdAt: "2026-06-08T10:22:00.000Z",
+              },
+            ],
+          }),
+          {
+            status: 200,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          },
+        ),
+      ),
+    );
+
     renderWithProviders(<HistoryPage />);
 
-    expect(screen.getByText(OPERATION_TYPES.restoreFace)).toBeInTheDocument();
-    expect(screen.getByText(PROCESSING_MODES.cloudAi)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getAllByText(OPERATION_TYPES.restoreFace)[0]).toBeInTheDocument();
+    });
+    expect(screen.getAllByText(PROCESSING_MODES.cloudAi)[0]).toBeInTheDocument();
     expect(screen.queryByAltText(/thumbnail/i)).not.toBeInTheDocument();
   });
 

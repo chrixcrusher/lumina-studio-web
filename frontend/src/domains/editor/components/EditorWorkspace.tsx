@@ -37,6 +37,7 @@ import Link from "next/link";
 import type { ChangeEvent, ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { APP_ROUTES } from "@/shared/constants/routes";
+import { getOrCreateGuestSessionId } from "@/shared/guest-session";
 
 interface Adjustments {
   brightness: number;
@@ -96,7 +97,6 @@ const CROP_PRESETS = [
   { id: "wide", label: "16:9", ratio: "16 / 9", exportRatio: 16 / 9 },
 ] as const satisfies readonly CropPreset[];
 
-const GUEST_SESSION_STORAGE_KEY = "luminaStudio.guestSessionId";
 const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024;
 const MAX_UPLOAD_SIZE_MB = MAX_UPLOAD_SIZE_BYTES / (1024 * 1024);
 const SUPPORTED_UPLOAD_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -136,14 +136,6 @@ function thumbUrl(url: string, w: number, h: number) {
 
 function fmtVal(value: number) {
   return value > 0 ? `+${value}` : `${value}`;
-}
-
-function createGuestSessionId() {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
-  }
-
-  return `guest-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 function validateImageUpload(file: File) {
@@ -466,14 +458,7 @@ export function EditorWorkspace() {
   });
 
   useEffect(() => {
-    const existingSessionId = window.sessionStorage.getItem(GUEST_SESSION_STORAGE_KEY);
-    const nextSessionId = existingSessionId ?? createGuestSessionId();
-
-    if (!existingSessionId) {
-      window.sessionStorage.setItem(GUEST_SESSION_STORAGE_KEY, nextSessionId);
-    }
-
-    setGuestSessionId(nextSessionId);
+    setGuestSessionId(getOrCreateGuestSessionId());
   }, []);
 
   const imageUrl = uploadedImage ?? activePhoto?.url ?? null;
