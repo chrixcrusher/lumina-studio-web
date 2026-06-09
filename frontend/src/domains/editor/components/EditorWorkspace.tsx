@@ -39,6 +39,7 @@ import { useEffect, useMemo, useState } from "react";
 import { APP_ROUTES } from "@/shared/constants/routes";
 
 interface Adjustments {
+  brightness: number;
   exposure: number;
   contrast: number;
   highlights: number;
@@ -54,7 +55,16 @@ interface FilterPreset {
   adj: Partial<Adjustments>;
 }
 
+interface TextOverlayState {
+  text: string;
+  color: string;
+  size: number;
+  x: number;
+  y: number;
+}
+
 const DEFAULT_ADJUSTMENTS: Adjustments = {
+  brightness: 0,
   exposure: 0,
   contrast: 0,
   highlights: 0,
@@ -63,6 +73,21 @@ const DEFAULT_ADJUSTMENTS: Adjustments = {
   vibrance: 0,
   warmth: 0,
 };
+
+const DEFAULT_TEXT_OVERLAY: TextOverlayState = {
+  text: "",
+  color: "#ffffff",
+  size: 34,
+  x: 50,
+  y: 50,
+};
+
+const CROP_PRESETS = [
+  { id: "free", label: "Free", ratio: null },
+  { id: "square", label: "1:1", ratio: "1 / 1" },
+  { id: "portrait", label: "4:5", ratio: "4 / 5" },
+  { id: "wide", label: "16:9", ratio: "16 / 9" },
+] as const;
 
 const GUEST_SESSION_STORAGE_KEY = "luminaStudio.guestSessionId";
 const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024;
@@ -129,9 +154,12 @@ function validateImageUpload(file: File) {
 function buildCSSFilter(adjustments: Adjustments, preset: FilterPreset, showOriginal: boolean) {
   if (showOriginal) return "none";
   const merged = { ...adjustments, ...preset.adj };
-  const brightness = Math.max(0.15, 1 + merged.exposure * 0.006);
-  const contrast = Math.max(0.15, 1 + merged.contrast * 0.007);
-  const saturate = Math.max(0, 1 + merged.saturation / 100);
+  const brightness = Math.max(
+    0.15,
+    1 + merged.brightness * 0.005 + merged.exposure * 0.006 + merged.highlights * 0.002 + merged.shadows * 0.0015,
+  );
+  const contrast = Math.max(0.15, 1 + merged.contrast * 0.007 + merged.highlights * 0.0015 - merged.shadows * 0.001);
+  const saturate = Math.max(0, 1 + merged.saturation / 100 + merged.vibrance / 180);
   const hueRotate = (merged.warmth ?? 0) * -0.14;
   const sepia = (merged.warmth ?? 0) > 0 ? ((merged.warmth ?? 0) / 100) * 0.22 : 0;
   return [
@@ -143,6 +171,10 @@ function buildCSSFilter(adjustments: Adjustments, preset: FilterPreset, showOrig
   ]
     .filter(Boolean)
     .join(" ");
+}
+
+function buildPreviewTransform(rotation: number, flipHorizontal: boolean, flipVertical: boolean) {
+  return `rotate(${rotation}deg) scaleX(${flipHorizontal ? -1 : 1}) scaleY(${flipVertical ? -1 : 1})`;
 }
 
 function Brand() {
@@ -248,11 +280,15 @@ function AdjSlider({
   value,
   onChange,
   icon,
+  min = -100,
+  max = 100,
 }: {
   label: string;
   value: number;
   onChange: (value: number) => void;
   icon?: ReactNode;
+  min?: number;
+  max?: number;
 }) {
   return (
     <Box>
@@ -282,8 +318,8 @@ function AdjSlider({
         </Typography>
       </Stack>
       <Slider
-        min={-100}
-        max={100}
+        min={min}
+        max={max}
         value={value}
         onChange={(_, next) => onChange(next as number)}
         aria-label={label}
@@ -375,6 +411,11 @@ export function EditorWorkspace() {
   const [selectedTool, setSelectedTool] = useState("crop");
   const [selectedPreset, setSelectedPreset] = useState(FILTER_PRESETS[0]);
   const [adjustments, setAdjustments] = useState<Adjustments>({ ...DEFAULT_ADJUSTMENTS });
+  const [cropPresetId, setCropPresetId] = useState<(typeof CROP_PRESETS)[number]["id"]>("free");
+  const [rotation, setRotation] = useState(0);
+  const [flipHorizontal, setFlipHorizontal] = useState(false);
+  const [flipVertical, setFlipVertical] = useState(false);
+  const [textOverlay, setTextOverlay] = useState<TextOverlayState>({ ...DEFAULT_TEXT_OVERLAY });
   const [showOriginal, setShowOriginal] = useState(false);
   const [zoom, setZoom] = useState(100);
   const [hfToken, setHfToken] = useState("");
@@ -404,10 +445,24 @@ export function EditorWorkspace() {
     () => buildCSSFilter(adjustments, selectedPreset, showOriginal),
     [adjustments, selectedPreset, showOriginal],
   );
+  const cropPreset = CROP_PRESETS.find((preset) => preset.id === cropPresetId) ?? CROP_PRESETS[0];
+  const activeCropRatio = showOriginal ? null : cropPreset.ratio;
+  const previewTransform = showOriginal ? "none" : buildPreviewTransform(rotation, flipHorizontal, flipVertical);
 
   const updateAdj = (key: keyof Adjustments, value: number) => {
     setAdjustments((current) => ({ ...current, [key]: value }));
     setSelectedPreset(FILTER_PRESETS[0]);
+  };
+
+  const resetManualEdits = () => {
+    setAdjustments({ ...DEFAULT_ADJUSTMENTS });
+    setSelectedPreset(FILTER_PRESETS[0]);
+    setCropPresetId("free");
+    setRotation(0);
+    setFlipHorizontal(false);
+    setFlipVertical(false);
+    setTextOverlay({ ...DEFAULT_TEXT_OVERLAY });
+    setShowOriginal(false);
   };
 
   const toggleSection = (key: keyof typeof expanded) => {
@@ -442,8 +497,7 @@ export function EditorWorkspace() {
       setUploadedFileName(file.name);
       setActivePhoto(null);
       setSelectedPreset(FILTER_PRESETS[0]);
-      setAdjustments({ ...DEFAULT_ADJUSTMENTS });
-      setShowOriginal(false);
+      resetManualEdits();
       setImageLoading(false);
     };
 
@@ -502,7 +556,7 @@ export function EditorWorkspace() {
                 setUploadedFileName(photo.alt);
                 setUploadError(null);
                 setImageLoading(false);
-                setShowOriginal(false);
+                resetManualEdits();
               }}
               sx={{
                 width: 60,
@@ -759,19 +813,62 @@ export function EditorWorkspace() {
                 }}
               >
                 <Box
-                  component="img"
-                  src={imageUrl}
-                  alt={imageAlt}
+                  data-testid="workspace-preview"
+                  data-transform={previewTransform}
+                  data-crop-ratio={activeCropRatio ?? "free"}
                   sx={{
-                    display: "block",
-                    maxHeight: "calc(100vh - 255px)",
+                    position: "relative",
+                    display: "inline-block",
+                    width: activeCropRatio ? "min(70vw, 760px)" : "auto",
                     maxWidth: "100%",
-                    objectFit: "contain",
-                    filter: cssFilter,
-                    transition: "filter 0.08s linear",
+                    aspectRatio: activeCropRatio ?? "auto",
+                    overflow: "hidden",
+                    transform: previewTransform,
+                    transformOrigin: "center center",
+                    transition: "filter 0.08s linear, transform 0.15s ease",
                     boxShadow: "0 32px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.04)",
                   }}
-                />
+                >
+                  <Box
+                    component="img"
+                    data-testid="workspace-image"
+                    data-filter={cssFilter}
+                    src={imageUrl}
+                    alt={imageAlt}
+                    sx={{
+                      display: "block",
+                      width: activeCropRatio ? "100%" : "auto",
+                      height: activeCropRatio ? "100%" : "auto",
+                      maxHeight: activeCropRatio ? "none" : "calc(100vh - 255px)",
+                      maxWidth: activeCropRatio ? "none" : "100%",
+                      objectFit: activeCropRatio ? "cover" : "contain",
+                      filter: cssFilter,
+                      transition: "filter 0.08s linear",
+                    }}
+                  />
+                  {!showOriginal && textOverlay.text.trim() && (
+                    <Box
+                      data-testid="text-overlay"
+                      sx={{
+                        position: "absolute",
+                        left: `${textOverlay.x}%`,
+                        top: `${textOverlay.y}%`,
+                        transform: "translate(-50%, -50%)",
+                        color: textOverlay.color,
+                        fontSize: `${textOverlay.size}px`,
+                        fontWeight: 800,
+                        lineHeight: 1.05,
+                        textAlign: "center",
+                        textShadow: "0 2px 12px rgba(0,0,0,0.72)",
+                        maxWidth: "86%",
+                        overflowWrap: "anywhere",
+                        pointerEvents: "none",
+                      }}
+                    >
+                      {textOverlay.text}
+                    </Box>
+                  )}
+                </Box>
                 <Box
                   sx={{
                     position: "absolute",
@@ -1007,11 +1104,166 @@ export function EditorWorkspace() {
               <Histogram adjustments={adjustments} />
             </Box>
 
+            <Box sx={{ pb: 2.4, mb: 2.2, borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+              <Typography
+                sx={{
+                  color: "#a9a5ff",
+                  fontSize: 12,
+                  fontWeight: 800,
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  mb: 2,
+                }}
+              >
+                {tools.find((tool) => tool.id === selectedTool)?.label} Tool
+              </Typography>
+
+              {selectedTool === "crop" && (
+                <Stack spacing={1.4}>
+                  <Select
+                    value={cropPresetId}
+                    onChange={(event) => setCropPresetId(event.target.value as typeof cropPresetId)}
+                    size="small"
+                    fullWidth
+                    inputProps={{ "aria-label": "Crop ratio" }}
+                    IconComponent={KeyboardArrowDownIcon}
+                    sx={{
+                      height: 41,
+                      bgcolor: "rgba(0,0,0,0.3)",
+                      borderRadius: 1.5,
+                      color: "#e4e4f2",
+                      fontSize: 13,
+                      "& fieldset": { borderColor: "rgba(255,255,255,0.06)" },
+                    }}
+                  >
+                    {CROP_PRESETS.map((preset) => (
+                      <MenuItem key={preset.id} value={preset.id}>
+                        {preset.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  <Typography sx={{ color: "#52527a", fontSize: 11, lineHeight: 1.55 }}>
+                    Crop is previewed in the browser by clipping the workspace image.
+                  </Typography>
+                </Stack>
+              )}
+
+              {selectedTool === "rotate" && (
+                <Stack spacing={1.4}>
+                  <Stack direction="row" spacing={1}>
+                    <Button
+                      fullWidth
+                      disabled={!imageUrl}
+                      onClick={() => setRotation((current) => (current - 90 + 360) % 360)}
+                      sx={{ bgcolor: "rgba(255,255,255,0.05)", color: "#8888d8" }}
+                    >
+                      Rotate Left
+                    </Button>
+                    <Button
+                      fullWidth
+                      disabled={!imageUrl}
+                      onClick={() => setRotation((current) => (current + 90) % 360)}
+                      sx={{ bgcolor: "rgba(255,255,255,0.05)", color: "#8888d8" }}
+                    >
+                      Rotate Right
+                    </Button>
+                  </Stack>
+                  <Typography sx={{ color: "#6868a0", fontSize: 13 }}>Rotation: {rotation} deg</Typography>
+                </Stack>
+              )}
+
+              {selectedTool === "flip" && (
+                <Stack direction="row" spacing={1}>
+                  <Button
+                    fullWidth
+                    disabled={!imageUrl}
+                    onClick={() => setFlipHorizontal((current) => !current)}
+                    sx={{
+                      bgcolor: flipHorizontal ? "rgba(124,102,255,0.18)" : "rgba(255,255,255,0.05)",
+                      color: flipHorizontal ? "#a78bfa" : "#8888d8",
+                    }}
+                  >
+                    Flip H
+                  </Button>
+                  <Button
+                    fullWidth
+                    disabled={!imageUrl}
+                    onClick={() => setFlipVertical((current) => !current)}
+                    sx={{
+                      bgcolor: flipVertical ? "rgba(124,102,255,0.18)" : "rgba(255,255,255,0.05)",
+                      color: flipVertical ? "#a78bfa" : "#8888d8",
+                    }}
+                  >
+                    Flip V
+                  </Button>
+                </Stack>
+              )}
+
+              {selectedTool === "text" && (
+                <Stack spacing={2.2}>
+                  <TextField
+                    value={textOverlay.text}
+                    onChange={(event) => setTextOverlay((current) => ({ ...current, text: event.target.value }))}
+                    placeholder="Overlay text"
+                    inputProps={{ "aria-label": "Text overlay content" }}
+                    size="small"
+                    fullWidth
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        bgcolor: "rgba(0,0,0,0.3)",
+                        borderRadius: 1.5,
+                        color: "#e4e4f2",
+                        fontSize: 13,
+                        "& fieldset": { borderColor: "rgba(255,255,255,0.06)" },
+                      },
+                    }}
+                  />
+                  <TextField
+                    value={textOverlay.color}
+                    onChange={(event) => setTextOverlay((current) => ({ ...current, color: event.target.value }))}
+                    type="color"
+                    inputProps={{ "aria-label": "Text overlay color" }}
+                    size="small"
+                    fullWidth
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        bgcolor: "rgba(0,0,0,0.3)",
+                        borderRadius: 1.5,
+                        "& fieldset": { borderColor: "rgba(255,255,255,0.06)" },
+                      },
+                    }}
+                  />
+                  <AdjSlider
+                    label="Text Size"
+                    value={textOverlay.size}
+                    onChange={(value) => setTextOverlay((current) => ({ ...current, size: value }))}
+                    min={12}
+                    max={72}
+                  />
+                  <AdjSlider
+                    label="Text X"
+                    value={textOverlay.x}
+                    onChange={(value) => setTextOverlay((current) => ({ ...current, x: value }))}
+                    min={0}
+                    max={100}
+                  />
+                  <AdjSlider
+                    label="Text Y"
+                    value={textOverlay.y}
+                    onChange={(value) => setTextOverlay((current) => ({ ...current, y: value }))}
+                    min={0}
+                    max={100}
+                  />
+                </Stack>
+              )}
+            </Box>
+
             <Box sx={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
               <SectionHeader label="Light Controls" expanded={expanded.light} onClick={() => toggleSection("light")} />
             </Box>
             {expanded.light && (
               <Stack spacing={3} sx={{ pt: 2, pb: 3 }}>
+                <AdjSlider label="Brightness" value={adjustments.brightness} onChange={(value) => updateAdj("brightness", value)} icon={<AutoFixHighIcon />} />
                 <AdjSlider label="Exposure" value={adjustments.exposure} onChange={(value) => updateAdj("exposure", value)} icon={<AutoFixHighIcon />} />
                 <AdjSlider label="Contrast" value={adjustments.contrast} onChange={(value) => updateAdj("contrast", value)} icon={<ContentCutIcon />} />
                 <AdjSlider label="Highlights" value={adjustments.highlights} onChange={(value) => updateAdj("highlights", value)} />
@@ -1076,10 +1328,7 @@ export function EditorWorkspace() {
           <Box sx={{ p: 1.5, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
             <Button
               fullWidth
-              onClick={() => {
-                setAdjustments({ ...DEFAULT_ADJUSTMENTS });
-                setSelectedPreset(FILTER_PRESETS[0]);
-              }}
+              onClick={resetManualEdits}
               sx={{
                 py: 1,
                 color: "#38385a",
@@ -1090,7 +1339,7 @@ export function EditorWorkspace() {
                 "&:hover": { color: "#6868a0", bgcolor: "rgba(255,255,255,0.06)" },
               }}
             >
-              Reset All Adjustments
+              Reset Manual Edits
             </Button>
           </Box>
         </Box>
