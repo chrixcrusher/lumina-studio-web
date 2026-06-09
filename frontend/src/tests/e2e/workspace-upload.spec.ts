@@ -114,3 +114,59 @@ test("guest AI restore displays the restored image through the canonical endpoin
   await expect(page.getByText(/restoration complete/i)).toBeVisible();
   await expect(page.getByAltText("Uploaded workspace image")).toHaveAttribute("src", /data:image\/jpeg;base64,/);
 });
+
+test("metadata-only history can be viewed and deleted for the guest session", async ({ page }) => {
+  await page.route("**/api/v1/history", async (route) => {
+    const request = route.request();
+    expect(request.headers()["x-session-id"]).toBeTruthy();
+
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        success: true,
+        history: [
+          {
+            id: "history-1",
+            operationType: "filter",
+            processingMode: "browser",
+            settingsUsed: {
+              filter: "Vivid",
+            },
+            outputFormat: null,
+            processingTimeMs: 80,
+            status: "success",
+            originalImageUrl: null,
+            enhancedImageUrl: null,
+            createdAt: "2026-06-08T10:22:00.000Z",
+          },
+        ],
+      }),
+    });
+  });
+  await page.route("**/api/v1/history/history-1", async (route) => {
+    expect(route.request().method()).toBe("DELETE");
+
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        success: true,
+        message: "History metadata deleted",
+      }),
+    });
+  });
+
+  await page.goto("/history");
+
+  await expect(page.getByText("filter").first()).toBeVisible();
+  await expect(page.getByText("browser").first()).toBeVisible();
+  await expect(page.getByText(/does not promise full image reloads/i)).toBeVisible();
+  await expect(page.getByText(/avoids stored thumbnails/i)).toBeVisible();
+  await expect(page.getByAltText(/thumbnail/i)).toHaveCount(0);
+
+  await page.getByRole("button", { name: /delete filter history/i }).click();
+
+  await expect(page.getByRole("status")).toHaveText(/history metadata deleted/i);
+  await expect(page.getByText("filter").first()).toHaveCount(0);
+});
