@@ -843,7 +843,7 @@ The table below is the live status box for the plan.
 | 2.1 | Build workspace shell and upload flow | done | Guest workspace shell, upload validation/loading states, and component coverage completed. |
 | 2.2 | Implement browser manual editing tools | done | Browser-side adjustments, crop, rotate, flip, text overlay, preview state, component coverage, and E2E manual-edit flow completed. |
 | 2.3 | Implement browser filters and export | done | Browser filters, before/after preview, canvas export/download, component coverage, and E2E export flow completed. |
-| 3.1 | Implement preset schema and repository | pending |  |
+| 3.1 | Implement preset schema and repository | done | Preset schema, account-scoped repository, ownership tests, typecheck, and lint passed. |
 | 3.2 | Implement preset APIs | pending |  |
 | 3.3 | Implement history schema and repository | pending |  |
 | 3.4 | Implement history APIs and UI | pending |  |
