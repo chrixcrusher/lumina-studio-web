@@ -1,0 +1,43 @@
+ ⚠ Attempted to load C:\Users\christian.paje\Documents\lumina-studio-web\frontend\node_modules\next\next-swc-fallback\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node, but it was not installed
+ ⚠ Attempted to load @next/swc-win32-x64-msvc, but it was not installed
+ ⚠ Attempted to load C:\Users\christian.paje\Documents\lumina-studio-web\frontend\node_modules\next\next-swc-fallback\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node, but it was not installed
+ ⚠ Attempted to load @next/swc-win32-x64-msvc, but it was not installed
+node:events:502
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: EPERM: operation not permitted, open 'C:\Users\christian.paje\Documents\lumina-studio-web\frontend\.next\trace'
+Emitted 'error' event on WriteStream instance at:
+    at emitErrorNT (node:internal/streams/destroy:169:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:128:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+  errno: -4048,
+  code: 'EPERM',
+  syscall: 'open',
+  path: 'C:\\Users\\christian.paje\\Documents\\lumina-studio-web\\frontend\\.next\\trace'
+}
+
+Node.js v20.20.2
+node:events:502
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: EPERM: operation not permitted, open 'C:\Users\christian.paje\Documents\lumina-studio-web\frontend\.next\trace'
+Emitted 'error' event on WriteStream instance at:
+    at emitErrorNT (node:internal/streams/destroy:169:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:128:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+  errno: -4048,
+  code: 'EPERM',
+  syscall: 'open',
+  path: 'C:\\Users\\christian.paje\\Documents\\lumina-studio-web\\frontend\\.next\\trace'
+}
+
+Node.js v20.20.2
+npm error Lifecycle script `dev` failed with error:
+npm error code 1
+npm error path C:\Users\christian.paje\Documents\lumina-studio-web\frontend
+npm error workspace lumina-studio-web-frontend@0.1.0
+npm error location C:\Users\christian.paje\Documents\lumina-studio-web\frontend
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c next dev --hostname 127.0.0.1 --port 3000

@@ -3,7 +3,7 @@ import { AppService } from "./app.service";
 
 describe("AppService", () => {
   it("returns a safe deployment smoke status", () => {
-    const service = new AppService({
+    const service = AppService.createForTesting({
       FRONTEND_URL: "https://lumina-web.vercel.app",
       MAX_UPLOAD_SIZE_MB: "8",
       MONGODB_URI: "mongodb+srv://example",

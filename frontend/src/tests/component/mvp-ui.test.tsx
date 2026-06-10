@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactElement } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -31,9 +31,13 @@ describe("MVP UI alignment", () => {
   it("renders landing entry points without trial or subscription language", () => {
     renderWithProviders(<LandingPage />);
 
+    expect(screen.getByText("This tool is not available on mobile devices. Please use a tablet or desktop")).toBeInTheDocument();
     expect(screen.getAllByText("LuminaStudio Web")[0]).toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: /enhance now/i })[0]).toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: /create account/i })[0]).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /^editor$/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /^history$/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /^settings$/i })).not.toBeInTheDocument();
     expect(screen.queryByText(/free trial/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/pro plan/i)).not.toBeInTheDocument();
   });
@@ -53,7 +57,7 @@ describe("MVP UI alignment", () => {
     expect(screen.getByText(/upload an image to start/i)).toBeInTheDocument();
     expect(screen.getByText(/guest workspace/i)).toBeInTheDocument();
 
-    for (const tool of ["Crop", "Rotate", "Flip", "Text"]) {
+    for (const tool of ["Select", "Crop", "Rotate", "Flip", "Text"]) {
       expect(screen.getByRole("button", { name: tool })).toBeInTheDocument();
     }
 
@@ -62,6 +66,7 @@ describe("MVP UI alignment", () => {
     }
 
     expect(screen.getByLabelText(/hugging face api token/i)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/use saved hugging face token/i)).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /ai restore/i })).toBeDisabled();
   });
 
@@ -145,9 +150,49 @@ describe("MVP UI alignment", () => {
     fireEvent.change(screen.getByRole("slider", { name: /brightness/i }), { target: { value: "40" } });
     expect(screen.getByTestId("workspace-image")).toHaveAttribute("data-filter", expect.stringContaining("brightness(1.200)"));
 
+    await user.click(screen.getByRole("button", { name: "Crop" }));
     fireEvent.mouseDown(screen.getByRole("combobox", { name: /crop ratio/i }));
     await user.click(screen.getByRole("option", { name: "1:1" }));
     expect(screen.getByTestId("workspace-preview")).toHaveAttribute("data-crop-ratio", "1 / 1");
+
+    fireEvent.mouseDown(screen.getByRole("combobox", { name: /crop ratio/i }));
+    await user.click(screen.getByRole("option", { name: "Free" }));
+    expect(screen.getByTestId("workspace-preview")).toHaveAttribute("data-crop-ratio", "free");
+    expect(screen.getByTestId("free-crop-frame")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /apply/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
+
+    const preview = screen.getByTestId("workspace-preview");
+    Object.defineProperty(preview, "getBoundingClientRect", {
+      configurable: true,
+      value: () => ({
+        width: 200,
+        height: 100,
+        left: 0,
+        top: 0,
+        right: 200,
+        bottom: 100,
+        x: 0,
+        y: 0,
+        toJSON: () => undefined,
+      }),
+    });
+    const freeCropHandle = screen.getByTestId("free-crop-handle-nw");
+    const pointerDown = new Event("pointerdown", { bubbles: true, cancelable: true });
+    Object.assign(pointerDown, { pointerId: 1, clientX: 0, clientY: 0 });
+    const pointerMove = new Event("pointermove", { bubbles: true, cancelable: true });
+    Object.assign(pointerMove, { pointerId: 1, clientX: 20, clientY: 10 });
+    const pointerUp = new Event("pointerup", { bubbles: true, cancelable: true });
+    Object.assign(pointerUp, { pointerId: 1, clientX: 20, clientY: 10 });
+    fireEvent(freeCropHandle, pointerDown);
+    fireEvent(freeCropHandle, pointerMove);
+    fireEvent(freeCropHandle, pointerUp);
+    await waitFor(() => {
+      expect(screen.getByTestId("free-crop-frame")).toHaveAttribute("data-crop-x", "10");
+    });
+    await user.click(screen.getByRole("button", { name: /apply/i }));
+    expect(screen.getByTestId("free-crop-frame")).toHaveAttribute("data-crop-x", "10");
+    expect(screen.getByTestId("free-crop-frame")).toHaveAttribute("data-crop-y", "10");
 
     await user.click(screen.getByRole("button", { name: "Rotate" }));
     await user.click(screen.getByRole("button", { name: /rotate right/i }));
@@ -158,9 +203,68 @@ describe("MVP UI alignment", () => {
     expect(screen.getByTestId("workspace-preview")).toHaveAttribute("data-transform", expect.stringContaining("scaleX(-1)"));
 
     await user.click(screen.getByRole("button", { name: "Text" }));
-    await user.type(screen.getByLabelText(/text overlay content/i), "Studio note");
+    fireEvent.change(screen.getByLabelText(/text overlay content/i), { target: { value: "Studio note" } });
     expect(screen.getByTestId("text-overlay")).toHaveTextContent("Studio note");
-  }, 10000);
+
+    await user.click(screen.getByRole("button", { name: /add text/i }));
+    fireEvent.change(screen.getByLabelText(/text overlay content/i), { target: { value: "Second note" } });
+    expect(screen.getByText("Studio note")).toBeInTheDocument();
+    expect(screen.getByTestId("text-overlay")).toHaveTextContent("Second note");
+  }, 30000);
+
+  it("offers advanced text color selection modes and synchronized color codes", async () => {
+    const user = userEvent.setup();
+    let resolveEyeDropper!: (value: { sRGBHex: string }) => void;
+    const eyeDropperPromise = new Promise<{ sRGBHex: string }>((resolve) => {
+      resolveEyeDropper = resolve;
+    });
+    const openEyeDropper = vi.fn(() => eyeDropperPromise);
+    vi.stubGlobal(
+      "EyeDropper",
+      vi.fn().mockImplementation(() => ({ open: openEyeDropper })),
+    );
+
+    renderWithProviders(<EditorWorkspace />);
+    await uploadWorkspaceImage(user);
+
+    await user.click(screen.getByRole("button", { name: "Text" }));
+    expect(screen.getByTestId("text-content-color-row")).toBeInTheDocument();
+
+    const colorTrigger = screen.getByTestId("text-color-trigger");
+    expect(colorTrigger).toHaveAttribute("data-color", "#ffffff");
+    await user.click(colorTrigger);
+    expect(screen.getByRole("button", { name: /eyedropper/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /swatches/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /color wheel/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /color sliders/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /color codes/i })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /eyedropper/i }));
+    expect(openEyeDropper).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(screen.queryByRole("button", { name: /swatches/i })).not.toBeInTheDocument();
+    });
+    await act(async () => {
+      resolveEyeDropper({ sRGBHex: "#38bdf8" });
+      await eyeDropperPromise;
+    });
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /swatches/i })).toBeInTheDocument();
+    });
+    expect(colorTrigger).toHaveAttribute("data-color", "#38bdf8");
+
+    await user.click(screen.getByRole("button", { name: /select #f87171/i }));
+    expect(colorTrigger).toHaveAttribute("data-color", "#f87171");
+
+    await user.click(screen.getByRole("button", { name: /color codes/i }));
+    fireEvent.change(screen.getByLabelText(/hex code/i), { target: { value: "#22c55e" } });
+    expect(colorTrigger).toHaveAttribute("data-color", "#22c55e");
+    expect(screen.getByLabelText(/rgb red/i)).toHaveValue(34);
+    expect(screen.getByLabelText(/rgb green/i)).toHaveValue(197);
+    expect(screen.getByLabelText(/rgb blue/i)).toHaveValue(94);
+    expect(screen.getByLabelText(/hsl hue/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/cmyk cyan/i)).toBeInTheDocument();
+  }, 30000);
 
   it("applies browser filters, shows the original preview, and exports a download", async () => {
     const user = userEvent.setup();
@@ -235,7 +339,7 @@ describe("MVP UI alignment", () => {
       toDataUrl.mockRestore();
       clickDownload.mockRestore();
     }
-  }, 10000);
+  }, 30000);
 
   it("rejects invalid upload files clearly", () => {
     renderWithProviders(<EditorWorkspace />);

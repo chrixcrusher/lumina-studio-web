@@ -40,6 +40,7 @@ test("guest manual edits update the browser preview", async ({ page }) => {
   await page.getByRole("slider", { name: /brightness/i }).fill("40");
   await expect(page.getByTestId("workspace-image")).toHaveAttribute("data-filter", /brightness\(1\.200\)/);
 
+  await page.getByRole("button", { name: "Crop" }).click();
   await page.getByRole("combobox", { name: /crop ratio/i }).click();
   await page.getByRole("option", { name: "1:1" }).click();
   await expect(page.getByTestId("workspace-preview")).toHaveAttribute("data-crop-ratio", "1 / 1");
@@ -73,7 +74,7 @@ test("guest can apply a browser filter and export the current image", async ({ p
   await page.getByRole("button", { name: /^export$/i }).click();
   const download = await downloadPromise;
 
-  expect(download.suggestedFilename()).toBe("valid-transparent-edited.png");
+  expect(download.suggestedFilename()).toMatch(/^LS-Web-\d{6}-valid-transparent\.png$/);
 });
 
 test("guest AI restore displays the restored image through the canonical endpoint", async ({ page }) => {

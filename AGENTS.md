@@ -1,8 +1,8 @@
 # LuminaStudio Web Agent Rules
 
-Source of truth: `ls-web-tdd.md`
+Source of truth: `docs/tdd/ls-web-tdd.md`
 
-Agents working from this docs folder must keep every implementation and documentation change aligned with the LuminaStudio Web MVP goal:
+Agents working from this repository must keep every implementation and documentation change aligned with the LuminaStudio Web MVP goal:
 
 ```text
 Build LuminaStudio Web and deploy it free-tier-first where possible.
@@ -118,8 +118,8 @@ cloud_ai
 
 ## Documentation Rules
 
-- Keep `ls-web-tdd.md` as the canonical design.
+- Keep `docs/tdd/ls-web-tdd.md` as the canonical design.
 - Update API, database, diagram, flow, and project-structure docs when the TDD changes.
 - Avoid adding desktop/offline requirements to Web MVP docs.
-- If work is being executed from `docs/ls-web-development-plan.md`, update the matching ticket status in that plan when the ticket is resolved.
+- If work is being executed from `docs/development-plan/ls-web-development-plan.md`, update the matching ticket status in that plan when the ticket is resolved.
 - Use the plan status values consistently: `pending`, `in_progress`, `done`, `blocked`.

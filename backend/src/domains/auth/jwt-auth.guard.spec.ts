@@ -5,7 +5,7 @@ import { AuthenticatedRequest } from "./auth.types";
 import { JwtAuthGuard } from "./jwt-auth.guard";
 
 describe("JwtAuthGuard", () => {
-  const tokenService = new AuthTokenService("test-secret");
+  const tokenService = AuthTokenService.createForTesting("test-secret");
 
   it("attaches verified bearer token payload to the request", () => {
     const guard = new JwtAuthGuard(tokenService);

@@ -22,7 +22,7 @@ describe("AuthService", () => {
 
   beforeEach(async () => {
     passwords = new AuthPasswordService();
-    tokens = new AuthTokenService("test-secret");
+    tokens = AuthTokenService.createForTesting("test-secret");
     existingAccount = accountDocument({
       passwordHash: await passwords.hashPassword("SecurePassword123"),
     });

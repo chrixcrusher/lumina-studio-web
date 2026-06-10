@@ -21,6 +21,12 @@ export const DEFAULT_PORT = 4000;
 export const DEFAULT_RATE_LIMIT_MAX_REQUESTS = 60;
 export const DEFAULT_RATE_LIMIT_WINDOW_MS = 60_000;
 export const DEFAULT_MAX_UPLOAD_SIZE_MB = 10;
+const HOSTED_DEPLOYMENT_ENV_MARKERS = [
+  "KOYEB_SERVICE_ID",
+  "RAILWAY_ENVIRONMENT",
+  "RAILWAY_SERVICE_ID",
+  "RENDER",
+];
 
 export function getDeploymentConfig(
   env: NodeJS.ProcessEnv = process.env,
@@ -83,7 +89,9 @@ export function readFrontendOrigins(env: NodeJS.ProcessEnv = process.env): strin
 }
 
 function assertProductionEnvironment(env: NodeJS.ProcessEnv): void {
-  if (env.NODE_ENV !== "production") {
+  const isHostedDeployment = hasHostedDeploymentEnvMarker(env);
+
+  if (env.NODE_ENV !== "production" && !isHostedDeployment) {
     return;
   }
 
@@ -92,8 +100,22 @@ function assertProductionEnvironment(env: NodeJS.ProcessEnv): void {
   );
 
   if (missingFields.length > 0) {
-    throw new Error(`Missing required production environment variables: ${missingFields.join(", ")}.`);
+    throw new Error(`Missing required deployment environment variables: ${missingFields.join(", ")}.`);
   }
+
+  if (isHostedDeployment && isLocalhostMongoDbUri(env.MONGODB_URI)) {
+    throw new Error(
+      "MONGODB_URI must point to MongoDB Atlas or another hosted MongoDB service in deployment.",
+    );
+  }
+}
+
+function hasHostedDeploymentEnvMarker(env: NodeJS.ProcessEnv): boolean {
+  return HOSTED_DEPLOYMENT_ENV_MARKERS.some((fieldName) => Boolean(env[fieldName]?.trim()));
+}
+
+function isLocalhostMongoDbUri(uri: string | undefined): boolean {
+  return /^mongodb(?:\+srv)?:\/\/(?:localhost|127\.0\.0\.1|\[::1\])(?::|\/|$)/i.test(uri?.trim() ?? "");
 }
 
 function normalizeOrigin(origin: string): string {

@@ -32,8 +32,31 @@ describe("deployment config", () => {
         NODE_ENV: "production",
       }),
     ).toThrow(
-      "Missing required production environment variables: MONGODB_URI, JWT_SECRET, TOKEN_ENCRYPTION_KEY.",
+      "Missing required deployment environment variables: MONGODB_URI, JWT_SECRET, TOKEN_ENCRYPTION_KEY.",
     );
+  });
+
+  it("fails fast on hosted deployments even when NODE_ENV is not production", () => {
+    expect(() =>
+      getDeploymentConfig({
+        FRONTEND_URL: "https://lumina-web.onrender.com",
+        RENDER: "true",
+      }),
+    ).toThrow(
+      "Missing required deployment environment variables: MONGODB_URI, JWT_SECRET, TOKEN_ENCRYPTION_KEY.",
+    );
+  });
+
+  it("rejects local MongoDB URIs on hosted deployments", () => {
+    expect(() =>
+      getDeploymentConfig({
+        FRONTEND_URL: "https://lumina-web.onrender.com",
+        JWT_SECRET: "replace-with-host-secret",
+        MONGODB_URI: "mongodb://127.0.0.1:27017/lumina-studio-web",
+        RENDER: "true",
+        TOKEN_ENCRYPTION_KEY: "replace-with-host-encryption-key",
+      }),
+    ).toThrow("MONGODB_URI must point to MongoDB Atlas or another hosted MongoDB service in deployment.");
   });
 
   it("allows only configured browser origins through CORS", async () => {

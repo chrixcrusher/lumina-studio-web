@@ -14,7 +14,15 @@ export type AppStatus = {
 
 @Injectable()
 export class AppService {
-  constructor(private readonly env: NodeJS.ProcessEnv = process.env) {}
+  private env: NodeJS.ProcessEnv = process.env;
+
+  static createForTesting(env: NodeJS.ProcessEnv): AppService {
+    const service = new AppService();
+
+    service.env = env;
+
+    return service;
+  }
 
   getStatus(): AppStatus {
     const config = getDeploymentConfig(this.env);

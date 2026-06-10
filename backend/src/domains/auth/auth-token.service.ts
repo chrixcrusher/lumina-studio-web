@@ -16,10 +16,17 @@ interface JwtClaims {
 
 @Injectable()
 export class AuthTokenService {
-  constructor(
-    private readonly jwtSecret = resolveJwtSecret(),
-    private readonly tokenTtlSeconds = AUTH_TOKEN_TTL_SECONDS,
-  ) {}
+  private jwtSecret = resolveJwtSecret();
+  private tokenTtlSeconds = AUTH_TOKEN_TTL_SECONDS;
+
+  static createForTesting(jwtSecret: string, tokenTtlSeconds = AUTH_TOKEN_TTL_SECONDS): AuthTokenService {
+    const service = new AuthTokenService();
+
+    service.jwtSecret = jwtSecret;
+    service.tokenTtlSeconds = tokenTtlSeconds;
+
+    return service;
+  }
 
   sign(account: Pick<AccountSummaryDto, "id" | "email">): string {
     const issuedAt = Math.floor(Date.now() / 1000);

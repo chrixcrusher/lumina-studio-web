@@ -1,10 +1,7 @@
 "use client";
 
-import HistoryIcon from "@mui/icons-material/History";
 import LoginIcon from "@mui/icons-material/Login";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import SettingsIcon from "@mui/icons-material/Settings";
-import TuneIcon from "@mui/icons-material/Tune";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -79,18 +76,6 @@ export function AppHeader({ compact = false }: AppHeaderProps) {
         </Button>
 
         <Box sx={{ flex: 1 }} />
-
-        <Stack direction="row" spacing={1} sx={{ display: { xs: "none", md: "flex" } }}>
-          <Button component={Link} href={APP_ROUTES.editor} startIcon={<TuneIcon />} color="inherit">
-            Editor
-          </Button>
-          <Button component={Link} href={APP_ROUTES.history} startIcon={<HistoryIcon />} color="inherit">
-            History
-          </Button>
-          <Button component={Link} href={APP_ROUTES.settings} startIcon={<SettingsIcon />} color="inherit">
-            Settings
-          </Button>
-        </Stack>
 
         <Stack direction="row" spacing={1}>
           <Button
