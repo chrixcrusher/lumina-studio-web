@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
-    "dev": "tsx watch src/main.ts",
+    "dev": "npm run build && npm run start",
     "build": "tsc -p tsconfig.build.json",
     "start": "node dist/main.js",
     "lint": "eslint \"src/**/*.ts\" --max-warnings=0",
@@ -24,7 +24,6 @@
     "@typescript-eslint/eslint-plugin": "^8.18.0",
     "@typescript-eslint/parser": "^8.18.0",
     "eslint": "^8.57.1",
-    "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
   }

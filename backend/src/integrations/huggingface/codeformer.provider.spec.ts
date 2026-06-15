@@ -16,15 +16,16 @@ describe("CodeFormerProvider", () => {
     provider = new CodeFormerProvider(huggingFace as unknown as HuggingFaceClient);
   });
 
-  it("maps restore requests to the CodeFormer Hugging Face model", async () => {
+  it("maps restore requests to the CodeFormer Hugging Face Space", async () => {
     huggingFace.runImageInference.mockResolvedValue({
       imageBase64: "cmVzdG9yZWQ=",
-      contentType: "image/jpeg",
+      contentType: "image/png",
     });
 
     await expect(
       provider.restoreFace({
         imageBase64: "aW1hZ2U=",
+        contentType: "image/jpeg",
         huggingFaceToken: "hf_secret_token_123456",
         fidelity: 0.7,
         outputFormat: "jpeg",
@@ -35,14 +36,14 @@ describe("CodeFormerProvider", () => {
         model: "CodeFormer",
         fidelity: 0.7,
       },
-      outputFormat: "jpeg",
+      outputFormat: "png",
     });
 
     expect(huggingFace.runImageInference).toHaveBeenCalledWith({
-      model: "sczhou/CodeFormer",
       imageBase64: "aW1hZ2U=",
       huggingFaceToken: "hf_secret_token_123456",
       contentType: "image/jpeg",
+      fidelity: 0.7,
     });
   });
 
@@ -50,6 +51,7 @@ describe("CodeFormerProvider", () => {
     await expect(
       provider.restoreFace({
         imageBase64: "",
+        contentType: "image/png",
         huggingFaceToken: "hf_secret_token_123456",
       }),
     ).rejects.toMatchObject({
@@ -59,6 +61,7 @@ describe("CodeFormerProvider", () => {
     await expect(
       provider.restoreFace({
         imageBase64: "aW1hZ2U=",
+        contentType: "image/png",
         huggingFaceToken: "hf_secret_token_123456",
         fidelity: 1.5,
       }),
@@ -67,6 +70,7 @@ describe("CodeFormerProvider", () => {
     await expect(
       provider.restoreFace({
         imageBase64: "aW1hZ2U=",
+        contentType: "image/png",
         huggingFaceToken: "hf_secret_token_123456",
         outputFormat: "gif",
       }),

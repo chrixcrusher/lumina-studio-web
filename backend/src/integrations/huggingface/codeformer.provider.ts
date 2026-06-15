@@ -5,7 +5,6 @@ import type {
   CodeFormerRestoreFaceResponse,
 } from "./hugging-face.types";
 
-const CODEFORMER_MODEL = process.env.HUGGING_FACE_CODEFORMER_MODEL ?? "sczhou/CodeFormer";
 const DEFAULT_OUTPUT_FORMAT = "jpeg";
 
 @Injectable()
@@ -18,10 +17,10 @@ export class CodeFormerProvider {
     const fidelity = this.optionalFidelity(request.fidelity);
     const outputFormat = this.optionalOutputFormat(request.outputFormat);
     const response = await this.huggingFace.runImageInference({
-      model: CODEFORMER_MODEL,
       imageBase64: this.requireImageBase64(request.imageBase64),
       huggingFaceToken: request.huggingFaceToken,
-      contentType: this.toImageContentType(outputFormat),
+      contentType: this.requireContentType(request.contentType),
+      fidelity,
     });
 
     return {
@@ -30,7 +29,7 @@ export class CodeFormerProvider {
         model: "CodeFormer",
         ...(fidelity === undefined ? {} : { fidelity }),
       },
-      outputFormat,
+      outputFormat: this.toOutputFormat(response.contentType) ?? outputFormat,
     };
   }
 
@@ -66,7 +65,27 @@ export class CodeFormerProvider {
     return value;
   }
 
-  private toImageContentType(outputFormat: string): string {
-    return `image/${outputFormat === "jpeg" ? "jpeg" : outputFormat}`;
+  private requireContentType(value: unknown): string {
+    if (value !== "image/jpeg" && value !== "image/png" && value !== "image/webp") {
+      throw new BadRequestException("Invalid field: image content type.");
+    }
+
+    return value;
+  }
+
+  private toOutputFormat(contentType: string): string | undefined {
+    if (contentType.startsWith("image/png")) {
+      return "png";
+    }
+
+    if (contentType.startsWith("image/webp")) {
+      return "webp";
+    }
+
+    if (contentType.startsWith("image/jpeg") || contentType.startsWith("image/jpg")) {
+      return "jpeg";
+    }
+
+    return undefined;
   }
 }

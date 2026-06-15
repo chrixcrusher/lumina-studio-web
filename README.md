@@ -50,39 +50,25 @@ Use this path if you only want to run the app locally and try it.
 npm install
 ```
 
-4. Create the frontend local environment file:
-
-PowerShell:
-
-```powershell
-Copy-Item frontend\.env.example frontend\.env.local
-```
-
-macOS/Linux:
-
-```bash
-cp frontend/.env.example frontend/.env.local
-```
-
-5. Start MongoDB locally. The default backend connection is:
+4. Start MongoDB locally. The default backend connection is:
 
 ```text
 mongodb://127.0.0.1:27017/lumina-studio-web
 ```
 
-6. Start the backend in one terminal:
+5. Start the backend in one terminal:
 
 ```bash
 npm run dev:backend
 ```
 
-7. Start the frontend in another terminal:
+6. Start the frontend in another terminal:
 
 ```bash
 npm run dev:frontend
 ```
 
-8. Open the app:
+7. Open the app:
 
 ```text
 http://localhost:3000
@@ -104,7 +90,7 @@ Install all workspace dependencies from the repository root:
 npm install
 ```
 
-Create the frontend local environment file:
+The frontend points browser API requests at `http://localhost:4000` during local development by default. Create a frontend local environment file when you need to override that backend URL:
 
 ```bash
 cp frontend/.env.example frontend/.env.local
@@ -188,13 +174,13 @@ TOKEN_ENCRYPTION_KEY=your-long-random-token-encryption-secret
 
 On hosted backend providers such as Render, Railway, or Koyeb, `MONGODB_URI` must be a hosted MongoDB connection string, for example MongoDB Atlas. Do not use `mongodb://127.0.0.1:27017/lumina-studio-web` in deployment; inside a hosted container, `127.0.0.1` means the container itself, not your local machine.
 
-Set `NEXT_PUBLIC_API_BASE_URL` before building the frontend if the API is not served from the same origin.
+Set `NEXT_PUBLIC_API_BASE_URL` before building the frontend when the API is hosted at a separate backend URL.
 
 ## Environment Variables
 
 ### Frontend
 
-`frontend/.env.local` is used by Next.js during local development.
+`frontend/.env.local` is optional during local development. Without it, browser API requests default to `http://localhost:4000`.
 
 | Variable | Default/example | Purpose |
 | --- | --- | --- |
@@ -215,8 +201,8 @@ The backend reads these from `process.env`.
 | `MAX_UPLOAD_SIZE_MB` | `10` | JSON/body upload limit for image payloads. |
 | `RATE_LIMIT_WINDOW_MS` | `60000` | Rate limit window for auth and AI restore routes. |
 | `RATE_LIMIT_MAX_REQUESTS` | `60` | Max requests per rate limit window. |
-| `HUGGING_FACE_CODEFORMER_MODEL` | `sczhou/CodeFormer` | Optional CodeFormer model override. |
-| `HUGGING_FACE_INFERENCE_BASE_URL` | Hugging Face inference API | Optional Hugging Face API base URL override. |
+| `HUGGING_FACE_CODEFORMER_SPACE_URL` | `https://sczhou-codeformer.hf.space` | Optional CodeFormer Hugging Face Space URL override. |
+| `HUGGING_FACE_CODEFORMER_API_NAME` | `inference` | Optional CodeFormer Gradio API function name override. |
 
 Never commit real secrets, JWT secrets, encryption keys, MongoDB credentials, or Hugging Face tokens.
 
@@ -262,13 +248,13 @@ npm run test:e2e --workspace frontend
 
 ### Frontend Cannot Reach The API
 
-Confirm `frontend/.env.local` contains:
+For the default local setup, confirm the backend is running and health responds:
 
 ```text
-NEXT_PUBLIC_API_BASE_URL=http://localhost:4000
+http://localhost:4000/api/v1/health
 ```
 
-Restart the frontend dev server after changing this file.
+If you set `NEXT_PUBLIC_API_BASE_URL` in `frontend/.env.local`, confirm it points to the backend origin and restart the frontend dev server after changing it.
 
 ### Backend Cannot Connect To MongoDB
 

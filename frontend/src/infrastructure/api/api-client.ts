@@ -1,7 +1,13 @@
+const configuredApiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
 const LOCAL_BACKEND_API_BASE_URL = "http://localhost:4000";
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? (process.env.NODE_ENV === "development" ? LOCAL_BACKEND_API_BASE_URL : "");
+const API_BASE_URL = normalizeApiBaseUrl(
+  configuredApiBaseUrl || (process.env.NODE_ENV === "development" ? LOCAL_BACKEND_API_BASE_URL : ""),
+);
 export const API_AUTH_TOKEN_STORAGE_KEY = "luminaStudio.authToken";
+
+function normalizeApiBaseUrl(value: string): string {
+  return value.replace(/\/+$/g, "");
+}
 
 export class ApiError extends Error {
   constructor(

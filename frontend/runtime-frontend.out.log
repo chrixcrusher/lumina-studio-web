@@ -1,0 +1,21 @@
+
+> lumina-studio-web@0.1.0 dev:frontend
+> npm run dev --workspace frontend
+
+
+> lumina-studio-web-frontend@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.5.19
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.160.86:3000
+
+ ✓ Starting...
+ ✓ Ready in 2.7s
+ ○ Compiling / ...
+ ✓ Compiled / in 6.7s (1373 modules)
+ GET / 200 in 7803ms
+ ○ Compiling /editor ...
+ ✓ Compiled /editor in 3.8s (1804 modules)
+ GET /editor 200 in 7017ms
+[?25h

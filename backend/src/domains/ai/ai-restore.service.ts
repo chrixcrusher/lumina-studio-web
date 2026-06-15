@@ -62,6 +62,7 @@ export class AiRestoreService {
 
     const restored = await this.codeFormer.restoreFace({
       imageBase64: image.imageBase64,
+      contentType: image.contentType,
       huggingFaceToken,
       fidelity: settings.fidelity,
       outputFormat,

@@ -83,6 +83,7 @@ describe("AiRestoreService", () => {
 
     expect(codeFormer.restoreFace).toHaveBeenCalledWith({
       imageBase64: transparentPng,
+      contentType: "image/png",
       huggingFaceToken: "hf_guest_token_123456",
       fidelity: 0.7,
       outputFormat: "jpeg",

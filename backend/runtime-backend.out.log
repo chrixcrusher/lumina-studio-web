@@ -1,0 +1,45 @@
+
+> lumina-studio-web-backend@0.1.0 start
+> node dist/main.js
+
+[NestFactory] Starting Nest application...
+[InstanceLoader] MongooseModule dependencies initialized
+[InstanceLoader] AppModule dependencies initialized
+[InstanceLoader] HuggingFaceModule dependencies initialized
+[InstanceLoader] MongooseCoreModule dependencies initialized
+[InstanceLoader] MongooseModule dependencies initialized
+[InstanceLoader] MongooseModule dependencies initialized
+[InstanceLoader] MongooseModule dependencies initialized
+[InstanceLoader] AccountPersistenceModule dependencies initialized
+[InstanceLoader] PresetPersistenceModule dependencies initialized
+[InstanceLoader] HistoryPersistenceModule dependencies initialized
+[InstanceLoader] HistoryModule dependencies initialized
+[InstanceLoader] AuthModule dependencies initialized
+[InstanceLoader] AccountModule dependencies initialized
+[InstanceLoader] PresetModule dependencies initialized
+[InstanceLoader] AiRestoreModule dependencies initialized
+[RoutesResolver] AppController {/api/v1}:
+[RouterExplorer] Mapped {/api/v1, GET} route
+[RouterExplorer] Mapped {/api/v1/health, GET} route
+[RoutesResolver] AuthController {/api/v1/auth}:
+[RouterExplorer] Mapped {/api/v1/auth/register, POST} route
+[RouterExplorer] Mapped {/api/v1/auth/login, POST} route
+[RouterExplorer] Mapped {/api/v1/auth/logout, POST} route
+[RouterExplorer] Mapped {/api/v1/auth/me, GET} route
+[RoutesResolver] AccountController {/api/v1/account}:
+[RouterExplorer] Mapped {/api/v1/account/hugging-face-token, PUT} route
+[RouterExplorer] Mapped {/api/v1/account/hugging-face-token, DELETE} route
+[RoutesResolver] PresetController {/api/v1/presets}:
+[RouterExplorer] Mapped {/api/v1/presets, GET} route
+[RouterExplorer] Mapped {/api/v1/presets, POST} route
+[RouterExplorer] Mapped {/api/v1/presets/:id, PUT} route
+[RouterExplorer] Mapped {/api/v1/presets/:id, DELETE} route
+[RouterExplorer] Mapped {/api/v1/presets/import, POST} route
+[RouterExplorer] Mapped {/api/v1/presets/:id/export, GET} route
+[RoutesResolver] HistoryController {/api/v1/history}:
+[RouterExplorer] Mapped {/api/v1/history, GET} route
+[RouterExplorer] Mapped {/api/v1/history, POST} route
+[RouterExplorer] Mapped {/api/v1/history/:id, DELETE} route
+[RoutesResolver] AiRestoreController {/api/v1/ai}:
+[RouterExplorer] Mapped {/api/v1/ai/restore-face, POST} route
+[NestApplication] Nest application successfully started

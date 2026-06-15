@@ -1,8 +1,8 @@
 export interface HuggingFaceInferenceRequest {
-  model: string;
   imageBase64: string;
   huggingFaceToken: string;
-  contentType?: string;
+  contentType: string;
+  fidelity?: number;
   timeoutMs?: number;
 }
 
@@ -13,6 +13,7 @@ export interface HuggingFaceInferenceResponse {
 
 export interface CodeFormerRestoreFaceRequest {
   imageBase64: string;
+  contentType: string;
   huggingFaceToken: string;
   fidelity?: number;
   outputFormat?: string;
