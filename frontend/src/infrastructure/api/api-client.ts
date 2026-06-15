@@ -1,7 +1,11 @@
 const configuredApiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
 const LOCAL_BACKEND_API_BASE_URL = "http://localhost:4000";
+const PRODUCTION_BACKEND_API_BASE_URL = "https://lumina-studio-web.onrender.com";
 const API_BASE_URL = normalizeApiBaseUrl(
-  configuredApiBaseUrl || (process.env.NODE_ENV === "development" ? LOCAL_BACKEND_API_BASE_URL : ""),
+  configuredApiBaseUrl ||
+    (process.env.NODE_ENV === "development"
+      ? LOCAL_BACKEND_API_BASE_URL
+      : PRODUCTION_BACKEND_API_BASE_URL),
 );
 export const API_AUTH_TOKEN_STORAGE_KEY = "luminaStudio.authToken";
 
