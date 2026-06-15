@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: lumina-studio-web-api
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    healthCheckPath: /api/v1/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 20.18.0
+      - key: FRONTEND_URL
+        sync: false
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: TOKEN_ENCRYPTION_KEY
+        generateValue: true
+      - key: MAX_UPLOAD_SIZE_MB
+        value: 10
+      - key: RATE_LIMIT_WINDOW_MS
+        value: 60000
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: 60
+      - key: HUGGING_FACE_CODEFORMER_SPACE_URL
+        value: https://sczhou-codeformer.hf.space
+      - key: HUGGING_FACE_CODEFORMER_API_NAME
+        value: inference

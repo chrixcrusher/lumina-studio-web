@@ -290,3 +290,5 @@ AI face restoration requires a valid user-provided Hugging Face token. Guest tok
 ## Deployment Notes
 
 The project is designed to be free-tier-first where possible. Provider-generated URLs are valid for the MVP; paid custom domains are optional. Do not introduce a platform-owned Hugging Face API token by default.
+
+For a step-by-step free deployment path using MongoDB Atlas, Render, and Vercel, see [docs/deployment/free-deployment.md](docs/deployment/free-deployment.md).
