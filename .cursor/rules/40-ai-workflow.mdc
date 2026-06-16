@@ -1,0 +1,12 @@
+---
+description: AI workflow, context tools, roles, and skills.
+alwaysApply: true
+---
+
+# AI Workflow
+
+Use `.agents/skills/` for repeatable workflows and `.agents/roles/` for role-specific reasoning.
+
+Graphify, Aider repo maps, Understand Anything, Repomix, and summaries are for discovery. Never edit from them alone. Read exact source files before changing code.
+
+For larger work: confirm docs, locate candidate files, read exact files, plan small edits, implement, test, update docs, and summarize verification.
