@@ -14,7 +14,10 @@
     "typecheck": "npm run typecheck --workspace frontend && npm run typecheck --workspace backend",
     "test": "npm run test --workspace frontend && npm run test --workspace backend",
     "verify": "npm run lint && npm run typecheck && npm run test && npm run build",
-    "ai:check": "npm run verify"
+    "ai:check": "npm run verify",
+    "ai:index": "node scripts/generate-ai-index.mjs",
+    "ai:context": "npm run ai:index",
+    "ai:graph": "graphify update . --no-description --no-label"
   },
   "devDependencies": {
     "@juliusbrussee/caveman-code": "^0.65.2",

@@ -1,0 +1,818 @@
+{
+  "description": "Lightweight source file map for token-efficient navigation.",
+  "regenerate": "npm run ai:index",
+  "files": [
+    {
+      "path": "backend/src/app.controller.ts",
+      "area": "backend",
+      "kind": "controller",
+      "lines": 18,
+      "chars": 379
+    },
+    {
+      "path": "backend/src/app.module.ts",
+      "area": "backend",
+      "kind": "module",
+      "lines": 27,
+      "chars": 875
+    },
+    {
+      "path": "backend/src/app.service.ts",
+      "area": "backend",
+      "kind": "service",
+      "lines": 42,
+      "chars": 998
+    },
+    {
+      "path": "backend/src/main.ts",
+      "area": "backend",
+      "kind": "source",
+      "lines": 30,
+      "chars": 1081
+    },
+    {
+      "path": "backend/src/app.controller.spec.ts",
+      "area": "backend",
+      "kind": "test",
+      "lines": 27,
+      "chars": 864
+    },
+    {
+      "path": "backend/src/app.service.spec.ts",
+      "area": "backend",
+      "kind": "test",
+      "lines": 25,
+      "chars": 743
+    },
+    {
+      "path": "backend/src/domains/account/account.controller.ts",
+      "area": "backend:account",
+      "kind": "controller",
+      "lines": 50,
+      "chars": 1359
+    },
+    {
+      "path": "backend/src/domains/account/account.module.ts",
+      "area": "backend:account",
+      "kind": "module",
+      "lines": 15,
+      "chars": 639
+    },
+    {
+      "path": "backend/src/domains/account/account-token-encryption.service.ts",
+      "area": "backend:account",
+      "kind": "service",
+      "lines": 75,
+      "chars": 2290
+    },
+    {
+      "path": "backend/src/domains/account/account.service.ts",
+      "area": "backend:account",
+      "kind": "service",
+      "lines": 82,
+      "chars": 2536
+    },
+    {
+      "path": "backend/src/domains/account/account-token-encryption.service.spec.ts",
+      "area": "backend:account",
+      "kind": "test",
+      "lines": 44,
+      "chars": 1536
+    },
+    {
+      "path": "backend/src/domains/account/account.controller.spec.ts",
+      "area": "backend:account",
+      "kind": "test",
+      "lines": 80,
+      "chars": 2330
+    },
+    {
+      "path": "backend/src/domains/account/account.service.spec.ts",
+      "area": "backend:account",
+      "kind": "test",
+      "lines": 103,
+      "chars": 3786
+    },
+    {
+      "path": "backend/src/domains/account/account.types.ts",
+      "area": "backend:account",
+      "kind": "types",
+      "lines": 10,
+      "chars": 213
+    },
+    {
+      "path": "backend/src/domains/ai/ai-restore.controller.ts",
+      "area": "backend:ai",
+      "kind": "controller",
+      "lines": 64,
+      "chars": 1774
+    },
+    {
+      "path": "backend/src/domains/ai/ai-restore.module.ts",
+      "area": "backend:ai",
+      "kind": "module",
+      "lines": 16,
+      "chars": 723
+    },
+    {
+      "path": "backend/src/domains/ai/ai-restore.service.ts",
+      "area": "backend:ai",
+      "kind": "service",
+      "lines": 263,
+      "chars": 8162
+    },
+    {
+      "path": "backend/src/domains/ai/ai-restore.controller.spec.ts",
+      "area": "backend:ai",
+      "kind": "test",
+      "lines": 112,
+      "chars": 2700
+    },
+    {
+      "path": "backend/src/domains/ai/ai-restore.service.spec.ts",
+      "area": "backend:ai",
+      "kind": "test",
+      "lines": 204,
+      "chars": 5964
+    },
+    {
+      "path": "backend/src/domains/ai/ai-restore.types.ts",
+      "area": "backend:ai",
+      "kind": "types",
+      "lines": 28,
+      "chars": 699
+    },
+    {
+      "path": "backend/src/domains/auth/auth.controller.ts",
+      "area": "backend:auth",
+      "kind": "controller",
+      "lines": 46,
+      "chars": 1200
+    },
+    {
+      "path": "backend/src/domains/auth/auth.module.ts",
+      "area": "backend:auth",
+      "kind": "module",
+      "lines": 16,
+      "chars": 649
+    },
+    {
+      "path": "backend/src/domains/auth/auth-password.service.ts",
+      "area": "backend:auth",
+      "kind": "service",
+      "lines": 113,
+      "chars": 2855
+    },
+    {
+      "path": "backend/src/domains/auth/auth-token.service.ts",
+      "area": "backend:auth",
+      "kind": "service",
+      "lines": 136,
+      "chars": 3838
+    },
+    {
+      "path": "backend/src/domains/auth/auth.service.ts",
+      "area": "backend:auth",
+      "kind": "service",
+      "lines": 176,
+      "chars": 5265
+    },
+    {
+      "path": "backend/src/domains/auth/jwt-auth.guard.ts",
+      "area": "backend:auth",
+      "kind": "source",
+      "lines": 35,
+      "chars": 1148
+    },
+    {
+      "path": "backend/src/domains/auth/auth-password.service.spec.ts",
+      "area": "backend:auth",
+      "kind": "test",
+      "lines": 22,
+      "chars": 872
+    },
+    {
+      "path": "backend/src/domains/auth/auth-token.service.spec.ts",
+      "area": "backend:auth",
+      "kind": "test",
+      "lines": 30,
+      "chars": 1214
+    },
+    {
+      "path": "backend/src/domains/auth/auth.controller.spec.ts",
+      "area": "backend:auth",
+      "kind": "test",
+      "lines": 95,
+      "chars": 2771
+    },
+    {
+      "path": "backend/src/domains/auth/auth.service.spec.ts",
+      "area": "backend:auth",
+      "kind": "test",
+      "lines": 175,
+      "chars": 5457
+    },
+    {
+      "path": "backend/src/domains/auth/jwt-auth.guard.spec.ts",
+      "area": "backend:auth",
+      "kind": "test",
+      "lines": 40,
+      "chars": 1340
+    },
+    {
+      "path": "backend/src/domains/auth/auth.types.ts",
+      "area": "backend:auth",
+      "kind": "types",
+      "lines": 54,
+      "chars": 973
+    },
+    {
+      "path": "backend/src/common/deployment-config.ts",
+      "area": "backend:common",
+      "kind": "source",
+      "lines": 134,
+      "chars": 4096
+    },
+    {
+      "path": "backend/src/common/rate-limit.middleware.ts",
+      "area": "backend:common",
+      "kind": "source",
+      "lines": 80,
+      "chars": 1930
+    },
+    {
+      "path": "backend/src/common/safe-logger.ts",
+      "area": "backend:common",
+      "kind": "source",
+      "lines": 59,
+      "chars": 1548
+    },
+    {
+      "path": "backend/src/common/deployment-config.spec.ts",
+      "area": "backend:common",
+      "kind": "test",
+      "lines": 96,
+      "chars": 2963
+    },
+    {
+      "path": "backend/src/common/rate-limit.middleware.spec.ts",
+      "area": "backend:common",
+      "kind": "test",
+      "lines": 43,
+      "chars": 1263
+    },
+    {
+      "path": "backend/src/common/safe-logger.spec.ts",
+      "area": "backend:common",
+      "kind": "test",
+      "lines": 16,
+      "chars": 590
+    },
+    {
+      "path": "backend/src/contracts/lumina.ts",
+      "area": "backend:contracts",
+      "kind": "source",
+      "lines": 40,
+      "chars": 1115
+    },
+    {
+      "path": "backend/src/contracts/api-contract.spec.ts",
+      "area": "backend:contracts",
+      "kind": "test",
+      "lines": 77,
+      "chars": 2973
+    },
+    {
+      "path": "backend/src/domains/history/history.controller.ts",
+      "area": "backend:history",
+      "kind": "controller",
+      "lines": 86,
+      "chars": 2501
+    },
+    {
+      "path": "backend/src/domains/history/history.module.ts",
+      "area": "backend:history",
+      "kind": "module",
+      "lines": 14,
+      "chars": 481
+    },
+    {
+      "path": "backend/src/domains/history/history.service.ts",
+      "area": "backend:history",
+      "kind": "service",
+      "lines": 234,
+      "chars": 7343
+    },
+    {
+      "path": "backend/src/domains/history/history.controller.spec.ts",
+      "area": "backend:history",
+      "kind": "test",
+      "lines": 149,
+      "chars": 3656
+    },
+    {
+      "path": "backend/src/domains/history/history.service.spec.ts",
+      "area": "backend:history",
+      "kind": "test",
+      "lines": 157,
+      "chars": 5085
+    },
+    {
+      "path": "backend/src/domains/history/history.types.ts",
+      "area": "backend:history",
+      "kind": "types",
+      "lines": 54,
+      "chars": 1218
+    },
+    {
+      "path": "backend/src/integrations/huggingface/codeformer.provider.ts",
+      "area": "backend:integrations",
+      "kind": "integration",
+      "lines": 92,
+      "chars": 2595
+    },
+    {
+      "path": "backend/src/integrations/huggingface/hugging-face.client.ts",
+      "area": "backend:integrations",
+      "kind": "integration",
+      "lines": 426,
+      "chars": 12828
+    },
+    {
+      "path": "backend/src/integrations/huggingface/hugging-face.module.ts",
+      "area": "backend:integrations",
+      "kind": "module",
+      "lines": 11,
+      "chars": 436
+    },
+    {
+      "path": "backend/src/integrations/huggingface/hugging-face-token.service.ts",
+      "area": "backend:integrations",
+      "kind": "service",
+      "lines": 43,
+      "chars": 1277
+    },
+    {
+      "path": "backend/src/integrations/huggingface/codeformer.provider.spec.ts",
+      "area": "backend:integrations",
+      "kind": "test",
+      "lines": 80,
+      "chars": 2245
+    },
+    {
+      "path": "backend/src/integrations/huggingface/hugging-face-token.service.spec.ts",
+      "area": "backend:integrations",
+      "kind": "test",
+      "lines": 21,
+      "chars": 922
+    },
+    {
+      "path": "backend/src/integrations/huggingface/hugging-face.client.spec.ts",
+      "area": "backend:integrations",
+      "kind": "test",
+      "lines": 331,
+      "chars": 10993
+    },
+    {
+      "path": "backend/src/integrations/huggingface/hugging-face.types.ts",
+      "area": "backend:integrations",
+      "kind": "types",
+      "lines": 30,
+      "chars": 607
+    },
+    {
+      "path": "backend/src/persistence/account-persistence.module.ts",
+      "area": "backend:persistence",
+      "kind": "module",
+      "lines": 12,
+      "chars": 448
+    },
+    {
+      "path": "backend/src/persistence/history-persistence.module.ts",
+      "area": "backend:persistence",
+      "kind": "module",
+      "lines": 12,
+      "chars": 448
+    },
+    {
+      "path": "backend/src/persistence/preset-persistence.module.ts",
+      "area": "backend:persistence",
+      "kind": "module",
+      "lines": 12,
+      "chars": 438
+    },
+    {
+      "path": "backend/src/persistence/repositories/account.repository.ts",
+      "area": "backend:persistence",
+      "kind": "repository",
+      "lines": 164,
+      "chars": 4752
+    },
+    {
+      "path": "backend/src/persistence/repositories/history.repository.ts",
+      "area": "backend:persistence",
+      "kind": "repository",
+      "lines": 69,
+      "chars": 2179
+    },
+    {
+      "path": "backend/src/persistence/repositories/preset.repository.ts",
+      "area": "backend:persistence",
+      "kind": "repository",
+      "lines": 80,
+      "chars": 2248
+    },
+    {
+      "path": "backend/src/persistence/mongodb/schemas/account.schema.ts",
+      "area": "backend:persistence",
+      "kind": "schema",
+      "lines": 50,
+      "chars": 1296
+    },
+    {
+      "path": "backend/src/persistence/mongodb/schemas/history.schema.ts",
+      "area": "backend:persistence",
+      "kind": "schema",
+      "lines": 83,
+      "chars": 2439
+    },
+    {
+      "path": "backend/src/persistence/mongodb/schemas/preset.schema.ts",
+      "area": "backend:persistence",
+      "kind": "schema",
+      "lines": 40,
+      "chars": 1002
+    },
+    {
+      "path": "backend/src/persistence/mongodb/schemas/account.schema.spec.ts",
+      "area": "backend:persistence",
+      "kind": "test",
+      "lines": 57,
+      "chars": 2086
+    },
+    {
+      "path": "backend/src/persistence/mongodb/schemas/history.schema.spec.ts",
+      "area": "backend:persistence",
+      "kind": "test",
+      "lines": 104,
+      "chars": 3542
+    },
+    {
+      "path": "backend/src/persistence/mongodb/schemas/preset.schema.spec.ts",
+      "area": "backend:persistence",
+      "kind": "test",
+      "lines": 60,
+      "chars": 1940
+    },
+    {
+      "path": "backend/src/persistence/repositories/account.repository.spec.ts",
+      "area": "backend:persistence",
+      "kind": "test",
+      "lines": 163,
+      "chars": 5243
+    },
+    {
+      "path": "backend/src/persistence/repositories/history.repository.spec.ts",
+      "area": "backend:persistence",
+      "kind": "test",
+      "lines": 165,
+      "chars": 5244
+    },
+    {
+      "path": "backend/src/persistence/repositories/preset.repository.spec.ts",
+      "area": "backend:persistence",
+      "kind": "test",
+      "lines": 142,
+      "chars": 4361
+    },
+    {
+      "path": "backend/src/domains/presets/preset.controller.ts",
+      "area": "backend:presets",
+      "kind": "controller",
+      "lines": 90,
+      "chars": 2346
+    },
+    {
+      "path": "backend/src/domains/presets/preset.module.ts",
+      "area": "backend:presets",
+      "kind": "module",
+      "lines": 14,
+      "chars": 470
+    },
+    {
+      "path": "backend/src/domains/presets/preset.service.ts",
+      "area": "backend:presets",
+      "kind": "service",
+      "lines": 252,
+      "chars": 6523
+    },
+    {
+      "path": "backend/src/domains/presets/preset.controller.spec.ts",
+      "area": "backend:presets",
+      "kind": "test",
+      "lines": 166,
+      "chars": 4767
+    },
+    {
+      "path": "backend/src/domains/presets/preset.service.spec.ts",
+      "area": "backend:presets",
+      "kind": "test",
+      "lines": 212,
+      "chars": 6315
+    },
+    {
+      "path": "backend/src/domains/presets/preset.types.ts",
+      "area": "backend:presets",
+      "kind": "types",
+      "lines": 40,
+      "chars": 801
+    },
+    {
+      "path": "frontend/src/domains/account/components/AccountSettingsPage.tsx",
+      "area": "frontend:account",
+      "kind": "component",
+      "lines": 181,
+      "chars": 6374
+    },
+    {
+      "path": "frontend/src/domains/account/services/account-api.ts",
+      "area": "frontend:account",
+      "kind": "frontend-api-service",
+      "lines": 20,
+      "chars": 548
+    },
+    {
+      "path": "frontend/src/domains/account/services/account-api.spec.ts",
+      "area": "frontend:account",
+      "kind": "test",
+      "lines": 68,
+      "chars": 2180
+    },
+    {
+      "path": "frontend/src/domains/account/types/account.ts",
+      "area": "frontend:account",
+      "kind": "types",
+      "lines": 10,
+      "chars": 197
+    },
+    {
+      "path": "frontend/src/app/auth/login/page.tsx",
+      "area": "frontend:app",
+      "kind": "route-page",
+      "lines": 6,
+      "chars": 150
+    },
+    {
+      "path": "frontend/src/app/auth/register/page.tsx",
+      "area": "frontend:app",
+      "kind": "route-page",
+      "lines": 6,
+      "chars": 156
+    },
+    {
+      "path": "frontend/src/app/editor/page.tsx",
+      "area": "frontend:app",
+      "kind": "route-page",
+      "lines": 6,
+      "chars": 151
+    },
+    {
+      "path": "frontend/src/app/history/page.tsx",
+      "area": "frontend:app",
+      "kind": "route-page",
+      "lines": 6,
+      "chars": 146
+    },
+    {
+      "path": "frontend/src/app/layout.tsx",
+      "area": "frontend:app",
+      "kind": "route-page",
+      "lines": 25,
+      "chars": 657
+    },
+    {
+      "path": "frontend/src/app/page.tsx",
+      "area": "frontend:app",
+      "kind": "route-page",
+      "lines": 6,
+      "chars": 138
+    },
+    {
+      "path": "frontend/src/app/presets/page.tsx",
+      "area": "frontend:app",
+      "kind": "route-page",
+      "lines": 6,
+      "chars": 146
+    },
+    {
+      "path": "frontend/src/app/providers.tsx",
+      "area": "frontend:app",
+      "kind": "route-page",
+      "lines": 20,
+      "chars": 653
+    },
+    {
+      "path": "frontend/src/app/settings/page.tsx",
+      "area": "frontend:app",
+      "kind": "route-page",
+      "lines": 6,
+      "chars": 166
+    },
+    {
+      "path": "frontend/src/domains/authentication/components/AuthForm.tsx",
+      "area": "frontend:authentication",
+      "kind": "component",
+      "lines": 274,
+      "chars": 8896
+    },
+    {
+      "path": "frontend/src/domains/authentication/services/auth-api.ts",
+      "area": "frontend:authentication",
+      "kind": "frontend-api-service",
+      "lines": 34,
+      "chars": 1079
+    },
+    {
+      "path": "frontend/src/domains/authentication/services/auth-api.spec.ts",
+      "area": "frontend:authentication",
+      "kind": "test",
+      "lines": 88,
+      "chars": 2573
+    },
+    {
+      "path": "frontend/src/domains/authentication/types/auth.ts",
+      "area": "frontend:authentication",
+      "kind": "types",
+      "lines": 38,
+      "chars": 659
+    },
+    {
+      "path": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
+      "area": "frontend:editor",
+      "kind": "component",
+      "lines": 3058,
+      "chars": 112362
+    },
+    {
+      "path": "frontend/src/domains/enhancement/services/restore-face-api.ts",
+      "area": "frontend:enhancement",
+      "kind": "frontend-api-service",
+      "lines": 17,
+      "chars": 643
+    },
+    {
+      "path": "frontend/src/domains/enhancement/services/restore-face-api.spec.ts",
+      "area": "frontend:enhancement",
+      "kind": "test",
+      "lines": 64,
+      "chars": 1815
+    },
+    {
+      "path": "frontend/src/domains/enhancement/types/restore-face.ts",
+      "area": "frontend:enhancement",
+      "kind": "types",
+      "lines": 26,
+      "chars": 532
+    },
+    {
+      "path": "frontend/src/domains/history/components/HistoryPage.tsx",
+      "area": "frontend:history",
+      "kind": "component",
+      "lines": 186,
+      "chars": 7917
+    },
+    {
+      "path": "frontend/src/domains/history/services/history-api.ts",
+      "area": "frontend:history",
+      "kind": "frontend-api-service",
+      "lines": 47,
+      "chars": 1183
+    },
+    {
+      "path": "frontend/src/domains/history/services/history-api.spec.ts",
+      "area": "frontend:history",
+      "kind": "test",
+      "lines": 95,
+      "chars": 2954
+    },
+    {
+      "path": "frontend/src/domains/history/types/history.ts",
+      "area": "frontend:history",
+      "kind": "types",
+      "lines": 32,
+      "chars": 797
+    },
+    {
+      "path": "frontend/src/infrastructure/api/api-client.ts",
+      "area": "frontend:infrastructure",
+      "kind": "source",
+      "lines": 115,
+      "chars": 2841
+    },
+    {
+      "path": "frontend/src/domains/landing/components/LandingPage.tsx",
+      "area": "frontend:landing",
+      "kind": "component",
+      "lines": 431,
+      "chars": 14231
+    },
+    {
+      "path": "frontend/src/domains/presets/components/PresetsPage.tsx",
+      "area": "frontend:presets",
+      "kind": "component",
+      "lines": 93,
+      "chars": 3728
+    },
+    {
+      "path": "frontend/src/domains/presets/services/presets-api.ts",
+      "area": "frontend:presets",
+      "kind": "frontend-api-service",
+      "lines": 59,
+      "chars": 1395
+    },
+    {
+      "path": "frontend/src/domains/presets/services/presets-api.spec.ts",
+      "area": "frontend:presets",
+      "kind": "test",
+      "lines": 110,
+      "chars": 2865
+    },
+    {
+      "path": "frontend/src/domains/presets/types/preset.ts",
+      "area": "frontend:presets",
+      "kind": "types",
+      "lines": 13,
+      "chars": 264
+    },
+    {
+      "path": "frontend/src/shared/components/AppHeader.tsx",
+      "area": "frontend:shared",
+      "kind": "component",
+      "lines": 141,
+      "chars": 4077
+    },
+    {
+      "path": "frontend/src/shared/components/MobileViewportGate.tsx",
+      "area": "frontend:shared",
+      "kind": "component",
+      "lines": 13,
+      "chars": 356
+    },
+    {
+      "path": "frontend/src/shared/constants/lumina.ts",
+      "area": "frontend:shared",
+      "kind": "constants",
+      "lines": 44,
+      "chars": 1289
+    },
+    {
+      "path": "frontend/src/shared/constants/routes.ts",
+      "area": "frontend:shared",
+      "kind": "constants",
+      "lines": 10,
+      "chars": 202
+    },
+    {
+      "path": "frontend/src/shared/guest-session.ts",
+      "area": "frontend:shared",
+      "kind": "source",
+      "lines": 25,
+      "chars": 720
+    },
+    {
+      "path": "frontend/src/shared/theme.ts",
+      "area": "frontend:shared",
+      "kind": "source",
+      "lines": 88,
+      "chars": 1713
+    },
+    {
+      "path": "frontend/src/tests/component/mvp-ui.test.tsx",
+      "area": "frontend:tests",
+      "kind": "test",
+      "lines": 417,
+      "chars": 17620
+    },
+    {
+      "path": "frontend/src/tests/contracts/api-contract.test.ts",
+      "area": "frontend:tests",
+      "kind": "test",
+      "lines": 258,
+      "chars": 7391
+    },
+    {
+      "path": "frontend/src/tests/e2e/workspace-upload.spec.ts",
+      "area": "frontend:tests",
+      "kind": "test",
+      "lines": 174,
+      "chars": 6383
+    },
+    {
+      "path": "frontend/src/tests/setup.ts",
+      "area": "frontend:tests",
+      "kind": "test",
+      "lines": 16,
+      "chars": 391
+    }
+  ]
+}

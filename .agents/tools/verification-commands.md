@@ -12,6 +12,9 @@ Detected package manager: npm workspaces.
 - `npm run test`: run frontend and backend Vitest suites.
 - `npm run verify`: run lint, typecheck, test, and build.
 - `npm run ai:check`: alias for `npm run verify`.
+- `npm run ai:index`: regenerate `.ai/index` file, route, symbol, and dependency indexes.
+- `npm run ai:context`: alias for `npm run ai:index`.
+- `npm run ai:graph`: run Graphify update into ignored `.graphify` output.
 
 ## Frontend Workspace
 

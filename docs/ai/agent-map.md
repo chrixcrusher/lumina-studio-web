@@ -4,6 +4,7 @@
 
 | Task | Primary Role | Supporting Roles |
 | --- | --- | --- |
+| Coordinate multi-agent work | Project Manager | Product Manager, System Architect, SQA Engineer |
 | Clarify a vague feature | Product Manager | System Architect, SQA Engineer |
 | Plan a cross-module change | System Architect | Frontend, Backend, Database |
 | Build UI or browser editing | Frontend Engineer | SQA, API Contract Check |
@@ -31,8 +32,8 @@
 
 ## Suggested Handoff Order
 
-Feature: Product Manager -> System Architect -> Engineer -> SQA -> Security if needed -> Release Check.
+Feature: Project Manager -> Product Manager -> System Architect -> Engineer -> SQA -> Security if needed -> Release Check.
 
-Bug: SQA or Engineer -> Relevant Engineer -> SQA -> Release Check.
+Bug: Project Manager if coordination is needed -> SQA or Engineer -> Relevant Engineer -> SQA -> Release Check.
 
-API/data change: System Architect -> Backend/Database -> Frontend -> API Contract Check -> SQA -> Security if needed.
+API/data change: Project Manager -> System Architect -> Backend/Database -> Frontend -> API Contract Check -> SQA -> Security if needed.

@@ -47,6 +47,9 @@ POST /api/v1/enhance/manual
 - `docs/api/ls-web-api_specification.md`: API contract documentation.
 - `docs/database/ls-web-database-schema.md`: database schema documentation.
 - `docs/diagrams`: ERD, DFD, flowchart, and user-flow diagrams.
+- `docs/ai/context-routing.md`: token-efficient routing by task type.
+- `docs/ai/maps`: compact task maps for API, backend, frontend, database, testing, and deployment.
+- `.ai/index`: lightweight generated file, route, symbol, and dependency indexes.
 - `.agents`: portable AI roles, skills, workflows, and tool policies.
 - `docs/ai`: human-facing AI development setup docs.
 
@@ -64,6 +67,9 @@ POST /api/v1/enhance/manual
 ## Context Strategy
 
 - Docs are the intent layer.
+- `docs/ai/context-routing.md` is the task routing layer.
+- `docs/ai/maps` are compact orientation maps.
+- `.ai/index` is the lightweight generated discovery layer.
 - Graphify is the navigation layer.
 - Aider repo maps are a coding context layer for Aider sessions.
 - Understand Anything is an onboarding and deep-inspection layer.
@@ -71,7 +77,7 @@ POST /api/v1/enhance/manual
 - Source files are the truth layer.
 - Tests, lint, typecheck, and build are the verification layer.
 
-Use `rg`/file search first, then read exact source files. Keep large generated outputs out of git.
+Use maps and `.ai/index` before broad file reads. Use `rg`/file search for exact symbols, then read exact source files. Keep large generated outputs out of git.
 
 ## Code Editing Rules
 
@@ -126,6 +132,7 @@ Use `rg`/file search first, then read exact source files. Keep large generated o
 Portable role prompts live in `.agents/roles/`.
 
 - Product Manager: requirements, acceptance criteria, user flows, scope.
+- Project Manager: task breakdown, role assignment, dependency tracking, progress coordination.
 - System Architect: module impact, boundaries, implementation plan.
 - Frontend Engineer: UI, routing, state, API clients, browser behavior.
 - Backend Engineer: controllers, services, DTOs, auth guards, contracts.
@@ -161,6 +168,9 @@ Reusable workflows live in `.agents/skills/`.
 - `npm run test:e2e --workspace frontend`: Playwright e2e tests.
 - `npm run verify`: lint, typecheck, test, and build.
 - `npm run ai:check`: AI workflow alias for `npm run verify`.
+- `npm run ai:index`: regenerate `.ai/index` discovery files.
+- `npm run ai:context`: alias for `npm run ai:index`.
+- `npm run ai:graph`: build/update the ignored Graphify graph.
 
 Run the smallest relevant set for the change. For release readiness, run lint, typecheck, tests, and build.
 

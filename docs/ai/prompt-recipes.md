@@ -44,6 +44,12 @@ Use AGENTS.md and the security-review skill. Focus on secrets, auth, authorizati
 Use AGENTS.md and the use-context-tools skill. If Graphify is available, use it only to identify likely related files. Then read the exact source files before planning or editing.
 ```
 
+## Use Token-Efficient Routing
+
+```text
+Use AGENTS.md, then docs/ai/context-routing.md. Read only the relevant docs/ai/maps/* file and .ai/index files needed to identify exact source files. Do not read the full TDD/API/database docs unless the compact maps are insufficient.
+```
+
 ## Use Aider Repo Map If Available
 
 ```text

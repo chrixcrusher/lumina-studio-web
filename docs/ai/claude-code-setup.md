@@ -6,6 +6,7 @@ Claude-specific subagent prompts live in `.claude/agents/`. Portable roles live 
 
 Use subagents for focused analysis:
 
+- `project-manager` for task orchestration, owner assignment, progress tracking, and milestone readiness.
 - `system-architect` for plans and boundaries.
 - `frontend-engineer` for Next.js and browser behavior.
 - `backend-engineer` for NestJS APIs.

@@ -1,0 +1,986 @@
+{
+  "description": "Import relationships for source navigation.",
+  "regenerate": "npm run ai:index",
+  "imports": [
+    {
+      "from": "backend/src/app.controller.spec.ts",
+      "to": "backend/src/app.controller.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/app.controller.spec.ts",
+      "to": "backend/src/app.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/app.controller.ts",
+      "to": "backend/src/app.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/app.module.ts",
+      "to": "backend/src/app.controller.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/app.module.ts",
+      "to": "backend/src/app.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/app.module.ts",
+      "to": "backend/src/common/deployment-config.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/app.module.ts",
+      "to": "backend/src/domains/account/account.module.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/app.module.ts",
+      "to": "backend/src/domains/ai/ai-restore.module.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/app.module.ts",
+      "to": "backend/src/domains/auth/auth.module.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/app.module.ts",
+      "to": "backend/src/domains/history/history.module.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/app.module.ts",
+      "to": "backend/src/domains/presets/preset.module.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/app.service.spec.ts",
+      "to": "backend/src/app.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/app.service.ts",
+      "to": "backend/src/common/deployment-config.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/common/deployment-config.spec.ts",
+      "to": "backend/src/common/deployment-config.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/common/rate-limit.middleware.spec.ts",
+      "to": "backend/src/common/rate-limit.middleware.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/common/safe-logger.spec.ts",
+      "to": "backend/src/common/safe-logger.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/contracts/api-contract.spec.ts",
+      "to": "backend/src/domains/account/account.controller.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/contracts/api-contract.spec.ts",
+      "to": "backend/src/domains/ai/ai-restore.controller.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/contracts/api-contract.spec.ts",
+      "to": "backend/src/domains/auth/auth.controller.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/contracts/api-contract.spec.ts",
+      "to": "backend/src/domains/history/history.controller.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/contracts/api-contract.spec.ts",
+      "to": "backend/src/domains/presets/preset.controller.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/account/account-token-encryption.service.spec.ts",
+      "to": "backend/src/domains/account/account-token-encryption.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/account/account.controller.spec.ts",
+      "to": "backend/src/domains/account/account.controller.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/account/account.controller.spec.ts",
+      "to": "backend/src/domains/account/account.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/account/account.controller.ts",
+      "to": "backend/src/domains/account/account.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/account/account.controller.ts",
+      "to": "backend/src/domains/account/account.types.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/account/account.controller.ts",
+      "to": "backend/src/domains/auth/auth.types.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/account/account.controller.ts",
+      "to": "backend/src/domains/auth/jwt-auth.guard.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/account/account.module.ts",
+      "to": "backend/src/domains/account/account-token-encryption.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/account/account.module.ts",
+      "to": "backend/src/domains/account/account.controller.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/account/account.module.ts",
+      "to": "backend/src/domains/account/account.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/account/account.module.ts",
+      "to": "backend/src/domains/auth/auth.module.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/account/account.module.ts",
+      "to": "backend/src/persistence/account-persistence.module.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/account/account.service.spec.ts",
+      "to": "backend/src/domains/account/account-token-encryption.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/account/account.service.spec.ts",
+      "to": "backend/src/domains/account/account.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/account/account.service.spec.ts",
+      "to": "backend/src/persistence/repositories/account.repository.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/account/account.service.ts",
+      "to": "backend/src/domains/account/account-token-encryption.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/account/account.service.ts",
+      "to": "backend/src/domains/account/account.types.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/account/account.service.ts",
+      "to": "backend/src/persistence/repositories/account.repository.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.controller.spec.ts",
+      "to": "backend/src/domains/ai/ai-restore.controller.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.controller.spec.ts",
+      "to": "backend/src/domains/ai/ai-restore.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.controller.spec.ts",
+      "to": "backend/src/domains/auth/auth-token.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.controller.ts",
+      "to": "backend/src/domains/ai/ai-restore.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.controller.ts",
+      "to": "backend/src/domains/ai/ai-restore.types.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.controller.ts",
+      "to": "backend/src/domains/auth/auth-token.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.controller.ts",
+      "to": "backend/src/domains/auth/auth.types.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.module.ts",
+      "to": "backend/src/domains/account/account.module.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.module.ts",
+      "to": "backend/src/domains/ai/ai-restore.controller.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.module.ts",
+      "to": "backend/src/domains/ai/ai-restore.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.module.ts",
+      "to": "backend/src/domains/auth/auth.module.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.module.ts",
+      "to": "backend/src/domains/history/history.module.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.module.ts",
+      "to": "backend/src/integrations/huggingface/hugging-face.module.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.module.ts",
+      "to": "backend/src/persistence/account-persistence.module.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.service.spec.ts",
+      "to": "backend/src/contracts/lumina.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.service.spec.ts",
+      "to": "backend/src/domains/account/account-token-encryption.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.service.spec.ts",
+      "to": "backend/src/domains/ai/ai-restore.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.service.spec.ts",
+      "to": "backend/src/domains/history/history.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.service.spec.ts",
+      "to": "backend/src/integrations/huggingface/codeformer.provider.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.service.spec.ts",
+      "to": "backend/src/integrations/huggingface/hugging-face-token.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.service.spec.ts",
+      "to": "backend/src/persistence/repositories/account.repository.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.service.ts",
+      "to": "backend/src/common/deployment-config.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.service.ts",
+      "to": "backend/src/contracts/lumina.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.service.ts",
+      "to": "backend/src/domains/account/account-token-encryption.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.service.ts",
+      "to": "backend/src/domains/ai/ai-restore.types.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.service.ts",
+      "to": "backend/src/domains/history/history.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.service.ts",
+      "to": "backend/src/integrations/huggingface/codeformer.provider.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.service.ts",
+      "to": "backend/src/integrations/huggingface/hugging-face-token.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.service.ts",
+      "to": "backend/src/persistence/repositories/account.repository.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.types.ts",
+      "to": "backend/src/contracts/lumina.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/ai/ai-restore.types.ts",
+      "to": "backend/src/persistence/mongodb/schemas/history.schema.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/auth-password.service.spec.ts",
+      "to": "backend/src/domains/auth/auth-password.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/auth-token.service.spec.ts",
+      "to": "backend/src/domains/auth/auth-token.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/auth-token.service.ts",
+      "to": "backend/src/domains/auth/auth.types.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/auth.controller.spec.ts",
+      "to": "backend/src/domains/auth/auth.controller.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/auth.controller.spec.ts",
+      "to": "backend/src/domains/auth/auth.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/auth.controller.spec.ts",
+      "to": "backend/src/domains/auth/auth.types.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/auth.controller.ts",
+      "to": "backend/src/domains/auth/auth.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/auth.controller.ts",
+      "to": "backend/src/domains/auth/auth.types.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/auth.controller.ts",
+      "to": "backend/src/domains/auth/jwt-auth.guard.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/auth.module.ts",
+      "to": "backend/src/domains/auth/auth-password.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/auth.module.ts",
+      "to": "backend/src/domains/auth/auth-token.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/auth.module.ts",
+      "to": "backend/src/domains/auth/auth.controller.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/auth.module.ts",
+      "to": "backend/src/domains/auth/auth.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/auth.module.ts",
+      "to": "backend/src/domains/auth/jwt-auth.guard.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/auth.module.ts",
+      "to": "backend/src/persistence/account-persistence.module.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/auth.service.spec.ts",
+      "to": "backend/src/domains/auth/auth-password.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/auth.service.spec.ts",
+      "to": "backend/src/domains/auth/auth-token.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/auth.service.spec.ts",
+      "to": "backend/src/domains/auth/auth.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/auth.service.spec.ts",
+      "to": "backend/src/persistence/mongodb/schemas/account.schema.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/auth.service.spec.ts",
+      "to": "backend/src/persistence/repositories/account.repository.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/auth.service.ts",
+      "to": "backend/src/domains/auth/auth-password.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/auth.service.ts",
+      "to": "backend/src/domains/auth/auth-token.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/auth.service.ts",
+      "to": "backend/src/domains/auth/auth.types.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/auth.service.ts",
+      "to": "backend/src/persistence/mongodb/schemas/account.schema.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/auth.service.ts",
+      "to": "backend/src/persistence/repositories/account.repository.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/jwt-auth.guard.spec.ts",
+      "to": "backend/src/domains/auth/auth-token.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/jwt-auth.guard.spec.ts",
+      "to": "backend/src/domains/auth/auth.types.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/jwt-auth.guard.spec.ts",
+      "to": "backend/src/domains/auth/jwt-auth.guard.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/jwt-auth.guard.ts",
+      "to": "backend/src/domains/auth/auth-token.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/auth/jwt-auth.guard.ts",
+      "to": "backend/src/domains/auth/auth.types.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/history/history.controller.spec.ts",
+      "to": "backend/src/contracts/lumina.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/history/history.controller.spec.ts",
+      "to": "backend/src/domains/auth/auth-token.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/history/history.controller.spec.ts",
+      "to": "backend/src/domains/history/history.controller.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/history/history.controller.spec.ts",
+      "to": "backend/src/domains/history/history.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/history/history.controller.ts",
+      "to": "backend/src/domains/auth/auth-token.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/history/history.controller.ts",
+      "to": "backend/src/domains/auth/auth.types.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/history/history.controller.ts",
+      "to": "backend/src/domains/history/history.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/history/history.controller.ts",
+      "to": "backend/src/domains/history/history.types.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/history/history.module.ts",
+      "to": "backend/src/domains/auth/auth.module.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/history/history.module.ts",
+      "to": "backend/src/domains/history/history.controller.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/history/history.module.ts",
+      "to": "backend/src/domains/history/history.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/history/history.module.ts",
+      "to": "backend/src/persistence/history-persistence.module.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/history/history.service.spec.ts",
+      "to": "backend/src/contracts/lumina.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/history/history.service.spec.ts",
+      "to": "backend/src/domains/history/history.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/history/history.service.spec.ts",
+      "to": "backend/src/persistence/mongodb/schemas/history.schema.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/history/history.service.spec.ts",
+      "to": "backend/src/persistence/repositories/history.repository.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/history/history.service.ts",
+      "to": "backend/src/contracts/lumina.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/history/history.service.ts",
+      "to": "backend/src/domains/history/history.types.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/history/history.service.ts",
+      "to": "backend/src/persistence/mongodb/schemas/history.schema.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/history/history.service.ts",
+      "to": "backend/src/persistence/repositories/history.repository.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/history/history.types.ts",
+      "to": "backend/src/contracts/lumina.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/history/history.types.ts",
+      "to": "backend/src/persistence/mongodb/schemas/history.schema.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/presets/preset.controller.spec.ts",
+      "to": "backend/src/domains/presets/preset.controller.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/presets/preset.controller.spec.ts",
+      "to": "backend/src/domains/presets/preset.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/presets/preset.controller.ts",
+      "to": "backend/src/domains/auth/auth.types.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/presets/preset.controller.ts",
+      "to": "backend/src/domains/auth/jwt-auth.guard.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/presets/preset.controller.ts",
+      "to": "backend/src/domains/presets/preset.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/presets/preset.controller.ts",
+      "to": "backend/src/domains/presets/preset.types.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/presets/preset.module.ts",
+      "to": "backend/src/domains/auth/auth.module.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/presets/preset.module.ts",
+      "to": "backend/src/domains/presets/preset.controller.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/presets/preset.module.ts",
+      "to": "backend/src/domains/presets/preset.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/presets/preset.module.ts",
+      "to": "backend/src/persistence/preset-persistence.module.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/presets/preset.service.spec.ts",
+      "to": "backend/src/domains/presets/preset.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/presets/preset.service.spec.ts",
+      "to": "backend/src/persistence/mongodb/schemas/preset.schema.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/presets/preset.service.spec.ts",
+      "to": "backend/src/persistence/repositories/preset.repository.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/presets/preset.service.ts",
+      "to": "backend/src/domains/presets/preset.types.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/presets/preset.service.ts",
+      "to": "backend/src/persistence/mongodb/schemas/preset.schema.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/domains/presets/preset.service.ts",
+      "to": "backend/src/persistence/repositories/preset.repository.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/integrations/huggingface/codeformer.provider.spec.ts",
+      "to": "backend/src/integrations/huggingface/codeformer.provider.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/integrations/huggingface/codeformer.provider.spec.ts",
+      "to": "backend/src/integrations/huggingface/hugging-face.client.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/integrations/huggingface/codeformer.provider.ts",
+      "to": "backend/src/integrations/huggingface/hugging-face.client.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/integrations/huggingface/codeformer.provider.ts",
+      "to": "backend/src/integrations/huggingface/hugging-face.types.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/integrations/huggingface/hugging-face-token.service.spec.ts",
+      "to": "backend/src/integrations/huggingface/hugging-face-token.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/integrations/huggingface/hugging-face.client.spec.ts",
+      "to": "backend/src/integrations/huggingface/hugging-face-token.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/integrations/huggingface/hugging-face.client.spec.ts",
+      "to": "backend/src/integrations/huggingface/hugging-face.client.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/integrations/huggingface/hugging-face.client.ts",
+      "to": "backend/src/integrations/huggingface/hugging-face-token.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/integrations/huggingface/hugging-face.client.ts",
+      "to": "backend/src/integrations/huggingface/hugging-face.types.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/integrations/huggingface/hugging-face.module.ts",
+      "to": "backend/src/integrations/huggingface/codeformer.provider.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/integrations/huggingface/hugging-face.module.ts",
+      "to": "backend/src/integrations/huggingface/hugging-face-token.service.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/integrations/huggingface/hugging-face.module.ts",
+      "to": "backend/src/integrations/huggingface/hugging-face.client.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/main.ts",
+      "to": "backend/src/app.module.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/main.ts",
+      "to": "backend/src/common/deployment-config.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/main.ts",
+      "to": "backend/src/common/rate-limit.middleware.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/main.ts",
+      "to": "backend/src/common/safe-logger.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/persistence/account-persistence.module.ts",
+      "to": "backend/src/persistence/mongodb/schemas/account.schema.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/persistence/account-persistence.module.ts",
+      "to": "backend/src/persistence/repositories/account.repository.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/persistence/history-persistence.module.ts",
+      "to": "backend/src/persistence/mongodb/schemas/history.schema.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/persistence/history-persistence.module.ts",
+      "to": "backend/src/persistence/repositories/history.repository.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/persistence/mongodb/schemas/account.schema.spec.ts",
+      "to": "backend/src/contracts/lumina.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/persistence/mongodb/schemas/account.schema.spec.ts",
+      "to": "backend/src/persistence/mongodb/schemas/account.schema.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/persistence/mongodb/schemas/account.schema.ts",
+      "to": "backend/src/contracts/lumina.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/persistence/mongodb/schemas/history.schema.spec.ts",
+      "to": "backend/src/contracts/lumina.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/persistence/mongodb/schemas/history.schema.spec.ts",
+      "to": "backend/src/persistence/mongodb/schemas/history.schema.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/persistence/mongodb/schemas/history.schema.ts",
+      "to": "backend/src/contracts/lumina.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/persistence/mongodb/schemas/history.schema.ts",
+      "to": "backend/src/persistence/mongodb/schemas/account.schema.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/persistence/mongodb/schemas/preset.schema.spec.ts",
+      "to": "backend/src/persistence/mongodb/schemas/preset.schema.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/persistence/mongodb/schemas/preset.schema.ts",
+      "to": "backend/src/persistence/mongodb/schemas/account.schema.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/persistence/preset-persistence.module.ts",
+      "to": "backend/src/persistence/mongodb/schemas/preset.schema.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/persistence/preset-persistence.module.ts",
+      "to": "backend/src/persistence/repositories/preset.repository.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/persistence/repositories/account.repository.spec.ts",
+      "to": "backend/src/contracts/lumina.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/persistence/repositories/account.repository.spec.ts",
+      "to": "backend/src/persistence/mongodb/schemas/account.schema.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/persistence/repositories/account.repository.spec.ts",
+      "to": "backend/src/persistence/repositories/account.repository.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/persistence/repositories/account.repository.ts",
+      "to": "backend/src/contracts/lumina.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/persistence/repositories/account.repository.ts",
+      "to": "backend/src/persistence/mongodb/schemas/account.schema.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/persistence/repositories/history.repository.spec.ts",
+      "to": "backend/src/contracts/lumina.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/persistence/repositories/history.repository.spec.ts",
+      "to": "backend/src/persistence/mongodb/schemas/history.schema.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/persistence/repositories/history.repository.spec.ts",
+      "to": "backend/src/persistence/repositories/history.repository.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/persistence/repositories/history.repository.ts",
+      "to": "backend/src/contracts/lumina.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/persistence/repositories/history.repository.ts",
+      "to": "backend/src/persistence/mongodb/schemas/history.schema.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/persistence/repositories/preset.repository.spec.ts",
+      "to": "backend/src/persistence/mongodb/schemas/preset.schema.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/persistence/repositories/preset.repository.spec.ts",
+      "to": "backend/src/persistence/repositories/preset.repository.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "backend/src/persistence/repositories/preset.repository.ts",
+      "to": "backend/src/persistence/mongodb/schemas/preset.schema.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "frontend/src/app/layout.tsx",
+      "to": "frontend/src/app/providers.tsx",
+      "kind": "internal"
+    },
+    {
+      "from": "frontend/src/domains/account/components/AccountSettingsPage.tsx",
+      "to": "frontend/src/domains/account/services/account-api.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "frontend/src/domains/account/services/account-api.spec.ts",
+      "to": "frontend/src/domains/account/services/account-api.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "frontend/src/domains/account/services/account-api.ts",
+      "to": "frontend/src/domains/account/types/account.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "frontend/src/domains/authentication/services/auth-api.spec.ts",
+      "to": "frontend/src/domains/authentication/services/auth-api.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "frontend/src/domains/authentication/services/auth-api.ts",
+      "to": "frontend/src/domains/authentication/types/auth.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "frontend/src/domains/enhancement/services/restore-face-api.spec.ts",
+      "to": "frontend/src/domains/enhancement/services/restore-face-api.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "frontend/src/domains/enhancement/services/restore-face-api.ts",
+      "to": "frontend/src/domains/enhancement/types/restore-face.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "frontend/src/domains/history/components/HistoryPage.tsx",
+      "to": "frontend/src/domains/history/services/history-api.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "frontend/src/domains/history/components/HistoryPage.tsx",
+      "to": "frontend/src/domains/history/types/history.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "frontend/src/domains/history/services/history-api.spec.ts",
+      "to": "frontend/src/domains/history/services/history-api.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "frontend/src/domains/history/services/history-api.ts",
+      "to": "frontend/src/domains/history/types/history.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "frontend/src/domains/presets/services/presets-api.spec.ts",
+      "to": "frontend/src/domains/presets/services/presets-api.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "frontend/src/domains/presets/services/presets-api.ts",
+      "to": "frontend/src/domains/presets/types/preset.ts",
+      "kind": "internal"
+    }
+  ]
+}

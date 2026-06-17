@@ -27,6 +27,22 @@ When `package.json` scripts change, update:
 - `.cursor/rules/30-testing.mdc`
 - Relevant setup docs.
 
+## Update Context Maps
+
+When routes, schemas, ownership rules, deployment shape, test layout, or major workflows change, update the matching map in `docs/ai/maps/`.
+
+Keep maps compact. They should help agents find exact files, not restate full canonical docs.
+
+## Regenerate Lightweight Indexes
+
+Run this after adding, moving, or deleting source files, routes, exported symbols, or imports:
+
+```powershell
+npm run ai:index
+```
+
+Review `.ai/index/routes.json` after API changes and `.ai/index/dependency-graph.json` after cross-module refactors.
+
 ## Regenerate Context Tool Outputs
 
 Regenerate Graphify, Understand Anything, repo map, or Repomix outputs only when needed for navigation or sharing context. Do not commit large generated outputs by default.

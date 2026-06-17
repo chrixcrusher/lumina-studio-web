@@ -1,0 +1,244 @@
+{
+  "description": "Backend routes and frontend API call sites.",
+  "regenerate": "npm run ai:index",
+  "routes": [
+    {
+      "source": "backend",
+      "method": "GET",
+      "path": "/api/v1",
+      "handler": "getStatus",
+      "file": "backend/src/app.controller.ts"
+    },
+    {
+      "source": "backend",
+      "method": "DELETE",
+      "path": "/api/v1/account/hugging-face-token",
+      "handler": "deleteHuggingFaceToken",
+      "file": "backend/src/domains/account/account.controller.ts"
+    },
+    {
+      "source": "backend",
+      "method": "PUT",
+      "path": "/api/v1/account/hugging-face-token",
+      "handler": "saveHuggingFaceToken",
+      "file": "backend/src/domains/account/account.controller.ts"
+    },
+    {
+      "source": "backend",
+      "method": "POST",
+      "path": "/api/v1/ai/restore-face",
+      "handler": "restoreFace",
+      "file": "backend/src/domains/ai/ai-restore.controller.ts"
+    },
+    {
+      "source": "backend",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "handler": "login",
+      "file": "backend/src/domains/auth/auth.controller.ts"
+    },
+    {
+      "source": "backend",
+      "method": "POST",
+      "path": "/api/v1/auth/logout",
+      "handler": "logout",
+      "file": "backend/src/domains/auth/auth.controller.ts"
+    },
+    {
+      "source": "backend",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "handler": "me",
+      "file": "backend/src/domains/auth/auth.controller.ts"
+    },
+    {
+      "source": "backend",
+      "method": "POST",
+      "path": "/api/v1/auth/register",
+      "handler": "register",
+      "file": "backend/src/domains/auth/auth.controller.ts"
+    },
+    {
+      "source": "backend",
+      "method": "GET",
+      "path": "/api/v1/health",
+      "handler": "getHealth",
+      "file": "backend/src/app.controller.ts"
+    },
+    {
+      "source": "backend",
+      "method": "GET",
+      "path": "/api/v1/history",
+      "handler": "listHistory",
+      "file": "backend/src/domains/history/history.controller.ts"
+    },
+    {
+      "source": "backend",
+      "method": "POST",
+      "path": "/api/v1/history",
+      "handler": "createHistory",
+      "file": "backend/src/domains/history/history.controller.ts"
+    },
+    {
+      "source": "backend",
+      "method": "DELETE",
+      "path": "/api/v1/history/:id",
+      "handler": "deleteHistory",
+      "file": "backend/src/domains/history/history.controller.ts"
+    },
+    {
+      "source": "backend",
+      "method": "GET",
+      "path": "/api/v1/presets",
+      "handler": "listPresets",
+      "file": "backend/src/domains/presets/preset.controller.ts"
+    },
+    {
+      "source": "backend",
+      "method": "POST",
+      "path": "/api/v1/presets",
+      "handler": "createPreset",
+      "file": "backend/src/domains/presets/preset.controller.ts"
+    },
+    {
+      "source": "backend",
+      "method": "DELETE",
+      "path": "/api/v1/presets/:id",
+      "handler": "deletePreset",
+      "file": "backend/src/domains/presets/preset.controller.ts"
+    },
+    {
+      "source": "backend",
+      "method": "PUT",
+      "path": "/api/v1/presets/:id",
+      "handler": "updatePreset",
+      "file": "backend/src/domains/presets/preset.controller.ts"
+    },
+    {
+      "source": "backend",
+      "method": "GET",
+      "path": "/api/v1/presets/:id/export",
+      "handler": "exportPreset",
+      "file": "backend/src/domains/presets/preset.controller.ts"
+    },
+    {
+      "source": "backend",
+      "method": "POST",
+      "path": "/api/v1/presets/import",
+      "handler": "importPreset",
+      "file": "backend/src/domains/presets/preset.controller.ts"
+    },
+    {
+      "source": "frontend",
+      "method": "DELETE",
+      "pathExpression": "\"/api/v1/account/hugging-face-token\"",
+      "file": "frontend/src/domains/account/services/account-api.ts",
+      "line": 15
+    },
+    {
+      "source": "frontend",
+      "method": "DELETE",
+      "pathExpression": "`/api/v1/history/${id}`",
+      "file": "frontend/src/domains/history/services/history-api.ts",
+      "line": 31
+    },
+    {
+      "source": "frontend",
+      "method": "DELETE",
+      "pathExpression": "`/api/v1/presets/${id}`",
+      "file": "frontend/src/domains/presets/services/presets-api.ts",
+      "line": 43
+    },
+    {
+      "source": "frontend",
+      "method": "GET",
+      "pathExpression": "\"/api/v1/auth/me\"",
+      "file": "frontend/src/domains/authentication/services/auth-api.ts",
+      "line": 31
+    },
+    {
+      "source": "frontend",
+      "method": "GET",
+      "pathExpression": "\"/api/v1/history\"",
+      "file": "frontend/src/domains/history/services/history-api.ts",
+      "line": 17
+    },
+    {
+      "source": "frontend",
+      "method": "GET",
+      "pathExpression": "\"/api/v1/presets\"",
+      "file": "frontend/src/domains/presets/services/presets-api.ts",
+      "line": 22
+    },
+    {
+      "source": "frontend",
+      "method": "GET",
+      "pathExpression": "`/api/v1/presets/${id}/export`",
+      "file": "frontend/src/domains/presets/services/presets-api.ts",
+      "line": 56
+    },
+    {
+      "source": "frontend",
+      "method": "POST",
+      "pathExpression": "\"/api/v1/auth/register\"",
+      "file": "frontend/src/domains/authentication/services/auth-api.ts",
+      "line": 6
+    },
+    {
+      "source": "frontend",
+      "method": "POST",
+      "pathExpression": "\"/api/v1/auth/login\"",
+      "file": "frontend/src/domains/authentication/services/auth-api.ts",
+      "line": 14
+    },
+    {
+      "source": "frontend",
+      "method": "POST",
+      "pathExpression": "\"/api/v1/auth/logout\"",
+      "file": "frontend/src/domains/authentication/services/auth-api.ts",
+      "line": 23
+    },
+    {
+      "source": "frontend",
+      "method": "POST",
+      "pathExpression": "\"/api/v1/ai/restore-face\"",
+      "file": "frontend/src/domains/enhancement/services/restore-face-api.ts",
+      "line": 5
+    },
+    {
+      "source": "frontend",
+      "method": "POST",
+      "pathExpression": "\"/api/v1/history\"",
+      "file": "frontend/src/domains/history/services/history-api.ts",
+      "line": 24
+    },
+    {
+      "source": "frontend",
+      "method": "POST",
+      "pathExpression": "\"/api/v1/presets\"",
+      "file": "frontend/src/domains/presets/services/presets-api.ts",
+      "line": 27
+    },
+    {
+      "source": "frontend",
+      "method": "POST",
+      "pathExpression": "\"/api/v1/presets/import\"",
+      "file": "frontend/src/domains/presets/services/presets-api.ts",
+      "line": 48
+    },
+    {
+      "source": "frontend",
+      "method": "PUT",
+      "pathExpression": "\"/api/v1/account/hugging-face-token\"",
+      "file": "frontend/src/domains/account/services/account-api.ts",
+      "line": 9
+    },
+    {
+      "source": "frontend",
+      "method": "PUT",
+      "pathExpression": "`/api/v1/presets/${id}`",
+      "file": "frontend/src/domains/presets/services/presets-api.ts",
+      "line": 35
+    }
+  ]
+}
