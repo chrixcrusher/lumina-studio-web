@@ -45,7 +45,7 @@ describe("restoreFace", () => {
     });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "/api/v1/ai/restore-face",
+      expect.stringMatching(/\/api\/v1\/ai\/restore-face$/),
       expect.objectContaining({
         method: "POST",
         headers: expect.any(Headers),

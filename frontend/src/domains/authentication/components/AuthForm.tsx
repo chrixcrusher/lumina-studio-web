@@ -11,9 +11,12 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
 import { useMemo, useState } from "react";
+import { ApiError } from "@/infrastructure/api/api-client";
 import { APP_ROUTES } from "@/shared/constants/routes";
+import { authApi } from "../services/auth-api";
 
 interface AuthFormProps {
   mode: "login" | "register";
@@ -56,10 +59,13 @@ function FieldLabel({ children }: { children: string }) {
 
 export function AuthForm({ mode }: AuthFormProps) {
   const isRegister = mode === "register";
+  const router = useRouter();
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validation = useMemo(() => {
     const errors: string[] = [];
@@ -68,10 +74,47 @@ export function AuthForm({ mode }: AuthFormProps) {
     if (password.length < 8) errors.push("Password must be at least 8 characters.");
     return errors;
   }, [displayName, email, isRegister, password]);
+  const idleSubmitLabel = isRegister ? "Create Account" : "Sign In";
+  const submittingSubmitLabel = isRegister ? "Creating account..." : "Signing in...";
+  const submitLabel = isSubmitting ? submittingSubmitLabel : idleSubmitLabel;
+  const clearApiError = () => setApiError(null);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSubmitted(true);
+    setApiError(null);
+
+    if (validation.length > 0) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      if (isRegister) {
+        await authApi.register({
+          displayName: displayName.trim(),
+          email: email.trim(),
+          password,
+        });
+      } else {
+        await authApi.login({
+          email: email.trim(),
+          password,
+        });
+      }
+      router.push(APP_ROUTES.editor);
+    } catch (error) {
+      if (error instanceof ApiError) {
+        setApiError(!isRegister && error.status === 401 ? "Invalid email or password." : error.message);
+      } else {
+        const fallbackMessage = isRegister
+          ? "We could not create your account. Please try again."
+          : "We could not sign you in. Please try again.";
+        setApiError(fallbackMessage);
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -166,10 +209,9 @@ export function AuthForm({ mode }: AuthFormProps) {
               {validation[0]}
             </Alert>
           )}
-          {submitted && validation.length === 0 && (
-            <Alert severity="success" sx={{ bgcolor: "rgba(34,197,94,0.12)", color: "#bbf7d0" }}>
-              Form is valid and ready to call{" "}
-              {isRegister ? "/api/v1/auth/register" : "/api/v1/auth/login"}.
+          {apiError && validation.length === 0 && (
+            <Alert severity="error" sx={{ bgcolor: "rgba(239,111,108,0.12)", color: "#ffd1d1" }}>
+              {apiError}
             </Alert>
           )}
 
@@ -181,7 +223,10 @@ export function AuthForm({ mode }: AuthFormProps) {
                   <TextField
                     fullWidth
                     value={displayName}
-                    onChange={(event) => setDisplayName(event.target.value)}
+                    onChange={(event) => {
+                      clearApiError();
+                      setDisplayName(event.target.value);
+                    }}
                     inputProps={{ "aria-label": "Display name" }}
                     placeholder="John Doe"
                     sx={inputSx}
@@ -202,7 +247,10 @@ export function AuthForm({ mode }: AuthFormProps) {
                   fullWidth
                   type="email"
                   value={email}
-                  onChange={(event) => setEmail(event.target.value)}
+                  onChange={(event) => {
+                    clearApiError();
+                    setEmail(event.target.value);
+                  }}
                   inputProps={{ "aria-label": "Email" }}
                   placeholder="you@example.com"
                   sx={inputSx}
@@ -222,7 +270,10 @@ export function AuthForm({ mode }: AuthFormProps) {
                   fullWidth
                   type="password"
                   value={password}
-                  onChange={(event) => setPassword(event.target.value)}
+                  onChange={(event) => {
+                    clearApiError();
+                    setPassword(event.target.value);
+                  }}
                   inputProps={{ "aria-label": "Password" }}
                   placeholder="••••••••"
                   sx={inputSx}
@@ -240,6 +291,7 @@ export function AuthForm({ mode }: AuthFormProps) {
                 type="submit"
                 variant="contained"
                 size="large"
+                disabled={isSubmitting}
                 sx={{
                   mt: 2.2,
                   py: 1.75,
@@ -251,7 +303,7 @@ export function AuthForm({ mode }: AuthFormProps) {
                   boxShadow: "0 0 22px rgba(124,102,255,0.26)",
                 }}
               >
-                {isRegister ? "Create Account" : "Sign In"}
+                {submitLabel}
               </Button>
             </Stack>
           </Box>

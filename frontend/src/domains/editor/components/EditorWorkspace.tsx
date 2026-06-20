@@ -14,10 +14,12 @@ import FlipIcon from "@mui/icons-material/Flip";
 import GridViewIcon from "@mui/icons-material/GridView";
 import HistoryIcon from "@mui/icons-material/History";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
+import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import LinkIcon from "@mui/icons-material/Link";
-import NorthWestIcon from "@mui/icons-material/NorthWest";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import RemoveIcon from "@mui/icons-material/Remove";
 import RedoIcon from "@mui/icons-material/Redo";
@@ -34,6 +36,10 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
 import CircularProgress from "@mui/material/CircularProgress";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
@@ -45,12 +51,25 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
+import type { Driver } from "driver.js";
 import Link from "next/link";
-import type { ChangeEvent, MouseEvent, PointerEvent, ReactNode, WheelEvent } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import type { ChangeEvent, CSSProperties, MouseEvent, PointerEvent, ReactNode, WheelEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
+import { createEditorDriverSteps } from "@/domains/editor/tour/editor-tour";
 import { restoreFace } from "@/domains/enhancement/services/restore-face-api";
+import { presetsApi } from "@/domains/presets/services/presets-api";
+import {
+  createPresetEnhancementSettings,
+  migratePresetEnhancementSettings,
+  parsePresetJsonPayload,
+  PresetSchemaError,
+  toEditorPresetSettings,
+  type EditorPresetAdjustments,
+} from "@/domains/presets/services/preset-schema";
+import type { Preset, SavePresetRequest } from "@/domains/presets/types/preset";
 import { ApiError, getApiAuthToken } from "@/infrastructure/api/api-client";
+import { clearBrowserPreferences, getBrowserPreferences, setBrowserPreference } from "@/shared/browser-preferences";
 import { APP_ROUTES } from "@/shared/constants/routes";
 import { getOrCreateGuestSessionId } from "@/shared/guest-session";
 
@@ -72,21 +91,23 @@ declare global {
   }
 }
 
-interface Adjustments {
-  brightness: number;
-  exposure: number;
-  contrast: number;
-  highlights: number;
-  shadows: number;
-  saturation: number;
-  vibrance: number;
-  warmth: number;
-}
+type Adjustments = EditorPresetAdjustments;
 
 interface FilterPreset {
   id: string;
   name: string;
   adj: Partial<Adjustments>;
+  css?: string[];
+}
+
+interface FilterPreviewTone {
+  background: string;
+  overlay?: string;
+  imageOverlay?: string;
+  imageFilter?: string;
+  imageOpacity?: number;
+  overlayOpacity?: number;
+  overlayMixBlendMode?: CSSProperties["mixBlendMode"];
 }
 
 interface CropPreset {
@@ -150,9 +171,27 @@ const DEFAULT_ADJUSTMENTS: Adjustments = {
   contrast: 0,
   highlights: 0,
   shadows: 0,
+  whites: 0,
+  blacks: 0,
   saturation: 0,
   vibrance: 0,
   warmth: 0,
+  temperature: 0,
+  tint: 0,
+  texture: 0,
+  clarity: 0,
+  vignetteAmount: 0,
+  vignetteMidpoint: 50,
+  vignetteRoundness: 0,
+  vignetteFeather: 50,
+  vignetteHighlights: 0,
+  grainAmount: 0,
+  grainSize: 25,
+  grainRoughness: 50,
+  sharpeningAmount: 0,
+  sharpeningRadius: 1,
+  sharpeningDetail: 25,
+  sharpeningMasking: 0,
 };
 
 const DEFAULT_TEXT_OVERLAY_VALUES = {
@@ -170,6 +209,32 @@ const DEFAULT_FREE_CROP: FreeCropState = {
   height: 100,
 };
 
+const DEFAULT_EXPANDED_SECTIONS = {
+  ai: true,
+  light: false,
+  color: false,
+  effects: false,
+  detail: false,
+  presets: false,
+};
+
+const EDITOR_LAYOUT = {
+  appRows: { xs: "auto minmax(0, 1fr)", md: "66px 1fr", lg: "70px 1fr" },
+  shellColumns: {
+    xs: "1fr",
+    md: "74px minmax(0, 1fr) minmax(340px, 24vw)",
+    lg: "78px minmax(0, 1fr) minmax(366px, 22vw)",
+    xl: "80px minmax(0, 1fr) 382px",
+  },
+  workspaceRows: { md: "minmax(0, 1fr) clamp(178px, 19vh, 214px)" },
+  uploadCardWidth: {
+    xs: "100%",
+    md: "min(480px, calc(100% - 48px))",
+    lg: "min(520px, calc(100% - 64px))",
+  },
+  filterCardWidth: { xs: "108px", sm: "122px", md: "124px", lg: "132px", xl: "138px" },
+} as const;
+
 const CROP_PRESETS = [
   { id: "none", label: "No Crop", ratio: null, exportRatio: null },
   { id: "free", label: "Free", ratio: null, exportRatio: null },
@@ -185,11 +250,113 @@ const SUPPORTED_UPLOAD_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]
 const FILTER_PRESETS: FilterPreset[] = [
   { id: "original", name: "Original", adj: {} },
   { id: "vivid", name: "Vivid", adj: { exposure: 5, contrast: 28, saturation: 38 } },
-  { id: "bw", name: "Black and White", adj: { contrast: 18, saturation: -100 } },
+  { id: "bw", name: "Black & White", adj: { contrast: 18, saturation: -100 } },
   { id: "vintage", name: "Vintage", adj: { warmth: 28, saturation: -24, contrast: 6 } },
   { id: "warm", name: "Warm", adj: { warmth: 35, saturation: 10, exposure: 8 } },
   { id: "cool", name: "Cool", adj: { warmth: -30, saturation: 5, contrast: 12 } },
+  { id: "sepia", name: "Sepia", adj: { temperature: 36, saturation: -18, contrast: 8 }, css: ["sepia(0.55)"] },
+  { id: "vignette", name: "Vignette", adj: { contrast: 12, vignetteAmount: -58 } },
+  { id: "blur", name: "Blur", adj: { exposure: 2, saturation: -6 }, css: ["blur(1.4px)"] },
+  { id: "sharpen", name: "Sharpen", adj: { contrast: 10, texture: 18, clarity: 22, sharpeningAmount: 70 } },
+  { id: "high-contrast", name: "High Contrast", adj: { contrast: 55, blacks: -18, whites: 18, highlights: 12, shadows: -10 } },
+  { id: "vibrant", name: "Vibrant", adj: { saturation: 28, vibrance: 46, contrast: 12 } },
+  { id: "matte", name: "Matte", adj: { contrast: -18, blacks: 22, shadows: 18, saturation: -8 } },
+  { id: "hdr", name: "HDR", adj: { contrast: 34, highlights: -24, shadows: 28, texture: 26, clarity: 30, vibrance: 18 } },
+  { id: "invert", name: "Invert", adj: {}, css: ["invert(1)"] },
+  { id: "duotone", name: "Duotone", adj: { contrast: 18, saturation: 18 }, css: ["sepia(0.85)", "hue-rotate(245deg)", "saturate(1.35)"] },
+  { id: "polaroid", name: "Polaroid", adj: { exposure: 10, temperature: 22, saturation: -8, contrast: -8, vignetteAmount: -28 } },
+  { id: "grain", name: "Grain", adj: { grainAmount: 46, grainSize: 38, grainRoughness: 62, contrast: 8, saturation: -8 } },
 ];
+
+const FILTER_PREVIEW_TONES: Record<string, FilterPreviewTone> = {
+  original: {
+    background: "linear-gradient(135deg, #202038 0%, #4b4a6c 54%, #747391 100%)",
+    imageFilter: "saturate(1) contrast(1)",
+  },
+  vivid: {
+    background: "linear-gradient(135deg, #312e81 0%, #7e22ce 48%, #ec4899 100%)",
+    imageOverlay: "linear-gradient(135deg, rgba(124,58,237,0.34), rgba(236,72,153,0.38))",
+    overlayMixBlendMode: "screen",
+  },
+  bw: {
+    background: "linear-gradient(135deg, #0f1018 0%, #60606e 46%, #e5e7eb 100%)",
+    imageFilter: "grayscale(1) contrast(1.18)",
+  },
+  vintage: {
+    background: "linear-gradient(135deg, #2f2418 0%, #8a704b 48%, #d6bd8a 100%)",
+    imageOverlay: "linear-gradient(135deg, rgba(111,78,55,0.35), rgba(214,188,138,0.22))",
+  },
+  warm: {
+    background: "linear-gradient(135deg, #5b1d0a 0%, #d97706 52%, #fbbf24 100%)",
+    imageOverlay: "linear-gradient(135deg, rgba(251,146,60,0.28), rgba(250,204,21,0.3))",
+    overlayMixBlendMode: "screen",
+  },
+  cool: {
+    background: "linear-gradient(135deg, #081a35 0%, #075985 52%, #22d3ee 100%)",
+    imageOverlay: "linear-gradient(135deg, rgba(14,165,233,0.3), rgba(45,212,191,0.2))",
+    overlayMixBlendMode: "screen",
+  },
+  sepia: {
+    background: "linear-gradient(135deg, #26160c 0%, #8b5e34 54%, #c58f4d 100%)",
+    imageFilter: "sepia(0.72) contrast(1.06)",
+  },
+  vignette: {
+    background: "radial-gradient(circle at center, #7c6d92 0%, #4b4267 45%, #090912 100%)",
+    overlay: "radial-gradient(circle at center, transparent 35%, rgba(0,0,0,0.78) 100%)",
+    imageOverlay: "radial-gradient(circle at center, rgba(255,255,255,0) 38%, rgba(0,0,0,0.72) 100%)",
+  },
+  blur: {
+    background: "linear-gradient(135deg, #4338ca 0%, #8b5cf6 48%, #c4b5fd 100%)",
+    imageFilter: "blur(1.8px) saturate(0.92)",
+    imageOpacity: 0.86,
+  },
+  sharpen: {
+    background: "linear-gradient(135deg, #111827 0%, #e0e7ff 48%, #4338ca 52%, #0f172a 100%)",
+    imageOverlay: "linear-gradient(135deg, rgba(255,255,255,0.18), rgba(15,23,42,0.18))",
+    overlayMixBlendMode: "overlay",
+  },
+  "high-contrast": {
+    background: "linear-gradient(135deg, #020617 0%, #0f172a 38%, #f8fafc 39%, #f8fafc 62%, #111827 63%, #000 100%)",
+    imageFilter: "contrast(1.55) saturate(1.05)",
+  },
+  vibrant: {
+    background: "linear-gradient(135deg, #dc2626 0%, #f97316 28%, #22c55e 54%, #2563eb 78%, #a855f7 100%)",
+    imageOverlay: "linear-gradient(135deg, rgba(236,72,153,0.18), rgba(34,197,94,0.18), rgba(59,130,246,0.22))",
+    overlayMixBlendMode: "screen",
+  },
+  matte: {
+    background: "linear-gradient(135deg, #334155 0%, #8b879d 52%, #d8cfc0 100%)",
+    imageOverlay: "linear-gradient(135deg, rgba(226,232,240,0.18), rgba(148,163,184,0.2))",
+    imageOpacity: 0.9,
+  },
+  hdr: {
+    background: "linear-gradient(135deg, #0f172a 0%, #38bdf8 32%, #f8fafc 52%, #f59e0b 74%, #312e81 100%)",
+    imageFilter: "contrast(1.22) brightness(1.08) saturate(1.16)",
+    imageOverlay: "linear-gradient(135deg, rgba(255,255,255,0.16), rgba(14,165,233,0.12))",
+    overlayMixBlendMode: "screen",
+  },
+  invert: {
+    background: "linear-gradient(135deg, #f8fafc 0%, #22d3ee 32%, #f472b6 58%, #111827 100%)",
+    imageFilter: "invert(1) hue-rotate(180deg) saturate(1.15)",
+  },
+  duotone: {
+    background: "linear-gradient(135deg, #220a45 0%, #7c3aed 46%, #f97316 100%)",
+    imageOverlay: "linear-gradient(135deg, rgba(124,58,237,0.42), rgba(249,115,22,0.42))",
+    overlayMixBlendMode: "color",
+  },
+  polaroid: {
+    background: "linear-gradient(135deg, #efe4c8 0%, #c08457 48%, #5b4636 100%)",
+    imageOverlay: "linear-gradient(135deg, rgba(255,247,237,0.18), rgba(194,120,73,0.24))",
+  },
+  grain: {
+    background:
+      "repeating-radial-gradient(circle at 30% 30%, rgba(255,255,255,0.22) 0 1px, rgba(0,0,0,0.16) 1px 2px, transparent 2px 5px), linear-gradient(135deg, #1f2937 0%, #6b5f73 54%, #a78b72 100%)",
+    imageOverlay:
+      "repeating-radial-gradient(circle at 18% 28%, rgba(255,255,255,0.16) 0 1px, rgba(0,0,0,0.12) 1px 2px, transparent 2px 5px)",
+    overlayMixBlendMode: "overlay",
+    overlayOpacity: 0.75,
+  },
+};
 
 const TEXT_COLOR_SWATCHES = [
   "#ffffff",
@@ -207,11 +374,11 @@ const TEXT_COLOR_SWATCHES = [
 ];
 
 const tools = [
-  { id: "select", label: "Select", icon: <NorthWestIcon /> },
+  { id: "select", label: "Select", mobileLabel: "Edit", icon: <TuneIcon /> },
   { id: "crop", label: "Crop", icon: <CropIcon /> },
   { id: "rotate", label: "Rotate", icon: <Rotate90DegreesCcwIcon /> },
-  { id: "flip", label: "Flip", icon: <FlipIcon /> },
   { id: "text", label: "Text", icon: <TextFieldsIcon /> },
+  { id: "flip", label: "Flip", icon: <FlipIcon /> },
 ];
 
 const FREE_CROP_HANDLES: Array<{
@@ -249,24 +416,106 @@ function validateImageUpload(file: File) {
 
 function buildCSSFilter(adjustments: Adjustments, preset: FilterPreset, showOriginal: boolean) {
   if (showOriginal) return "none";
-  const merged = { ...adjustments, ...preset.adj };
+  const merged = mergePresetAdjustments(adjustments, preset);
+  const temperature = (merged.temperature ?? 0) + (merged.warmth ?? 0);
   const brightness = Math.max(
     0.15,
-    1 + merged.brightness * 0.005 + merged.exposure * 0.006 + merged.highlights * 0.002 + merged.shadows * 0.0015,
+    1 +
+      merged.brightness * 0.005 +
+      merged.exposure * 0.006 +
+      merged.highlights * 0.002 +
+      merged.shadows * 0.0015 +
+      merged.whites * 0.0018 -
+      merged.blacks * 0.0015,
   );
-  const contrast = Math.max(0.15, 1 + merged.contrast * 0.007 + merged.highlights * 0.0015 - merged.shadows * 0.001);
+  const contrast = Math.max(
+    0.15,
+    1 +
+      merged.contrast * 0.007 +
+      merged.highlights * 0.0015 -
+      merged.shadows * 0.001 +
+      merged.texture * 0.0015 +
+      merged.clarity * 0.002 +
+      merged.sharpeningAmount * 0.001,
+  );
   const saturate = Math.max(0, 1 + merged.saturation / 100 + merged.vibrance / 180);
-  const hueRotate = (merged.warmth ?? 0) * -0.14;
-  const sepia = (merged.warmth ?? 0) > 0 ? ((merged.warmth ?? 0) / 100) * 0.22 : 0;
+  const hueRotate = temperature * -0.14 + merged.tint * 0.09;
+  const sepia = temperature > 0 ? (temperature / 100) * 0.22 : 0;
   return [
     `brightness(${brightness.toFixed(3)})`,
     `contrast(${contrast.toFixed(3)})`,
     `saturate(${saturate.toFixed(3)})`,
     sepia > 0.008 ? `sepia(${sepia.toFixed(3)})` : "",
     Math.abs(hueRotate) > 0.3 ? `hue-rotate(${hueRotate.toFixed(1)}deg)` : "",
+    ...(preset.css ?? []),
   ]
     .filter(Boolean)
     .join(" ");
+}
+
+function mergePresetAdjustments(adjustments: Adjustments, preset: FilterPreset): Adjustments {
+  return { ...adjustments, ...preset.adj };
+}
+
+function getFilterEffectValues(adjustments: Adjustments, showOriginal: boolean) {
+  if (showOriginal) {
+    return { vignette: 0, grain: 0 };
+  }
+
+  return {
+    vignette: clamp(-adjustments.vignetteAmount, 0, 100) / 100,
+    grain: clamp(adjustments.grainAmount, 0, 100) / 100,
+  };
+}
+
+function getFilterEffectOverlaySx(adjustments: Adjustments, showOriginal: boolean) {
+  const { vignette, grain } = getFilterEffectValues(adjustments, showOriginal);
+
+  if (vignette === 0 && grain === 0) return null;
+
+  const backgrounds = [
+    vignette > 0
+      ? `radial-gradient(circle at center, rgba(0,0,0,0) ${42 + adjustments.vignetteMidpoint * 0.22}%, rgba(0,0,0,${(0.62 * vignette).toFixed(3)}) 100%)`
+      : "",
+    grain > 0
+      ? `repeating-radial-gradient(circle at 20% 30%, rgba(255,255,255,${(0.1 * grain).toFixed(3)}) 0 1px, rgba(0,0,0,${(0.08 * grain).toFixed(3)}) 1px 2px, transparent 2px 5px)`
+      : "",
+  ].filter(Boolean);
+
+  return {
+    position: "absolute",
+    inset: 0,
+    pointerEvents: "none",
+    zIndex: 1,
+    backgroundImage: backgrounds.join(", "),
+    mixBlendMode: grain > 0 ? "overlay" : "normal",
+    opacity: grain > 0 && vignette === 0 ? 0.72 : 1,
+  };
+}
+
+function drawFilterEffects(context: CanvasRenderingContext2D, width: number, height: number, adjustments: Adjustments) {
+  const { vignette, grain } = getFilterEffectValues(adjustments, false);
+
+  if (vignette > 0 && typeof context.createRadialGradient === "function") {
+    const radius = Math.max(width, height) * 0.72;
+    const gradient = context.createRadialGradient(width / 2, height / 2, Math.min(width, height) * 0.22, width / 2, height / 2, radius);
+    gradient.addColorStop(0, "rgba(0,0,0,0)");
+    gradient.addColorStop(1, `rgba(0,0,0,${(0.62 * vignette).toFixed(3)})`);
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, width, height);
+  }
+
+  if (grain > 0 && typeof context.fillRect === "function") {
+    const step = Math.max(2, Math.round(9 - clamp(adjustments.grainSize, 0, 100) / 18));
+    const alpha = 0.11 * grain;
+    for (let y = 0; y < height; y += step) {
+      for (let x = 0; x < width; x += step) {
+        const seed = (x * 13 + y * 17) % 29;
+        context.fillStyle = seed % 2 === 0 ? `rgba(255,255,255,${alpha.toFixed(3)})` : `rgba(0,0,0,${(alpha * 0.8).toFixed(3)})`;
+        context.fillRect(x, y, 1, 1);
+      }
+    }
+  }
 }
 
 function buildPreviewTransform(rotation: number, flipHorizontal: boolean, flipVertical: boolean) {
@@ -318,6 +567,19 @@ function getExportCrop(width: number, height: number, cropPreset: CropPreset, fr
   }
 
   return getCenteredCrop(width, height, cropPreset.exportRatio);
+}
+
+function readTextFile(file: File): Promise<string> {
+  if (typeof file.text === "function") {
+    return file.text();
+  }
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : "");
+    reader.onerror = () => reject(new Error("File could not be read."));
+    reader.readAsText(file);
+  });
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -697,33 +959,37 @@ function getExportButtonLabel(status: string, isHovered: boolean) {
 
 function Brand() {
   return (
-    <Stack direction="row" spacing={1.4} alignItems="center">
+    <Stack direction="row" spacing={{ xs: 1, sm: 1.35, md: 1.4 }} alignItems="center" sx={{ minWidth: 0 }}>
       <Box
         component="img"
         src="/ls-logo.png"
         alt=""
         sx={{
-          width: 40,
-          height: 40,
-          borderRadius: 2,
+          width: { xs: 38, sm: 44, md: 48, lg: 52 },
+          height: { xs: 38, sm: 44, md: 48, lg: 52 },
+          borderRadius: { xs: 1.8, sm: 2, md: 2.2 },
           display: "block",
           objectFit: "cover",
+          flexShrink: 0,
           boxShadow: "0 0 16px rgba(124,102,255,0.45)",
         }}
       />
-      <Stack direction="row" spacing={0.6} alignItems="baseline">
+      <Stack direction={{ xs: "column", md: "row" }} spacing={{ xs: 0.05, md: 0.6 }} alignItems={{ xs: "flex-start", md: "baseline" }} sx={{ minWidth: 0 }}>
         <Typography
           sx={{
             fontFamily: '"Playfair Display", Georgia, serif',
-            fontSize: 22,
+            fontSize: { xs: 22, sm: 26, md: 27, lg: 30 },
             fontWeight: 700,
             color: "#e4e4f2",
             lineHeight: 1,
+            maxWidth: { xs: 88, sm: 118, md: "none" },
+            overflow: "hidden",
+            textOverflow: "ellipsis",
           }}
         >
           Lumina
         </Typography>
-        <Typography sx={{ fontSize: 12, color: "#4a4a78", letterSpacing: "0.08em" }}>
+        <Typography sx={{ fontSize: { xs: 11, sm: 13, md: 13, lg: 14 }, color: "#6868a0", letterSpacing: { xs: "0.2em", md: "0.12em" }, lineHeight: 1 }}>
           STUDIO
         </Typography>
       </Stack>
@@ -734,11 +1000,17 @@ function Brand() {
 function ToolButton({
   active,
   label,
+  mobileLabel,
+  hideOnMobile,
+  dataTour,
   children,
   onClick,
 }: {
   active?: boolean;
   label: string;
+  mobileLabel?: string;
+  hideOnMobile?: boolean;
+  dataTour?: string;
   children: ReactNode;
   onClick?: () => void;
 }) {
@@ -746,19 +1018,257 @@ function ToolButton({
     <IconButton
       aria-label={label}
       title={label}
+      data-tour={dataTour}
       onClick={onClick}
       sx={{
-        width: 42,
-        height: 42,
-        borderRadius: 1.5,
+        display: { xs: hideOnMobile ? "none" : "inline-flex", md: "inline-flex" },
+        width: { xs: 70, md: 50, lg: 52 },
+        height: { xs: 64, md: 50, lg: 52 },
+        borderRadius: { xs: 2, md: 1.7 },
+        flexDirection: { xs: "column", md: "row" },
+        gap: { xs: 0.55, md: 0 },
         color: active ? "#a78bfa" : "#52527a",
         bgcolor: active ? "rgba(124,102,255,0.18)" : "transparent",
         outline: active ? "1px solid rgba(124,102,255,0.35)" : "none",
+        "& svg": { fontSize: { xs: 24, md: 26, lg: 28 } },
         "&:hover": { bgcolor: "rgba(124,102,255,0.12)", color: "#a78bfa" },
       }}
     >
       {children}
+      <Box
+        component="span"
+        sx={{
+          display: { xs: "block", md: "none" },
+          color: active ? "#c4b5fd" : "#8888b8",
+          fontSize: 11,
+          fontWeight: active ? 800 : 600,
+          lineHeight: 1,
+        }}
+      >
+        {mobileLabel ?? label}
+      </Box>
     </IconButton>
+  );
+}
+
+function FilterPresetCarousel({
+  presets,
+  selectedPreset,
+  previewUrl,
+  onSelect,
+}: {
+  presets: FilterPreset[];
+  selectedPreset: FilterPreset;
+  previewUrl: string | null;
+  onSelect: (preset: FilterPreset) => void;
+}) {
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const [canScrollPrevious, setCanScrollPrevious] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
+
+  const updateScrollState = useCallback(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+
+    const maxScrollLeft = scroller.scrollWidth - scroller.clientWidth;
+    setCanScrollPrevious(scroller.scrollLeft > 2);
+    setCanScrollNext(scroller.scrollLeft < maxScrollLeft - 2);
+  }, []);
+
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return undefined;
+
+    updateScrollState();
+    scroller.addEventListener("scroll", updateScrollState, { passive: true });
+    window.addEventListener("resize", updateScrollState);
+
+    const resizeObserver = typeof ResizeObserver !== "undefined" ? new ResizeObserver(updateScrollState) : null;
+    resizeObserver?.observe(scroller);
+
+    return () => {
+      scroller.removeEventListener("scroll", updateScrollState);
+      window.removeEventListener("resize", updateScrollState);
+      resizeObserver?.disconnect();
+    };
+  }, [updateScrollState]);
+
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+
+    const selectedButton = Array.from(scroller.querySelectorAll<HTMLElement>("[data-filter-id]")).find(
+      (element) => element.dataset.filterId === selectedPreset.id,
+    );
+    if (selectedButton && typeof selectedButton.scrollIntoView === "function") {
+      selectedButton.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+    }
+    window.setTimeout(updateScrollState, 180);
+  }, [selectedPreset.id, updateScrollState]);
+
+  const scrollByGroup = (direction: -1 | 1) => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+
+    scroller.scrollBy({
+      left: direction * Math.max(scroller.clientWidth * 0.82, 180),
+      behavior: "smooth",
+    });
+    window.setTimeout(updateScrollState, 240);
+  };
+
+  const arrowSx = {
+    width: { xs: 42, md: 50, lg: 54 },
+    height: { xs: 72, md: 92, lg: 100 },
+    flexShrink: 0,
+    borderRadius: 2.1,
+    color: "#a78bfa",
+    border: "1px solid rgba(124,102,255,0.24)",
+    bgcolor: "rgba(16,16,30,0.86)",
+    boxShadow: "inset 0 0 18px rgba(124,102,255,0.08), 0 12px 30px rgba(0,0,0,0.26)",
+    transition: "opacity 0.18s ease, color 0.18s ease, border-color 0.18s ease, background-color 0.18s ease",
+    "&:hover": {
+      color: "#ffffff",
+      borderColor: "rgba(167,139,250,0.52)",
+      bgcolor: "rgba(124,102,255,0.18)",
+    },
+    "&.Mui-disabled": {
+      color: "rgba(104,104,160,0.42)",
+      borderColor: "rgba(255,255,255,0.055)",
+      bgcolor: "rgba(255,255,255,0.025)",
+      boxShadow: "none",
+      opacity: 0.55,
+    },
+  };
+
+  return (
+    <Stack direction="row" alignItems="center" spacing={{ xs: 0.8, md: 1.25 }} sx={{ flex: "1 1 auto", width: "100%", minWidth: 0 }}>
+      <IconButton aria-label="Previous filters" disabled={!canScrollPrevious} onClick={() => scrollByGroup(-1)} sx={arrowSx}>
+        <KeyboardArrowLeftIcon sx={{ fontSize: { xs: 36, md: 44, lg: 48 } }} />
+      </IconButton>
+      <Box
+        ref={scrollerRef}
+        role="list"
+        aria-label="Filter presets"
+        sx={{
+          "--filter-card-width": EDITOR_LAYOUT.filterCardWidth,
+          flex: 1,
+          minWidth: 0,
+          display: "grid",
+          gridAutoFlow: "column",
+          gridAutoColumns: "var(--filter-card-width)",
+          gap: { xs: 1.45, md: 1.9, lg: 2.15 },
+          px: { xs: 0.4, md: 0.65 },
+          py: { xs: 0.65, md: 0.8 },
+          overflowX: "auto",
+          overscrollBehaviorX: "contain",
+          scrollBehavior: "smooth",
+          scrollPaddingInline: { xs: 8, md: 12 },
+          scrollbarWidth: "none",
+          "&::-webkit-scrollbar": { display: "none" },
+        }}
+      >
+        {presets.map((preset) => {
+          const active = selectedPreset.id === preset.id;
+          const tone = FILTER_PREVIEW_TONES[preset.id] ?? FILTER_PREVIEW_TONES.original;
+          const previewFilter = [buildCSSFilter({ ...DEFAULT_ADJUSTMENTS }, preset, false), tone.imageFilter].filter(Boolean).join(" ");
+          const overlayBackground = previewUrl ? tone.imageOverlay ?? tone.overlay ?? "transparent" : tone.overlay ?? "transparent";
+
+          return (
+            <Box key={preset.id} role="listitem" sx={{ minWidth: 0 }}>
+              <Box
+                component="button"
+                type="button"
+                data-filter-id={preset.id}
+                aria-label={preset.name}
+                onClick={() => onSelect(preset)}
+                sx={{
+                  width: "100%",
+                  p: 0,
+                  border: 0,
+                  bgcolor: "transparent",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: { xs: 0.85, md: 1 },
+                  opacity: active ? 1 : 0.94,
+                  cursor: "pointer",
+                  textAlign: "center",
+                  "&:focus-visible .filter-preview-card": {
+                    outline: "2px solid #c4b5fd",
+                    outlineOffset: 3,
+                  },
+                }}
+              >
+                <Box
+                  className="filter-preview-card"
+                  sx={{
+                    position: "relative",
+                    width: "100%",
+                    aspectRatio: { xs: "1.14 / 1", md: "1.46 / 1" },
+                    borderRadius: { xs: 1.9, md: 1.55 },
+                    overflow: "hidden",
+                    background: tone.background,
+                    border: active ? "3px solid #7c66ff" : "2px solid rgba(255,255,255,0.085)",
+                    boxShadow: active
+                      ? "0 0 0 2px rgba(124,102,255,0.18), 0 14px 34px rgba(124,102,255,0.18)"
+                      : "inset 0 0 0 1px rgba(0,0,0,0.32), 0 10px 24px rgba(0,0,0,0.2)",
+                    transition: "border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease",
+                    ".MuiBox-root:hover &": { transform: "translateY(-1px)" },
+                  }}
+                >
+                  {previewUrl && (
+                    <Box
+                      component="img"
+                      src={previewUrl}
+                      alt=""
+                      aria-hidden="true"
+                      sx={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        display: "block",
+                        filter: previewFilter,
+                        opacity: tone.imageOpacity ?? 1,
+                      }}
+                    />
+                  )}
+                  {overlayBackground !== "transparent" && (
+                    <Box
+                      aria-hidden="true"
+                      sx={{
+                        position: "absolute",
+                        inset: 0,
+                        background: overlayBackground,
+                        mixBlendMode: tone.overlayMixBlendMode ?? "normal",
+                        opacity: tone.overlayOpacity ?? 1,
+                        pointerEvents: "none",
+                      }}
+                    />
+                  )}
+                </Box>
+                <Typography
+                  component="span"
+                  noWrap
+                  sx={{
+                    width: "100%",
+                    color: active ? "#a78bfa" : "#6f6aa3",
+                    fontSize: { xs: 12.5, md: 13.5, lg: 14 },
+                    fontWeight: active ? 800 : 650,
+                    lineHeight: 1.05,
+                  }}
+                >
+                  {preset.name}
+                </Typography>
+              </Box>
+            </Box>
+          );
+        })}
+      </Box>
+      <IconButton aria-label="Next filters" disabled={!canScrollNext} onClick={() => scrollByGroup(1)} sx={arrowSx}>
+        <KeyboardArrowRightIcon sx={{ fontSize: { xs: 36, md: 44, lg: 48 } }} />
+      </IconButton>
+    </Stack>
   );
 }
 
@@ -779,9 +1289,9 @@ function SectionHeader({
       sx={{
         justifyContent: "space-between",
         px: 0,
-        py: 1.25,
+        py: { xs: 1.25, md: 1.45 },
         color: expanded ? "#a9a5ff" : "#6868a0",
-        fontSize: 12,
+        fontSize: { xs: 12, md: 13 },
         fontWeight: 800,
         letterSpacing: "0.12em",
         textTransform: "uppercase",
@@ -810,13 +1320,13 @@ function AdjSlider({
 }) {
   return (
     <Box>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-        <Stack direction="row" spacing={1} alignItems="center">
-          <Box sx={{ display: "flex", color: "#6868a0", "& svg": { fontSize: 14 } }}>{icon}</Box>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.15 }}>
+        <Stack direction="row" spacing={1.1} alignItems="center">
+          <Box sx={{ display: "flex", color: "#6868a0", "& svg": { fontSize: 16 } }}>{icon}</Box>
           <Typography
             sx={{
               color: "#8888d8",
-              fontSize: 12,
+              fontSize: { xs: 12, md: 13 },
               textTransform: "uppercase",
               letterSpacing: "0.08em",
               fontWeight: 600,
@@ -828,7 +1338,7 @@ function AdjSlider({
         <Typography
           sx={{
             fontFamily: '"JetBrains Mono", monospace',
-            fontSize: 11,
+            fontSize: { xs: 11, md: 12 },
             color: value === 0 ? "#6868a0" : "#a78bfa",
           }}
         >
@@ -843,18 +1353,19 @@ function AdjSlider({
         aria-label={label}
         size="small"
         sx={{
-          height: 18,
-          p: 0,
+          height: 24,
+          py: 0.8,
+          px: 0,
           color: "#7c66ff",
           "& .MuiSlider-rail": {
-            height: 1,
+            height: 3,
             bgcolor: "rgba(255,255,255,0.12)",
             opacity: 1,
           },
-          "& .MuiSlider-track": { height: 1.5 },
+          "& .MuiSlider-track": { height: 3 },
           "& .MuiSlider-thumb": {
-            width: 12,
-            height: 12,
+            width: 16,
+            height: 16,
             bgcolor: value === 0 ? "rgba(255,255,255,0.28)" : "#a78bfa",
             boxShadow: value === 0 ? "none" : "0 0 10px rgba(124,102,255,0.5)",
           },
@@ -1312,6 +1823,7 @@ export function EditorWorkspace() {
   const [cropPresetId, setCropPresetId] = useState<(typeof CROP_PRESETS)[number]["id"]>("none");
   const [freeCrop, setFreeCrop] = useState<FreeCropState>({ ...DEFAULT_FREE_CROP });
   const [draftFreeCrop, setDraftFreeCrop] = useState<FreeCropState>({ ...DEFAULT_FREE_CROP });
+  const [freeCropEditing, setFreeCropEditing] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [flipHorizontal, setFlipHorizontal] = useState(false);
   const [flipVertical, setFlipVertical] = useState(false);
@@ -1328,25 +1840,108 @@ export function EditorWorkspace() {
   const [aiRestoring, setAiRestoring] = useState(false);
   const [aiStatus, setAiStatus] = useState("Ready");
   const [exportStatus, setExportStatus] = useState("Export");
+  const [cropStatus, setCropStatus] = useState("No crop selected");
   const [exportHovered, setExportHovered] = useState(false);
   const [resetConfirmed, setResetConfirmed] = useState(false);
-  const [expanded, setExpanded] = useState({
-    ai: true,
-    light: false,
-    color: false,
-    presets: false,
-  });
+  const [savedPresets, setSavedPresets] = useState<Preset[]>([]);
+  const [selectedSavedPresetId, setSelectedSavedPresetId] = useState("none");
+  const [presetLoading, setPresetLoading] = useState(false);
+  const [presetError, setPresetError] = useState<string | null>(null);
+  const [savePresetOpen, setSavePresetOpen] = useState(false);
+  const [presetName, setPresetName] = useState("");
+  const [presetSaving, setPresetSaving] = useState(false);
+  const [expanded, setExpanded] = useState(DEFAULT_EXPANDED_SECTIONS);
   const exportStatusTimeoutRef = useRef<number | null>(null);
   const aiStatusTimeoutRef = useRef<number | null>(null);
   const resetTimeoutRef = useRef<number | null>(null);
+  const tourDriverRef = useRef<Driver | null>(null);
+  const tourPersistOnDestroyRef = useRef(true);
   const freeCropDragRef = useRef<FreeCropDragState | null>(null);
   const colorPickerReturnAnchorRef = useRef<HTMLElement | null>(null);
+
+  const loadSavedPresets = useCallback(async () => {
+    setPresetLoading(true);
+    setPresetError(null);
+    try {
+      setSavedPresets(await presetsApi.list());
+    } catch (error) {
+      setPresetError(getApiErrorMessage(error));
+    } finally {
+      setPresetLoading(false);
+    }
+  }, []);
+
+  const startEditorTour = useCallback(async () => {
+    const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
+
+    try {
+      const { driver } = await import("driver.js");
+
+      tourPersistOnDestroyRef.current = false;
+      tourDriverRef.current?.destroy();
+      tourPersistOnDestroyRef.current = true;
+      const tour = driver({
+        steps: createEditorDriverSteps(),
+        animate: !prefersReducedMotion,
+        smoothScroll: true,
+        allowClose: true,
+        allowKeyboardControl: true,
+        overlayColor: "#08080e",
+        overlayOpacity: 0.72,
+        overlayClickBehavior: "close",
+        stagePadding: 8,
+        stageRadius: 10,
+        popoverClass: "lumina-driver-tour",
+        showButtons: ["previous", "next", "close"],
+        showProgress: true,
+        progressText: "{{current}} / {{total}}",
+        prevBtnText: "Back",
+        nextBtnText: "Next",
+        doneBtnText: "Done",
+        onDestroyed: () => {
+          if (tourPersistOnDestroyRef.current) {
+            setBrowserPreference("editorTourShown", true);
+          }
+          tourDriverRef.current = null;
+        },
+      });
+
+      tourDriverRef.current = tour;
+      tour.drive();
+    } catch {
+      tourDriverRef.current = null;
+    }
+  }, []);
 
   useEffect(() => {
     setGuestSessionId(getOrCreateGuestSessionId());
     setHasAuthToken(Boolean(getApiAuthToken()));
+    const preferences = getBrowserPreferences();
+    let tourFrame: number | null = null;
+
+    if (preferences.editorExpandedSections) {
+      setExpanded((current) => ({
+        ...current,
+        ...preferences.editorExpandedSections,
+      }));
+    }
+
+    if (!preferences.editorTourShown) {
+      tourFrame = window.requestAnimationFrame(() => {
+        void startEditorTour();
+      });
+    }
 
     return () => {
+      if (tourFrame) {
+        window.cancelAnimationFrame(tourFrame);
+      }
+
+      tourPersistOnDestroyRef.current = false;
+      tourDriverRef.current?.destroy();
+      tourDriverRef.current = null;
+      tourPersistOnDestroyRef.current = true;
+
       if (exportStatusTimeoutRef.current) {
         window.clearTimeout(exportStatusTimeoutRef.current);
       }
@@ -1359,7 +1954,18 @@ export function EditorWorkspace() {
         window.clearTimeout(resetTimeoutRef.current);
       }
     };
-  }, []);
+  }, [startEditorTour]);
+
+  useEffect(() => {
+    if (!hasAuthToken) {
+      setSavedPresets([]);
+      setSelectedSavedPresetId("none");
+      setPresetError("Sign in to save and sync presets.");
+      return;
+    }
+
+    void loadSavedPresets();
+  }, [hasAuthToken, loadSavedPresets]);
 
   const imageUrl = uploadedImage;
   const filterPreviewUrl = imageUrl;
@@ -1368,14 +1974,20 @@ export function EditorWorkspace() {
     () => buildCSSFilter(adjustments, selectedPreset, showOriginal),
     [adjustments, selectedPreset, showOriginal],
   );
+  const activeFilterAdjustments = useMemo(() => mergePresetAdjustments(adjustments, selectedPreset), [adjustments, selectedPreset]);
+  const filterEffectOverlaySx = useMemo(() => getFilterEffectOverlaySx(activeFilterAdjustments, showOriginal), [activeFilterAdjustments, showOriginal]);
   const cropPreset = CROP_PRESETS.find((preset) => preset.id === cropPresetId) ?? CROP_PRESETS[0];
+  const freeCropPreviewActive = !showOriginal && cropPreset.id === "free" && !freeCropEditing;
   const activeCropRatio = showOriginal || cropPreset.id === "none" || cropPreset.id === "free" ? null : cropPreset.ratio;
-  const cropMode = showOriginal ? "none" : cropPreset.id === "free" ? "free" : activeCropRatio ?? "none";
+  const appliedFreeCropRatio = freeCropPreviewActive ? `${freeCrop.width} / ${freeCrop.height}` : null;
+  const previewCropRatio = activeCropRatio ?? appliedFreeCropRatio;
+  const cropMode = showOriginal ? "none" : freeCropPreviewActive ? "free-applied" : cropPreset.id === "free" ? "free-editing" : activeCropRatio ?? "none";
   const previewTransform = showOriginal ? "none" : buildPreviewTransform(rotation, flipHorizontal, flipVertical);
   const selectedTextOverlay = textOverlays.find((overlay) => overlay.id === selectedTextId) ?? null;
   const selectedTextColor = selectedTextOverlay?.color ?? DEFAULT_TEXT_OVERLAY_VALUES.color;
   const exportButtonLabel = getExportButtonLabel(exportStatus, exportHovered);
   const colorPickerOpen = Boolean(colorPickerAnchorEl);
+  const selectedSavedPreset = savedPresets.find((preset) => preset.id === selectedSavedPresetId) ?? null;
 
   useEffect(() => {
     if (!selectedTextOverlay) {
@@ -1413,8 +2025,10 @@ export function EditorWorkspace() {
     setAdjustments({ ...DEFAULT_ADJUSTMENTS });
     setSelectedPreset(FILTER_PRESETS[0]);
     setCropPresetId("none");
+    setCropStatus("No crop selected");
     setFreeCrop({ ...DEFAULT_FREE_CROP });
     setDraftFreeCrop({ ...DEFAULT_FREE_CROP });
+    setFreeCropEditing(false);
     setRotation(0);
     setFlipHorizontal(false);
     setFlipVertical(false);
@@ -1425,6 +2039,143 @@ export function EditorWorkspace() {
     setEyedropperActive(false);
     colorPickerReturnAnchorRef.current = null;
     setShowOriginal(false);
+  };
+
+  const serializeCurrentPreset = (): SavePresetRequest => ({
+    presetName: presetName.trim(),
+    enhancementSettings: createPresetEnhancementSettings({
+      adjustments,
+      filterPresetId: selectedPreset.id,
+      cropPresetId,
+      freeCrop,
+      rotation,
+      flipHorizontal,
+      flipVertical,
+      textOverlays,
+    }),
+  });
+
+  const applyPresetSettings = (settings: unknown) => {
+    const normalized = toEditorPresetSettings(settings);
+    setAdjustments({ ...DEFAULT_ADJUSTMENTS, ...normalized.adjustments });
+    setSelectedPreset(FILTER_PRESETS.find((preset) => preset.id === normalized.filterPresetId) ?? FILTER_PRESETS[0]);
+    const nextCropPreset = CROP_PRESETS.find((preset) => preset.id === normalized.cropPresetId) ?? CROP_PRESETS[0];
+    const nextFreeCrop = clampFreeCrop({ ...DEFAULT_FREE_CROP, ...normalized.freeCrop });
+    setCropPresetId(nextCropPreset.id as (typeof CROP_PRESETS)[number]["id"]);
+    setCropStatus(nextCropPreset.id === "none" ? "No crop selected" : `${nextCropPreset.label} crop applied`);
+    setFreeCrop(nextFreeCrop);
+    setDraftFreeCrop(nextFreeCrop);
+    setFreeCropEditing(false);
+    setRotation(normalized.rotation ?? 0);
+    setFlipHorizontal(Boolean(normalized.flipHorizontal));
+    setFlipVertical(Boolean(normalized.flipVertical));
+    setTextOverlays(normalized.textOverlays ?? []);
+    setSelectedTextId(normalized.textOverlays?.[0]?.id ?? null);
+    setShowOriginal(false);
+  };
+
+  const handleSavedPresetChange = (id: string) => {
+    setSelectedSavedPresetId(id);
+    const preset = savedPresets.find((item) => item.id === id);
+    if (!preset) return;
+    applyPresetSettings(preset.enhancementSettings);
+    setPresetError(null);
+  };
+
+  const handleSavePreset = async () => {
+    const trimmedName = presetName.trim();
+    if (!hasAuthToken) {
+      setPresetError("Sign in to save presets.");
+      return;
+    }
+    if (!trimmedName) {
+      setPresetError("Preset name is required.");
+      return;
+    }
+    if (savedPresets.some((preset) => preset.presetName.toLowerCase() === trimmedName.toLowerCase())) {
+      setPresetError("A preset with this name already exists.");
+      return;
+    }
+
+    setPresetSaving(true);
+    setPresetError(null);
+    try {
+      const created = await presetsApi.create(serializeCurrentPreset());
+      setSavedPresets((current) => [...current, created]);
+      setSelectedSavedPresetId(created.id);
+      applyPresetSettings(created.enhancementSettings);
+      setSavePresetOpen(false);
+      setPresetName("");
+    } catch (error) {
+      setPresetError(getApiErrorMessage(error));
+    } finally {
+      setPresetSaving(false);
+    }
+  };
+
+  const handleImportPreset = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    try {
+      const parsed = parsePresetJsonPayload(JSON.parse(await readTextFile(file)));
+
+      if (hasAuthToken) {
+        const imported = await presetsApi.import({
+          presetName: parsed.presetName,
+          enhancementSettings: parsed.enhancementSettings,
+        });
+        setSavedPresets((current) => [...current.filter((preset) => preset.id !== imported.id), imported]);
+        setSelectedSavedPresetId(imported.id);
+        applyPresetSettings(imported.enhancementSettings);
+      } else {
+        setSelectedSavedPresetId("none");
+        applyPresetSettings(parsed.enhancementSettings);
+        setPresetError(`${parsed.presetName} imported for this session only.`);
+        return;
+      }
+      setPresetError(null);
+    } catch (error) {
+      setPresetError(
+        error instanceof SyntaxError
+          ? "Preset JSON could not be parsed."
+          : error instanceof PresetSchemaError
+            ? error.message
+            : getApiErrorMessage(error),
+      );
+    }
+  };
+
+  const downloadPresetJson = (payload: SavePresetRequest) => {
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `${payload.presetName.replace(/[^a-z0-9-]+/gi, "-").replace(/^-|-$/g, "").toLowerCase() || "lumina-preset"}.json`;
+    document.body.append(link);
+    link.click();
+    URL.revokeObjectURL(link.href);
+    link.remove();
+  };
+
+  const handleExportPreset = async () => {
+    setPresetError(null);
+    try {
+      if (hasAuthToken && selectedSavedPreset) {
+        const exported = await presetsApi.export(selectedSavedPreset.id);
+        downloadPresetJson({
+          presetName: exported.presetName,
+          enhancementSettings: migratePresetEnhancementSettings(exported.enhancementSettings),
+        });
+        return;
+      }
+      downloadPresetJson({
+        presetName: selectedSavedPreset?.presetName ?? "Lumina Preset",
+        enhancementSettings: serializeCurrentPreset().enhancementSettings,
+      });
+    } catch (error) {
+      setPresetError(getApiErrorMessage(error));
+    }
   };
 
   const handleResetManualEdits = () => {
@@ -1438,8 +2189,22 @@ export function EditorWorkspace() {
     resetTimeoutRef.current = window.setTimeout(() => setResetConfirmed(false), 900);
   };
 
+  const replayTour = () => {
+    void startEditorTour();
+  };
+
+  const resetEditorPreferences = () => {
+    clearBrowserPreferences();
+    setExpanded(DEFAULT_EXPANDED_SECTIONS);
+    void startEditorTour();
+  };
+
   const toggleSection = (key: keyof typeof expanded) => {
-    setExpanded((current) => ({ ...current, [key]: !current[key] }));
+    setExpanded((current) => {
+      const next = { ...current, [key]: !current[key] };
+      setBrowserPreference("editorExpandedSections", next);
+      return next;
+    });
   };
 
   const addTextOverlay = () => {
@@ -1538,10 +2303,16 @@ export function EditorWorkspace() {
 
   const handleCropPresetChange = (value: (typeof CROP_PRESETS)[number]["id"]) => {
     setCropPresetId(value);
+    const selectedCrop = CROP_PRESETS.find((preset) => preset.id === value) ?? CROP_PRESETS[0];
+    setCropStatus(value === "none" ? "No crop selected" : `${selectedCrop.label} crop selected`);
 
     if (value === "free") {
       setDraftFreeCrop(freeCrop);
+      setFreeCropEditing(true);
+      return;
     }
+
+    setFreeCropEditing(false);
   };
 
   const applyFreeCrop = () => {
@@ -1550,11 +2321,15 @@ export function EditorWorkspace() {
     setDraftFreeCrop(appliedCrop);
     setFreeCrop(appliedCrop);
     setCropPresetId("free");
+    setFreeCropEditing(false);
+    setCropStatus("Free crop applied");
   };
 
   const cancelFreeCrop = () => {
     setDraftFreeCrop(freeCrop);
     setCropPresetId("none");
+    setFreeCropEditing(false);
+    setCropStatus("Free crop canceled");
   };
 
   const beginFreeCropInteraction = (event: PointerEvent<HTMLElement>, mode: FreeCropDragMode) => {
@@ -1808,6 +2583,10 @@ export function EditorWorkspace() {
         crop.sourceWidth,
         crop.sourceHeight,
       );
+      context.save();
+      context.translate(-crop.sourceWidth / 2, -crop.sourceHeight / 2);
+      drawFilterEffects(context, crop.sourceWidth, crop.sourceHeight, mergePresetAdjustments(adjustments, selectedPreset));
+      context.restore();
 
       const visibleTextOverlays = textOverlays.filter((overlay) => overlay.text.trim().length > 0);
       if (visibleTextOverlays.length > 0) {
@@ -1858,42 +2637,69 @@ export function EditorWorkspace() {
   return (
     <Box
       sx={{
-        height: "100vh",
+        minHeight: "100dvh",
+        width: "100%",
+        maxWidth: "100dvw",
+        height: { xs: "auto", md: "100vh" },
         bgcolor: "#08080e",
         color: "#e4e4f2",
         display: "grid",
-        gridTemplateRows: "55px 1fr",
-        overflow: "hidden",
+        gridTemplateRows: EDITOR_LAYOUT.appRows,
+        overflowX: "hidden",
+        overflowY: { xs: "visible", md: "hidden" },
         fontFamily: '"Outfit", sans-serif',
+        pb: { xs: 12, md: 0 },
       }}
     >
       <Box
         component="header"
         sx={{
-          display: "grid",
+          display: { xs: "flex", md: "grid" },
           gridTemplateColumns: {
-            xs: "214px minmax(0, 1fr) 314px",
-            md: "260px minmax(0, 1fr) 326px",
-            lg: "320px minmax(0, 1fr) 344px",
+            xs: "minmax(0, 1fr) auto",
+            sm: "minmax(0, 1fr) max-content",
+            md: "300px minmax(0, 1fr) max-content",
+            lg: "340px minmax(0, 1fr) max-content",
           },
+          gap: { xs: 0.75, md: 1 },
+          justifyContent: { xs: "space-between", md: "normal" },
           alignItems: "center",
-          px: 0,
-          bgcolor: "#0d0d18",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          width: "100%",
+          maxWidth: "100dvw",
+          overflow: "hidden",
+          px: { xs: 1.25, sm: 2, md: 0 },
+          py: { xs: 1.25, sm: 2, md: 0 },
+          bgcolor: { xs: "#08080e", md: "#0d0d18" },
+          borderBottom: { xs: 0, md: "1px solid rgba(255,255,255,0.06)" },
         }}
       >
-        <Box sx={{ pl: { xs: 1.1, md: 1.5, lg: 2 }, minWidth: 0 }}>
+        <Box sx={{ pl: { xs: 0, md: 2, lg: 2.5 }, minWidth: 0, flexShrink: 1 }}>
           <Brand />
         </Box>
 
-        <Box sx={{ minWidth: 0 }} />
+        <Box sx={{ minWidth: 0, display: { xs: "none", md: "block" } }} />
 
         <Stack
+          aria-label="Editor actions"
           direction="row"
-          spacing={{ xs: 0.45, md: 0.65, lg: 0.8 }}
-          justifyContent="flex-end"
+          spacing={{ xs: 0.45, md: 0.85, lg: 1 }}
+          justifyContent={{ xs: "flex-end", sm: "flex-end" }}
           alignItems="center"
-          sx={{ minWidth: 0, px: { xs: 0.8, md: 1.1, lg: 1.4 } }}
+          sx={{
+            minWidth: 0,
+            width: { xs: "auto", sm: "100%" },
+            maxWidth: "100%",
+            px: { xs: 0, md: 1.5, lg: 1.8 },
+            flexWrap: "nowrap",
+            overflowX: "hidden",
+            overflowY: "hidden",
+            scrollbarWidth: "none",
+            whiteSpace: "nowrap",
+            "&::-webkit-scrollbar": { display: "none" },
+            "& .MuiButton-root, & .MuiIconButton-root, & .MuiDivider-root": {
+              flexShrink: 0,
+            },
+          }}
         >
           {hasAuthToken && (
             <>
@@ -1903,7 +2709,14 @@ export function EditorWorkspace() {
                 size="small"
                 title="History"
                 aria-label="History"
-                sx={{ color: "#6868a0", "&:hover": { color: "#a78bfa", bgcolor: "rgba(124,102,255,0.1)" } }}
+                sx={{
+                  display: { xs: "none", sm: "inline-flex" },
+                  color: "#6868a0",
+                  width: { sm: 40, md: 44 },
+                  height: { sm: 40, md: 44 },
+                  "& svg": { fontSize: { sm: 21, md: 23 } },
+                  "&:hover": { color: "#a78bfa", bgcolor: "rgba(124,102,255,0.1)" },
+                }}
               >
                 <HistoryIcon fontSize="small" />
               </IconButton>
@@ -1913,48 +2726,73 @@ export function EditorWorkspace() {
                 size="small"
                 title="Settings"
                 aria-label="Settings"
-                sx={{ color: "#6868a0", "&:hover": { color: "#a78bfa", bgcolor: "rgba(124,102,255,0.1)" } }}
+                sx={{
+                  display: { xs: "none", sm: "inline-flex" },
+                  color: "#6868a0",
+                  width: { sm: 40, md: 44 },
+                  height: { sm: 40, md: 44 },
+                  "& svg": { fontSize: { sm: 21, md: 23 } },
+                  "&:hover": { color: "#a78bfa", bgcolor: "rgba(124,102,255,0.1)" },
+                }}
               >
                 <SettingsIcon fontSize="small" />
               </IconButton>
-              <Divider orientation="vertical" flexItem sx={{ borderColor: "rgba(255,255,255,0.08)", mx: 0.2 }} />
+              <Divider orientation="vertical" flexItem sx={{ display: { xs: "none", sm: "block" }, borderColor: "rgba(255,255,255,0.08)", mx: 0.2 }} />
             </>
           )}
-          <IconButton size="small" sx={{ color: "#38385a", width: 34, height: 34 }}>
+          <Tooltip title="Replay tour. Shift-click to reset tips.">
+            <IconButton
+              size="small"
+              aria-label="Replay editor tour"
+              onClick={(event) => {
+                if (event.shiftKey) {
+                  resetEditorPreferences();
+                  return;
+                }
+                replayTour();
+              }}
+              sx={{ color: "#6868a0", width: { xs: 38, md: 44 }, height: { xs: 38, md: 44 }, "& svg": { fontSize: { md: 23 } }, "&:hover": { color: "#a78bfa", bgcolor: "rgba(124,102,255,0.1)" } }}
+            >
+              <HelpOutlineIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <IconButton size="small" sx={{ display: { xs: "none", sm: "inline-flex" }, color: "#38385a", width: { sm: 40, md: 44 }, height: { sm: 40, md: 44 }, "& svg": { fontSize: { md: 23 } } }}>
             <UndoIcon fontSize="small" />
           </IconButton>
-          <IconButton size="small" sx={{ color: "#38385a", width: 34, height: 34 }}>
+          <IconButton size="small" sx={{ display: { xs: "none", sm: "inline-flex" }, color: "#38385a", width: { sm: 40, md: 44 }, height: { sm: 40, md: 44 }, "& svg": { fontSize: { md: 23 } } }}>
             <RedoIcon fontSize="small" />
           </IconButton>
-          <Divider orientation="vertical" flexItem sx={{ borderColor: "rgba(255,255,255,0.08)", mx: 0.35 }} />
+          <Divider orientation="vertical" flexItem sx={{ display: { xs: "none", sm: "block" }, borderColor: "rgba(255,255,255,0.08)", mx: 0.35 }} />
           <Button
             size="small"
-            startIcon={<VisibilityOffOutlinedIcon sx={{ fontSize: 14 }} />}
+            startIcon={<VisibilityOffOutlinedIcon sx={{ fontSize: 18 }} />}
             disabled={!imageUrl}
             onMouseDown={() => setShowOriginal(true)}
             onMouseUp={() => setShowOriginal(false)}
             onMouseLeave={() => setShowOriginal(false)}
             sx={{
               color: showOriginal ? "#a78bfa" : "#6868a0",
+              display: { xs: "none", sm: "inline-flex" },
               border: `1px solid ${showOriginal ? "rgba(124,102,255,0.4)" : "rgba(255,255,255,0.06)"}`,
               bgcolor: showOriginal ? "rgba(124,102,255,0.18)" : "rgba(255,255,255,0.04)",
-              px: { xs: 0.75, md: 0.9, lg: 1.1 },
-              minWidth: { xs: 94, md: 100, lg: 104 },
-              height: 36,
-              fontSize: { xs: 10, md: 10.5, lg: 11 },
+              px: { xs: 1, md: 1.45, lg: 1.7 },
+              minWidth: { xs: 104, md: 126, lg: 136 },
+              height: { xs: 40, md: 46 },
+              fontSize: { xs: 11, md: 13, lg: 13.5 },
               lineHeight: 1.05,
               textTransform: "none",
               "& .MuiButton-startIcon": {
                 mr: 0.7,
-                "& svg": { fontSize: 14 },
+                "& svg": { fontSize: 18 },
               },
             }}
           >
             Before / After
           </Button>
-          <Divider orientation="vertical" flexItem sx={{ borderColor: "rgba(255,255,255,0.08)", mx: 0.35 }} />
+          <Divider orientation="vertical" flexItem sx={{ display: { xs: "none", sm: "block" }, borderColor: "rgba(255,255,255,0.08)", mx: 0.35 }} />
           <Button
-            startIcon={<DownloadIcon sx={{ fontSize: 17 }} />}
+            data-tour="export"
+            startIcon={<DownloadIcon sx={{ fontSize: 21 }} />}
             variant="contained"
             disabled={!imageUrl}
             onClick={handleExport}
@@ -1970,9 +2808,10 @@ export function EditorWorkspace() {
               color: "#fff",
               background: "linear-gradient(135deg, rgba(124,102,255,0.92), rgba(147,51,234,0.92))",
               boxShadow: "0 0 22px rgba(124,102,255,0.35)",
-              px: 2,
-              minWidth: { xs: 96, md: 104, lg: 112 },
-              height: 38,
+              px: { xs: 1.1, sm: 1.45, md: 2.3 },
+              minWidth: { xs: 88, sm: 98, md: 128, lg: 140 },
+              height: { xs: 38, sm: 40, md: 48 },
+              fontSize: { xs: 12, sm: 13, md: 15 },
               border: "1px solid rgba(255,255,255,0.14)",
               "&::before": {
                 content: '""',
@@ -1999,6 +2838,8 @@ export function EditorWorkspace() {
               "& .MuiButton-startIcon": {
                 position: "relative",
                 zIndex: 1,
+                mr: { xs: 0.55, md: 1 },
+                "& svg": { fontSize: { xs: 17, md: 21 } },
               },
               "&:disabled": {
                 color: "rgba(255,255,255,0.46)",
@@ -2007,7 +2848,7 @@ export function EditorWorkspace() {
               },
             }}
           >
-            <Box component="span" sx={{ position: "relative", zIndex: 1, minWidth: 58, textAlign: "center" }}>
+            <Box component="span" sx={{ position: "relative", zIndex: 1, minWidth: { xs: 38, sm: 44, md: 58 }, textAlign: "center" }}>
               {exportButtonLabel}
             </Box>
           </Button>
@@ -2017,9 +2858,10 @@ export function EditorWorkspace() {
             title="Exit to Landing"
             sx={{
               color: "#8888b8",
-              width: 38,
-              height: 38,
-              ml: 0.4,
+              width: { xs: 36, sm: 40, md: 46 },
+              height: { xs: 36, sm: 40, md: 46 },
+              ml: { xs: 0.15, md: 0.4 },
+              "& svg": { fontSize: { xs: 24, md: 30 } },
               "&:hover": { color: "#c8c8e4", bgcolor: "rgba(255,255,255,0.06)" },
             }}
           >
@@ -2032,75 +2874,108 @@ export function EditorWorkspace() {
         sx={{
           minHeight: 0,
           display: "grid",
-          gridTemplateColumns: {
-            xs: "56px minmax(0, 1fr) 314px",
-            md: "60px minmax(0, 1fr) 326px",
-            lg: "62px minmax(0, 1fr) 344px",
-          },
-          overflow: "hidden",
+          gridTemplateColumns: EDITOR_LAYOUT.shellColumns,
+          gridTemplateRows: { xs: "auto minmax(460px, 1fr) auto", md: "1fr" },
+          overflow: { xs: "visible", md: "hidden" },
+          rowGap: { xs: 2.2, md: 0 },
         }}
       >
         <Box
+          aria-label="Mobile tool navigation"
           sx={{
-            bgcolor: "#0d0d18",
-            borderRight: "1px solid rgba(255,255,255,0.06)",
+            position: { xs: "fixed", md: "static" },
+            left: { xs: 16, md: "auto" },
+            right: { xs: 16, md: "auto" },
+            bottom: { xs: 12, md: "auto" },
+            zIndex: { xs: 30, md: "auto" },
+            bgcolor: { xs: "rgba(13,13,24,0.94)", md: "#0d0d18" },
+            backdropFilter: { xs: "blur(18px)", md: "none" },
+            borderRight: { xs: 0, md: "1px solid rgba(255,255,255,0.06)" },
+            borderBottom: { xs: 0, md: 0 },
+            border: { xs: "1px solid rgba(255,255,255,0.1)", md: 0 },
+            borderRadius: { xs: 3, md: 0 },
+            boxShadow: { xs: "0 20px 60px rgba(0,0,0,0.55), 0 0 30px rgba(124,102,255,0.18)", md: "none" },
             display: "flex",
-            flexDirection: "column",
+            flexDirection: { xs: "row", md: "column" },
             alignItems: "center",
-            gap: 0.7,
-            py: 1.8,
+            justifyContent: { xs: "space-between", md: "flex-start" },
+            gap: { xs: 0.25, md: 0.7 },
+            py: { xs: 1, md: 2 },
+            px: { xs: 0.6, md: 0.55 },
+            overflowX: { xs: "hidden", md: "visible" },
           }}
         >
           {tools.map((tool) => (
             <ToolButton
               key={tool.id}
               label={tool.label}
+              mobileLabel={tool.mobileLabel ?? tool.label}
               active={selectedTool === tool.id}
+              dataTour={tool.id === "crop" ? "crop" : undefined}
               onClick={() => handleSelectTool(tool.id)}
             >
               {tool.icon}
             </ToolButton>
           ))}
-          <Box sx={{ flex: 1 }} />
+          <Box sx={{ flex: 1, display: { xs: "none", md: "block" } }} />
           <IconButton
             component={Link}
             href={hasAuthToken ? APP_ROUTES.settings : APP_ROUTES.login}
             aria-label={hasAuthToken ? "Account settings" : "Sign in"}
             title={hasAuthToken ? "Account settings" : "Sign in"}
             sx={{
-              width: 42,
-              height: 42,
+              display: { xs: "none", md: "inline-flex" },
+              width: { md: 50, lg: 52 },
+              height: { md: 50, lg: 52 },
               borderRadius: 1.5,
               color: "#52527a",
+              "& svg": { fontSize: { md: 26, lg: 28 } },
               "&:hover": { bgcolor: "rgba(124,102,255,0.12)", color: "#a78bfa" },
             }}
           >
             <PersonOutlineIcon />
           </IconButton>
-          <ToolButton label="Zoom in" onClick={() => setZoom((current) => Math.min(300, current + 10))}>
+          <ToolButton label="Zoom in" hideOnMobile onClick={() => setZoom((current) => Math.min(300, current + 10))}>
             <ZoomInIcon />
           </ToolButton>
-          <Typography sx={{ color: "#38385a", fontSize: 10, fontFamily: '"JetBrains Mono", monospace' }}>
+          <Typography sx={{ display: { xs: "none", md: "block" }, color: "#4a4a72", fontSize: 11, fontFamily: '"JetBrains Mono", monospace', fontWeight: 700 }}>
             {zoom}%
           </Typography>
-          <ToolButton label="Zoom out" onClick={() => setZoom((current) => Math.max(20, current - 10))}>
+          <ToolButton label="Zoom out" hideOnMobile onClick={() => setZoom((current) => Math.max(20, current - 10))}>
             <ZoomOutIcon />
           </ToolButton>
         </Box>
 
-        <Box sx={{ minWidth: 0, minHeight: 0, display: "grid", gridTemplateRows: "1fr 120px" }}>
+        <Box
+          sx={{
+            minWidth: 0,
+            minHeight: 0,
+            display: { xs: "block", md: "grid" },
+            gridTemplateRows: EDITOR_LAYOUT.workspaceRows,
+          }}
+        >
           <Box
             onWheel={handleWorkspaceWheel}
             sx={{
               position: "relative",
-              minHeight: 0,
+              minHeight: { xs: 460, md: 0 },
+              height: { xs: "min(62vh, 500px)", md: "auto" },
               display: "grid",
               placeItems: "center",
               overflow: "hidden",
-              bgcolor: "#06060c",
-              backgroundImage:
-                "linear-gradient(rgba(255,255,255,0.014) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.014) 1px, transparent 1px)",
-              backgroundSize: "44px 44px",
+              width: { xs: "calc(100dvw - 32px)", md: "auto" },
+              maxWidth: "100%",
+              justifySelf: "center",
+              mx: { xs: 0, md: 0 },
+              mb: { xs: 2.4, md: 0 },
+              borderRadius: { xs: 3, md: 0 },
+              border: { xs: imageUrl ? "1px solid rgba(255,255,255,0.08)" : "1px dashed rgba(167,139,250,0.52)", md: 0 },
+              bgcolor: { xs: "rgba(13,13,24,0.72)", md: "#06060c" },
+              backgroundImage: {
+                xs: "radial-gradient(circle at 20% 0%, rgba(124,102,255,0.16), transparent 35%)",
+                md: "linear-gradient(rgba(255,255,255,0.014) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.014) 1px, transparent 1px)",
+              },
+              backgroundSize: { xs: "auto", md: "52px 52px" },
             }}
           >
             <Box
@@ -2136,9 +3011,9 @@ export function EditorWorkspace() {
             )}
 
             {imageLoading && (
-              <Stack role="status" spacing={1.5} alignItems="center" sx={{ color: "#a78bfa", zIndex: 1 }}>
-                <CircularProgress size={26} sx={{ color: "#a78bfa" }} />
-                <Typography sx={{ color: "#c8c8e4", fontSize: 14 }}>Loading image...</Typography>
+              <Stack role="status" spacing={1.8} alignItems="center" sx={{ color: "#a78bfa", zIndex: 1 }}>
+                <CircularProgress size={34} sx={{ color: "#a78bfa" }} />
+                <Typography sx={{ color: "#c8c8e4", fontSize: 16, fontWeight: 700 }}>Loading image...</Typography>
               </Stack>
             )}
 
@@ -2148,20 +3023,25 @@ export function EditorWorkspace() {
                 alignItems="center"
                 sx={{
                   zIndex: 1,
-                  width: "min(520px, calc(100% - 32px))",
-                  p: { xs: 2.5, md: 4 },
-                  border: "1px dashed rgba(167,139,250,0.42)",
-                  borderRadius: 2,
+                  width: EDITOR_LAYOUT.uploadCardWidth,
+                  maxWidth: { xs: "calc(100dvw - 56px)", md: EDITOR_LAYOUT.uploadCardWidth },
+                  minHeight: { xs: 300, md: 340, lg: 370 },
+                  boxSizing: "border-box",
+                  p: { xs: 3, md: 5, lg: 5.5 },
+                  border: "1px dashed rgba(167,139,250,0.5)",
+                  borderRadius: 2.5,
                   bgcolor: "rgba(13,13,24,0.82)",
                   textAlign: "center",
+                  justifyContent: "center",
+                  boxShadow: "0 24px 90px rgba(0,0,0,0.38), inset 0 0 40px rgba(124,102,255,0.05)",
                 }}
               >
-                <UploadFileIcon sx={{ color: "#a78bfa", fontSize: 38 }} />
+                <UploadFileIcon sx={{ color: "#a78bfa", fontSize: { xs: 46, md: 58 } }} />
                 <Box>
-                  <Typography sx={{ color: "#e4e4f2", fontSize: 22, fontWeight: 700 }}>
+                  <Typography sx={{ color: "#e4e4f2", fontSize: { xs: 24, md: 30 }, fontWeight: 800 }}>
                     Upload an image to start
                   </Typography>
-                  <Typography sx={{ color: "#8888b8", fontSize: 14, mt: 0.7 }}>
+                  <Typography sx={{ color: "#8888b8", fontSize: { xs: 14, md: 16 }, mt: 0.9 }}>
                     JPEG, PNG, or WebP up to {MAX_UPLOAD_SIZE_MB} MB.
                   </Typography>
                 </Box>
@@ -2173,7 +3053,10 @@ export function EditorWorkspace() {
                     color: "#ffffff",
                     background: "linear-gradient(135deg, #7c66ff, #9333ea)",
                     boxShadow: "0 0 22px rgba(124,102,255,0.3)",
-                    px: 2.5,
+                    px: { xs: 2.8, md: 3.4 },
+                    minHeight: { xs: 46, md: 50 },
+                    fontSize: { xs: 14, md: 15.5 },
+                    fontWeight: 800,
                   }}
                 >
                   Upload Image
@@ -2195,20 +3078,28 @@ export function EditorWorkspace() {
                   transformOrigin: "center center",
                   transition: "transform 0.15s ease",
                   position: "relative",
-                  maxWidth: "calc(100% - 80px)",
+                  width: { xs: "100%", md: "auto" },
+                  height: { xs: "100%", md: "auto" },
+                  maxWidth: { xs: "calc(100dvw - 56px)", md: "calc(100% - 72px)" },
                 }}
               >
                 <Box
                   data-testid="workspace-preview"
                   data-transform={previewTransform}
                   data-crop-ratio={cropMode}
+                  data-free-crop-applied={freeCropPreviewActive ? "true" : "false"}
+                  data-preview-fit={previewCropRatio ? "crop" : "contain"}
+                  data-mobile-fit-box={previewCropRatio ? "false" : "true"}
                   onPointerDown={handleWorkspacePreviewPointerDown}
                   sx={{
                     position: "relative",
-                    display: "inline-block",
-                    width: activeCropRatio ? "min(70vw, 760px)" : "auto",
+                    display: { xs: "flex", md: previewCropRatio ? "inline-block" : "inline-flex" },
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: previewCropRatio ? { xs: "100%", md: "min(72vw, 860px)" } : { xs: "100%", md: "auto" },
+                    height: previewCropRatio ? "auto" : { xs: "100%", md: "auto" },
                     maxWidth: "100%",
-                    aspectRatio: activeCropRatio ?? "auto",
+                    aspectRatio: previewCropRatio ?? "auto",
                     overflow: "hidden",
                     transform: previewTransform,
                     transformOrigin: "center center",
@@ -2224,19 +3115,23 @@ export function EditorWorkspace() {
                     data-testid="workspace-image"
                     data-filter={cssFilter}
                     src={imageUrl}
-                    alt={imageAlt}
-                    sx={{
-                      display: "block",
-                      width: activeCropRatio ? "100%" : "auto",
-                      height: activeCropRatio ? "100%" : "auto",
-                      maxHeight: activeCropRatio ? "none" : "calc(100vh - 255px)",
-                      maxWidth: activeCropRatio ? "none" : "100%",
-                      objectFit: activeCropRatio ? "cover" : "contain",
-                      filter: cssFilter,
-                      transition: "filter 0.08s linear",
-                    }}
-                  />
-                  {!showOriginal && cropPreset.id === "free" && (
+                      alt={imageAlt}
+                      sx={{
+                        display: "block",
+                        width: freeCropPreviewActive ? `${10000 / freeCrop.width}%` : activeCropRatio ? "100%" : "auto",
+                        height: freeCropPreviewActive ? `${10000 / freeCrop.height}%` : activeCropRatio ? "100%" : { xs: "100%", md: "auto" },
+                        maxHeight: previewCropRatio ? "none" : { xs: "100%", md: "calc(100vh - 310px)" },
+                        maxWidth: previewCropRatio ? "none" : "100%",
+                        objectFit: freeCropPreviewActive ? "fill" : activeCropRatio ? "cover" : "contain",
+                        objectPosition: "center center",
+                        filter: cssFilter,
+                        transform: freeCropPreviewActive ? `translate(-${freeCrop.x}%, -${freeCrop.y}%)` : "none",
+                        transformOrigin: "top left",
+                        transition: "filter 0.08s linear, transform 0.15s ease",
+                      }}
+                    />
+                  {filterEffectOverlaySx && <Box data-testid="filter-effect-overlay" sx={filterEffectOverlaySx} />}
+                  {!showOriginal && cropPreset.id === "free" && freeCropEditing && (
                     <Box
                       data-testid="free-crop-frame"
                       data-crop-x={draftFreeCrop.x}
@@ -2283,8 +3178,8 @@ export function EditorWorkspace() {
                           onPointerCancel={endFreeCropInteraction}
                           sx={{
                             position: "absolute",
-                            width: 12,
-                            height: 12,
+                            width: { xs: 20, md: 12 },
+                            height: { xs: 20, md: 12 },
                             border: "2px solid rgba(255,255,255,0.96)",
                             bgcolor: "#7c66ff",
                             boxShadow: "0 0 10px rgba(124,102,255,0.55)",
@@ -2385,119 +3280,63 @@ export function EditorWorkspace() {
             )}
           </Box>
 
-          <Stack
-            direction="row"
-            spacing={1.5}
-            alignItems="center"
-            sx={{
-              px: 2.3,
-              bgcolor: "#0d0d18",
-              borderTop: "1px solid rgba(255,255,255,0.06)",
-              overflowX: "auto",
-              scrollbarWidth: "none",
-            }}
-          >
-            {FILTER_PRESETS.map((preset) => {
-              const active = selectedPreset.id === preset.id;
-              const swatchBackground =
-                preset.id === "bw"
-                  ? "linear-gradient(135deg, #101018, #d4d4e7)"
-                  : preset.id === "warm"
-                    ? "linear-gradient(135deg, #4c1d1d, #f59e0b)"
-                    : preset.id === "cool"
-                      ? "linear-gradient(135deg, #0f172a, #38bdf8)"
-                      : preset.id === "vintage"
-                        ? "linear-gradient(135deg, #312e21, #c4a36d)"
-                        : preset.id === "vivid"
-                          ? "linear-gradient(135deg, #312e81, #ec4899)"
-                          : "linear-gradient(135deg, #171728, #5b5b88)";
-              return (
-                <Box
-                  component="button"
-                  key={preset.id}
-                  aria-label={preset.name}
-                  onClick={() => setSelectedPreset(preset)}
-                  sx={{
-                    p: 0,
-                    border: 0,
-                    bgcolor: "transparent",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: 0.8,
-                    opacity: active ? 1 : 0.62,
-                    cursor: "pointer",
-                    minWidth: 82,
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: 82,
-                      height: 56,
-                      borderRadius: 1,
-                      overflow: "hidden",
-                      outline: active ? "2px solid #7c66ff" : "2px solid rgba(255,255,255,0.08)",
-                      outlineOffset: 1,
-                    }}
-                  >
-                    {filterPreviewUrl ? (
-                      <Box
-                        component="img"
-                        src={filterPreviewUrl}
-                        alt=""
-                        aria-hidden="true"
-                        sx={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                          display: "block",
-                          filter: buildCSSFilter({ ...DEFAULT_ADJUSTMENTS }, preset, false),
-                        }}
-                      />
-                    ) : (
-                      <Box
-                        aria-hidden="true"
-                        sx={{
-                          width: "100%",
-                          height: "100%",
-                          background: swatchBackground,
-                        }}
-                      />
-                    )}
-                  </Box>
-                  <Typography
-                    sx={{
-                      color: active ? "#a78bfa" : "#3a3a62",
-                      fontSize: 12,
-                      fontWeight: active ? 700 : 500,
-                    }}
-                  >
-                    {preset.name}
-                  </Typography>
-                </Box>
-              );
-            })}
+          <Box sx={{ width: { xs: "calc(100dvw - 32px)", md: "auto" }, maxWidth: "100%", mx: { xs: "auto", md: 0 }, overflow: "hidden" }}>
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+              sx={{ display: { xs: "flex", md: "none" }, mb: 1.4 }}
+            >
+              <Typography sx={{ color: "#c4b5fd", fontSize: 14, fontWeight: 900, letterSpacing: "0.16em", textTransform: "uppercase" }}>
+                Quick Looks
+              </Typography>
+              <Button size="small" endIcon={<KeyboardArrowDownIcon sx={{ transform: "rotate(-90deg)" }} />} sx={{ color: "#a9a5ff", textTransform: "none", minWidth: 0, px: 0 }}>
+                View all
+              </Button>
+            </Stack>
+            <Stack
+              data-tour="filters"
+              direction={{ xs: "column", md: "row" }}
+              spacing={{ xs: 1.35, md: 1.8 }}
+              alignItems={{ xs: "stretch", md: "center" }}
+              sx={{
+                px: { xs: 0, md: 2.1 },
+                py: { xs: 0, md: 2.2 },
+                bgcolor: { xs: "transparent", md: "#0d0d18" },
+                borderTop: { xs: 0, md: "1px solid rgba(255,255,255,0.06)" },
+                overflow: "hidden",
+              }}
+            >
+            <FilterPresetCarousel
+              presets={FILTER_PRESETS}
+              selectedPreset={selectedPreset}
+              previewUrl={filterPreviewUrl}
+              onSelect={setSelectedPreset}
+            />
             <Stack
               spacing={0.6}
               alignItems="center"
               sx={{
-                ml: "auto",
-                pr: 1.4,
-                minWidth: 188,
+                ml: { xs: 0, md: "auto" },
+                pr: { xs: 0, md: 1.1 },
+                minWidth: { xs: "100%", md: 206 },
                 flexShrink: 0,
               }}
             >
               <Button
+                data-tour="upload"
                 component="label"
                 size="small"
-                startIcon={<UploadFileIcon sx={{ fontSize: 14 }} />}
+                startIcon={<UploadFileIcon sx={{ fontSize: 17 }} />}
                 sx={{
                   color: "#a9a5ff",
                   border: "1px solid rgba(124,102,255,0.22)",
                   bgcolor: "rgba(255,255,255,0.045)",
-                  px: 1.8,
-                  minWidth: 138,
-                  height: 34,
+                  px: 2.1,
+                  minWidth: { xs: "100%", md: 154 },
+                  height: { xs: 42, md: 44 },
+                  fontSize: { xs: 13, md: 14 },
+                  fontWeight: 800,
                   "&:hover": {
                     color: "#ffffff",
                     bgcolor: "rgba(124,102,255,0.16)",
@@ -2518,7 +3357,7 @@ export function EditorWorkspace() {
                 aria-live="polite"
                 sx={{
                   color: "#52527a",
-                  fontSize: 10,
+                  fontSize: { xs: 10.5, md: 11 },
                   fontFamily: '"JetBrains Mono", monospace',
                   whiteSpace: "nowrap",
                 }}
@@ -2526,30 +3365,54 @@ export function EditorWorkspace() {
                 {guestSessionId ? `Guest workspace ${guestSessionId.slice(0, 8)}` : "Guest workspace"}
               </Typography>
             </Stack>
-          </Stack>
+            </Stack>
+          </Box>
         </Box>
 
         <Box
           sx={{
-            bgcolor: "#0d0d18",
-            borderLeft: "1px solid rgba(255,255,255,0.06)",
+            bgcolor: { xs: "rgba(13,13,24,0.86)", md: "#0d0d18" },
+            borderLeft: { xs: 0, md: "1px solid rgba(255,255,255,0.06)" },
+            borderTop: { xs: 0, md: 0 },
+            border: { xs: "1px solid rgba(255,255,255,0.08)", md: 0 },
+            borderRadius: { xs: 3, md: 0 },
+            mx: { xs: 2, md: 0 },
+            mb: { xs: 1, md: 0 },
+            boxShadow: { xs: "0 18px 70px rgba(0,0,0,0.38)", md: "none" },
             display: "grid",
             gridTemplateRows: "1fr auto",
             minHeight: 0,
+            maxHeight: { xs: "none", md: "100%" },
           }}
         >
-          <Box sx={{ overflowY: "auto", px: 2.5, pt: 3, pb: 2, scrollbarWidth: "none" }}>
-            <Box sx={{ pb: 2.2, mb: 2.2, borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+          <Box
+            sx={{
+              overflowY: "auto",
+              px: { xs: 2, md: 3 },
+              pt: { xs: 2, md: 3.4 },
+              pb: { xs: 2.4, md: 3 },
+              scrollbarWidth: "none",
+              "& .MuiButton-root": {
+                minHeight: { md: 44 },
+                fontSize: { md: 13.5 },
+                borderRadius: 1.6,
+              },
+              "& .MuiInputBase-root": {
+                fontSize: { md: 14 },
+              },
+            }}
+          >
+            <Box data-tour="ai" sx={{ pb: { xs: 2.2, md: 2.7 }, mb: { xs: 2.2, md: 2.7 }, borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
               <SectionHeader label="AI Face Restoration" expanded={expanded.ai} onClick={() => toggleSection("ai")} />
               {expanded.ai && (
-                <Stack spacing={2} sx={{ mt: 2 }}>
+                <Stack spacing={{ xs: 2, md: 2.3 }} sx={{ mt: { xs: 2, md: 2.3 } }}>
                   <Box
                     sx={{
                       color: "#8888b8",
-                      fontSize: 12,
-                      px: 1.2,
-                      py: 1.1,
-                      borderRadius: 1,
+                      fontSize: { xs: 12, md: 13 },
+                      px: { xs: 1.2, md: 1.45 },
+                      py: { xs: 1.1, md: 1.25 },
+                      borderRadius: 1.2,
                       bgcolor: "rgba(255,255,255,0.05)",
                       border: "1px solid rgba(255,255,255,0.05)",
                     }}
@@ -2561,11 +3424,11 @@ export function EditorWorkspace() {
                     <Typography
                       sx={{
                         color: "#a9a5ff",
-                        fontSize: 12,
+                        fontSize: { xs: 12, md: 13 },
                         fontWeight: 800,
                         letterSpacing: "0.08em",
                         textTransform: "uppercase",
-                        mb: 1,
+                        mb: { xs: 1, md: 1.1 },
                       }}
                     >
                       Hugging Face API Token
@@ -2581,23 +3444,23 @@ export function EditorWorkspace() {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <LinkIcon sx={{ color: "#52527a", fontSize: 16 }} />
+                            <LinkIcon sx={{ color: "#52527a", fontSize: { xs: 16, md: 18 } }} />
                           </InputAdornment>
                         ),
                       }}
                       sx={{
                         "& .MuiOutlinedInput-root": {
-                          height: 40,
+                          height: { xs: 42, md: 46 },
                           bgcolor: "rgba(0,0,0,0.3)",
                           borderRadius: 2,
                           color: "#e4e4f2",
-                          fontSize: 13,
+                          fontSize: { xs: 13, md: 14 },
                           "& fieldset": { borderColor: "rgba(255,255,255,0.05)" },
                           "&:hover fieldset": { borderColor: "rgba(124,102,255,0.3)" },
                         },
                       }}
                     />
-                    <Typography sx={{ color: "#52527a", fontSize: 11, lineHeight: 1.55, mt: 1.1 }}>
+                    <Typography sx={{ color: "#64649a", fontSize: { xs: 11, md: 12 }, lineHeight: 1.6, mt: 1.2 }}>
                       You must provide your own Hugging Face API token for AI restoration.
                     </Typography>
                   </Box>
@@ -2615,7 +3478,7 @@ export function EditorWorkspace() {
                           "&.Mui-checked": { color: "#7c66ff" },
                         }}
                       />
-                      <Typography sx={{ color: "#8888d8", fontSize: 12 }}>Use saved token</Typography>
+                      <Typography sx={{ color: "#8888d8", fontSize: { xs: 12, md: 13 } }}>Use saved token</Typography>
                     </Stack>
                   )}
 
@@ -2631,13 +3494,14 @@ export function EditorWorkspace() {
                       },
                       position: "relative",
                       overflow: "hidden",
-                      py: 1.5,
+                      minHeight: { xs: 50, md: 54 },
+                      py: { xs: 1.45, md: 1.65 },
                       borderRadius: 2,
                       color: "#a78bfa",
                       bgcolor: "rgba(124,102,255,0.15)",
                       border: "1px solid rgba(124,102,255,0.32)",
                       fontWeight: 800,
-                      fontSize: 17,
+                      fontSize: { xs: 17, md: 18 },
                       boxShadow: "0 0 20px rgba(124,102,255,0.18)",
                       "&::before": {
                         content: '""',
@@ -2658,6 +3522,7 @@ export function EditorWorkspace() {
                       "& .MuiButton-startIcon": {
                         position: "relative",
                         zIndex: 1,
+                        "& svg": { fontSize: { xs: 20, md: 22 } },
                       },
                       "&:hover": { bgcolor: "rgba(124,102,255,0.2)" },
                       "&:disabled": {
@@ -2672,8 +3537,8 @@ export function EditorWorkspace() {
                   </Button>
 
                   <Stack direction="row" justifyContent="space-between" sx={{ px: 0.5 }}>
-                    <Typography sx={{ color: "#6868a0", fontSize: 14 }}>Status:</Typography>
-                    <Typography sx={{ color: getStatusColor(aiStatus), fontSize: 14, textAlign: "right" }}>
+                    <Typography sx={{ color: "#6868a0", fontSize: { xs: 14, md: 15 } }}>Status:</Typography>
+                    <Typography sx={{ color: getStatusColor(aiStatus), fontSize: { xs: 14, md: 15 }, fontWeight: 700, textAlign: "right" }}>
                       {aiStatus}
                     </Typography>
                   </Stack>
@@ -2681,22 +3546,27 @@ export function EditorWorkspace() {
               )}
             </Box>
 
-            <Box sx={{ mb: 2.2 }}>
+            <Box sx={{ mb: 2.7, display: { xs: "none", md: "block" } }}>
               <Histogram adjustments={adjustments} />
             </Box>
 
-            <Box sx={{ pb: 2.4, mb: 2.2, borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+            <Box sx={{ pb: { xs: 2.4, md: 2.8 }, mb: { xs: 2.2, md: 2.7 }, borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
               <Typography
                 sx={{
                   color: "#a9a5ff",
-                  fontSize: 12,
+                  fontSize: { xs: 12, md: 13 },
                   fontWeight: 800,
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
-                  mb: 2,
+                  mb: { xs: 2, md: 2.2 },
                 }}
               >
-                {tools.find((tool) => tool.id === selectedTool)?.label} Tool
+                <Box component="span" sx={{ display: { xs: "none", md: "inline" } }}>
+                  {tools.find((tool) => tool.id === selectedTool)?.label} Tool
+                </Box>
+                <Box component="span" sx={{ display: { xs: "inline", md: "none" } }}>
+                  Manual Adjustments
+                </Box>
               </Typography>
 
               {selectedTool === "crop" && (
@@ -2709,11 +3579,11 @@ export function EditorWorkspace() {
                     inputProps={{ "aria-label": "Crop ratio" }}
                     IconComponent={KeyboardArrowDownIcon}
                     sx={{
-                      height: 41,
+                      height: { xs: 42, md: 46 },
                       bgcolor: "rgba(0,0,0,0.3)",
                       borderRadius: 1.5,
                       color: "#e4e4f2",
-                      fontSize: 13,
+                      fontSize: { xs: 13, md: 14 },
                       "& fieldset": { borderColor: "rgba(255,255,255,0.06)" },
                     }}
                   >
@@ -2723,9 +3593,9 @@ export function EditorWorkspace() {
                       </MenuItem>
                     ))}
                   </Select>
-                  {cropPresetId === "free" ? (
+                  {cropPresetId === "free" && freeCropEditing ? (
                     <Stack spacing={1.4}>
-                      <Typography sx={{ color: "#52527a", fontSize: 11, lineHeight: 1.55 }}>
+                      <Typography sx={{ color: "#64649a", fontSize: { xs: 11, md: 12 }, lineHeight: 1.6 }}>
                         Drag the crop frame on the image, then apply it for export or cancel to leave the full image.
                       </Typography>
                       <Stack direction="row" spacing={1}>
@@ -2756,13 +3626,53 @@ export function EditorWorkspace() {
                         </Button>
                       </Stack>
                     </Stack>
+                  ) : cropPresetId === "free" ? (
+                    <Stack spacing={1.4}>
+                      <Typography sx={{ color: "#64649a", fontSize: { xs: 11, md: 12 }, lineHeight: 1.6 }}>
+                        Free crop is applied to the preview and export. Adjust it to bring the crop frame back.
+                      </Typography>
+                      <Stack direction="row" spacing={1}>
+                        <Button
+                          fullWidth
+                          disabled={!imageUrl}
+                          onClick={() => {
+                            setDraftFreeCrop(freeCrop);
+                            setFreeCropEditing(true);
+                            setCropStatus("Adjust free crop");
+                          }}
+                          sx={{
+                            bgcolor: "rgba(124,102,255,0.16)",
+                            color: "#a78bfa",
+                            border: "1px solid rgba(124,102,255,0.28)",
+                            fontWeight: 800,
+                          }}
+                        >
+                          Adjust
+                        </Button>
+                        <Button
+                          fullWidth
+                          onClick={cancelFreeCrop}
+                          sx={{
+                            bgcolor: "rgba(255,255,255,0.04)",
+                            color: "#fca5a5",
+                            border: "1px solid rgba(248,113,113,0.22)",
+                            fontWeight: 800,
+                          }}
+                        >
+                          Clear
+                        </Button>
+                      </Stack>
+                    </Stack>
                   ) : (
-                    <Typography sx={{ color: "#52527a", fontSize: 11, lineHeight: 1.55 }}>
+                    <Typography sx={{ color: "#64649a", fontSize: { xs: 11, md: 12 }, lineHeight: 1.6 }}>
                       {cropPresetId === "none"
                         ? "No crop keeps the full image in the browser preview and export."
                         : "Fixed crop ratios are previewed in the browser by clipping the workspace image."}
                     </Typography>
                   )}
+                  <Typography aria-live="polite" sx={{ color: "#a9a5ff", fontSize: { xs: 11, md: 12 }, fontWeight: 700 }}>
+                    {cropStatus}
+                  </Typography>
                 </Stack>
               )}
 
@@ -2786,7 +3696,7 @@ export function EditorWorkspace() {
                       Rotate Right
                     </Button>
                   </Stack>
-                  <Typography sx={{ color: "#6868a0", fontSize: 13 }}>Rotation: {rotation} deg</Typography>
+                  <Typography sx={{ color: "#6868a0", fontSize: { xs: 13, md: 14 } }}>Rotation: {rotation} deg</Typography>
                 </Stack>
               )}
 
@@ -2860,11 +3770,11 @@ export function EditorWorkspace() {
                         flex: 1,
                         minWidth: 0,
                         "& .MuiOutlinedInput-root": {
-                          height: 43,
+                          height: { xs: 43, md: 46 },
                           bgcolor: "rgba(0,0,0,0.3)",
                           borderRadius: 1.5,
                           color: "#e4e4f2",
-                          fontSize: 13,
+                          fontSize: { xs: 13, md: 14 },
                           "& fieldset": { borderColor: "rgba(255,255,255,0.06)" },
                           "&:hover fieldset": { borderColor: "rgba(167,139,250,0.28)" },
                           "&.Mui-focused fieldset": { borderColor: "rgba(167,139,250,0.58)" },
@@ -2879,9 +3789,9 @@ export function EditorWorkspace() {
                       disabled={!selectedTextOverlay}
                       onClick={handleOpenTextColorPicker}
                       sx={{
-                        width: 43,
-                        minWidth: 43,
-                        height: 43,
+                        width: { xs: 43, md: 46 },
+                        minWidth: { xs: 43, md: 46 },
+                        height: { xs: 43, md: 46 },
                         p: 0,
                         borderRadius: 1.5,
                         bgcolor: "rgba(0,0,0,0.3)",
@@ -2964,12 +3874,14 @@ export function EditorWorkspace() {
               <SectionHeader label="Light Controls" expanded={expanded.light} onClick={() => toggleSection("light")} />
             </Box>
             {expanded.light && (
-              <Stack spacing={3} sx={{ pt: 2, pb: 3 }}>
+              <Stack spacing={{ xs: 3, md: 3.2 }} sx={{ pt: { xs: 2, md: 2.3 }, pb: { xs: 3, md: 3.4 } }}>
                 <AdjSlider label="Brightness" value={adjustments.brightness} onChange={(value) => updateAdj("brightness", value)} icon={<AutoFixHighIcon />} />
                 <AdjSlider label="Exposure" value={adjustments.exposure} onChange={(value) => updateAdj("exposure", value)} icon={<AutoFixHighIcon />} />
                 <AdjSlider label="Contrast" value={adjustments.contrast} onChange={(value) => updateAdj("contrast", value)} icon={<ContentCutIcon />} />
                 <AdjSlider label="Highlights" value={adjustments.highlights} onChange={(value) => updateAdj("highlights", value)} />
                 <AdjSlider label="Shadows" value={adjustments.shadows} onChange={(value) => updateAdj("shadows", value)} />
+                <AdjSlider label="Whites" value={adjustments.whites} onChange={(value) => updateAdj("whites", value)} />
+                <AdjSlider label="Blacks" value={adjustments.blacks} onChange={(value) => updateAdj("blacks", value)} />
               </Stack>
             )}
 
@@ -2977,48 +3889,101 @@ export function EditorWorkspace() {
               <SectionHeader label="Color Controls" expanded={expanded.color} onClick={() => toggleSection("color")} />
             </Box>
             {expanded.color && (
-              <Stack spacing={3} sx={{ pt: 2, pb: 3 }}>
+              <Stack spacing={{ xs: 3, md: 3.2 }} sx={{ pt: { xs: 2, md: 2.3 }, pb: { xs: 3, md: 3.4 } }}>
                 <AdjSlider label="Saturation" value={adjustments.saturation} onChange={(value) => updateAdj("saturation", value)} />
                 <AdjSlider label="Vibrance" value={adjustments.vibrance} onChange={(value) => updateAdj("vibrance", value)} />
-                <AdjSlider label="Warmth" value={adjustments.warmth} onChange={(value) => updateAdj("warmth", value)} />
+                <AdjSlider label="Temperature" value={adjustments.temperature} onChange={(value) => updateAdj("temperature", value)} />
+                <AdjSlider label="Tint" value={adjustments.tint} onChange={(value) => updateAdj("tint", value)} />
               </Stack>
             )}
 
-            <Box sx={{ borderBottom: "1px solid rgba(255,255,255,0.05)", mt: 2 }}>
+            <Box sx={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+              <SectionHeader label="Effects" expanded={expanded.effects} onClick={() => toggleSection("effects")} />
+            </Box>
+            {expanded.effects && (
+              <Stack spacing={{ xs: 3, md: 3.2 }} sx={{ pt: { xs: 2, md: 2.3 }, pb: { xs: 3, md: 3.4 } }}>
+                <AdjSlider label="Texture" value={adjustments.texture} onChange={(value) => updateAdj("texture", value)} />
+                <AdjSlider label="Clarity" value={adjustments.clarity} onChange={(value) => updateAdj("clarity", value)} />
+                <AdjSlider label="Vignette" value={adjustments.vignetteAmount} onChange={(value) => updateAdj("vignetteAmount", value)} />
+                <AdjSlider label="Grain" value={adjustments.grainAmount} onChange={(value) => updateAdj("grainAmount", value)} min={0} max={100} />
+              </Stack>
+            )}
+
+            <Box sx={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+              <SectionHeader label="Detail" expanded={expanded.detail} onClick={() => toggleSection("detail")} />
+            </Box>
+            {expanded.detail && (
+              <Stack spacing={{ xs: 3, md: 3.2 }} sx={{ pt: { xs: 2, md: 2.3 }, pb: { xs: 3, md: 3.4 } }}>
+                <AdjSlider label="Sharpening" value={adjustments.sharpeningAmount} onChange={(value) => updateAdj("sharpeningAmount", value)} min={0} max={150} />
+                <AdjSlider label="Radius" value={adjustments.sharpeningRadius} onChange={(value) => updateAdj("sharpeningRadius", value)} min={1} max={3} />
+                <AdjSlider label="Masking" value={adjustments.sharpeningMasking} onChange={(value) => updateAdj("sharpeningMasking", value)} min={0} max={100} />
+              </Stack>
+            )}
+
+            <Box data-tour="presets" sx={{ borderBottom: "1px solid rgba(255,255,255,0.05)", mt: 2 }}>
               <SectionHeader label="Preset Manager" expanded={expanded.presets} onClick={() => toggleSection("presets")} />
             </Box>
             {expanded.presets && (
-              <Stack spacing={1.4} sx={{ pt: 2, pb: 3 }}>
+              <Stack spacing={{ xs: 1.4, md: 1.6 }} sx={{ pt: { xs: 2, md: 2.3 }, pb: { xs: 3, md: 3.4 } }}>
                 <Select
-                  value="none"
+                  value={selectedSavedPresetId}
+                  onChange={(event) => handleSavedPresetChange(event.target.value as string)}
                   size="small"
                   fullWidth
                   IconComponent={KeyboardArrowDownIcon}
+                  inputProps={{ "aria-label": "Saved preset" }}
                   sx={{
-                    height: 41,
+                    height: { xs: 42, md: 46 },
                     bgcolor: "rgba(0,0,0,0.3)",
                     borderRadius: 1.5,
                     color: "#e4e4f2",
-                    fontSize: 13,
+                    fontSize: { xs: 13, md: 14 },
                     "& fieldset": { borderColor: "rgba(255,255,255,0.06)" },
                   }}
                 >
                   <MenuItem value="none" disabled>
-                    No saved presets yet
+                    {presetLoading ? "Loading presets..." : savedPresets.length === 0 ? "No saved presets yet" : "Choose a preset"}
                   </MenuItem>
+                  {savedPresets.map((preset) => (
+                    <MenuItem key={preset.id} value={preset.id}>
+                      {preset.presetName}
+                    </MenuItem>
+                  ))}
                 </Select>
+                {presetError && (
+                  <Typography role="alert" sx={{ color: hasAuthToken ? "#fca5a5" : "#8888b8", fontSize: { xs: 11, md: 12 }, lineHeight: 1.55 }}>
+                    {presetError}
+                  </Typography>
+                )}
                 <Stack direction="row" spacing={1}>
-                  <Button fullWidth startIcon={<AddIcon />} sx={{ bgcolor: "rgba(255,255,255,0.05)", color: "#8888d8" }}>
+                  <Button
+                    fullWidth
+                    startIcon={<AddIcon />}
+                    disabled={!hasAuthToken}
+                    onClick={() => {
+                      setPresetError(null);
+                      setPresetName("");
+                      setSavePresetOpen(true);
+                    }}
+                    sx={{ bgcolor: "rgba(255,255,255,0.05)", color: "#8888d8" }}
+                  >
                     Add Preset
                   </Button>
-                  <Button fullWidth startIcon={<FileDownloadOutlinedIcon />} sx={{ bgcolor: "rgba(255,255,255,0.05)", color: "#8888d8" }}>
+                  <Button
+                    component="label"
+                    fullWidth
+                    startIcon={<FileDownloadOutlinedIcon />}
+                    sx={{ bgcolor: "rgba(255,255,255,0.05)", color: "#8888d8" }}
+                  >
                     Import
+                    <input hidden type="file" accept="application/json,.json" aria-label="Import preset JSON" onChange={handleImportPreset} />
                   </Button>
                 </Stack>
                 <Button
                   fullWidth
                   startIcon={<FileUploadOutlinedIcon />}
                   variant="outlined"
+                  onClick={handleExportPreset}
                   sx={{ color: "#8888d8", borderColor: "rgba(255,255,255,0.1)" }}
                 >
                   Export JSON
@@ -3027,16 +3992,18 @@ export function EditorWorkspace() {
             )}
           </Box>
 
-          <Box sx={{ p: 1.5, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+          <Box sx={{ p: { xs: 1.5, md: 2 }, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
             <Button
               fullWidth
               onClick={handleResetManualEdits}
               sx={{
-                py: 1,
+                minHeight: { xs: 42, md: 46 },
+                py: { xs: 1, md: 1.15 },
                 color: resetConfirmed ? "#86efac" : "#6868a0",
                 border: `1px solid ${resetConfirmed ? "rgba(134,239,172,0.38)" : "rgba(255,255,255,0.05)"}`,
                 bgcolor: resetConfirmed ? "rgba(22,101,52,0.18)" : "rgba(255,255,255,0.03)",
-                fontSize: 11,
+                fontSize: { xs: 11, md: 12 },
+                fontWeight: 800,
                 letterSpacing: "0.08em",
                 boxShadow: resetConfirmed ? "0 0 18px rgba(34,197,94,0.2)" : "none",
                 transform: resetConfirmed ? "translateY(-1px)" : "none",
@@ -3052,6 +4019,64 @@ export function EditorWorkspace() {
           </Box>
         </Box>
       </Box>
+      <Dialog
+        open={savePresetOpen}
+        onClose={() => {
+          if (!presetSaving) setSavePresetOpen(false);
+        }}
+        fullWidth
+        maxWidth="xs"
+        PaperProps={{
+          sx: {
+            bgcolor: "#0d0d18",
+            color: "#e4e4f2",
+            border: "1px solid rgba(167,139,250,0.22)",
+            borderRadius: 2,
+          },
+        }}
+      >
+        <DialogTitle sx={{ color: "#f2f0ff", fontWeight: 800 }}>Save Preset</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            fullWidth
+            value={presetName}
+            onChange={(event) => {
+              setPresetError(null);
+              setPresetName(event.target.value);
+            }}
+            label="Preset name"
+            inputProps={{ "aria-label": "Preset name" }}
+            sx={{
+              mt: 1,
+              "& .MuiInputLabel-root": { color: "#8888b8" },
+              "& .MuiOutlinedInput-root": {
+                color: "#e4e4f2",
+                bgcolor: "rgba(0,0,0,0.3)",
+                "& fieldset": { borderColor: "rgba(255,255,255,0.08)" },
+              },
+            }}
+          />
+          {presetError && (
+            <Typography role="alert" sx={{ color: "#fca5a5", fontSize: 12, mt: 1.2 }}>
+              {presetError}
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2.5 }}>
+          <Button disabled={presetSaving} onClick={() => setSavePresetOpen(false)} sx={{ color: "#8888d8" }}>
+            Cancel
+          </Button>
+          <Button
+            disabled={presetSaving}
+            onClick={handleSavePreset}
+            variant="contained"
+            sx={{ bgcolor: "#7c66ff", "&:hover": { bgcolor: "#6d5ae8" } }}
+          >
+            {presetSaving ? "Saving..." : "Save"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

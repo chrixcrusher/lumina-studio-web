@@ -427,14 +427,68 @@ Preset settings are browser-side adjustment/filter configurations. Presets do no
 {
   "presetName": "Warm Vintage",
   "enhancementSettings": {
-    "exposure": 5,
-    "contrast": -5,
-    "saturation": 25,
-    "temperature": 8,
-    "filter": "vintage"
+    "schemaVersion": "2.0.0",
+    "light": {
+      "exposure": 5,
+      "contrast": -5,
+      "highlights": -12,
+      "shadows": 10,
+      "whites": 4,
+      "blacks": -8
+    },
+    "color": {
+      "temperature": 8,
+      "tint": 0,
+      "saturation": 25,
+      "vibrance": 16
+    },
+    "effects": {
+      "texture": 6,
+      "clarity": 8,
+      "vignette": {
+        "amount": -20,
+        "midpoint": 50,
+        "roundness": 0,
+        "feather": 50,
+        "highlights": 0
+      },
+      "grain": {
+        "amount": 0,
+        "size": 25,
+        "roughness": 50
+      }
+    },
+    "detail": {
+      "sharpening": {
+        "amount": 20,
+        "radius": 1,
+        "detail": 25,
+        "masking": 0
+      }
+    },
+    "geometry": {
+      "crop": {
+        "x": 0,
+        "y": 0,
+        "width": 100,
+        "height": 100,
+        "aspectRatio": "none"
+      },
+      "rotate90": 0,
+      "flipHorizontal": false,
+      "flipVertical": false
+    },
+    "textOverlay": {
+      "items": []
+    },
+    "filter": {
+      "id": "vintage"
+    }
   }
 }
 ```
+
+Legacy flat preset settings are migrated by the browser on import/apply. Unknown future fields are ignored by the editor unless they are added to the supported schema.
 
 ## GET `/api/v1/presets`
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import "driver.js/dist/driver.css";
 import "./globals.css";
 import { AppProviders } from "./providers";
 
