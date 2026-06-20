@@ -14,3 +14,10 @@ pnpm-debug.log*
 dev-server*.log
 Lumina Studio Logo/
 Lumina-Studio-Prototype-by-Figma-Make/
+
+# AI/codebase analysis generated outputs
+graphify-out/
+.graphify/
+.understand-anything/
+repomix-output.*
+.repo-map/

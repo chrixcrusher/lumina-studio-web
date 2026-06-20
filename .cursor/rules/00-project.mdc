@@ -1,0 +1,18 @@
+---
+description: LuminaStudio Web project overview and source-of-truth docs.
+alwaysApply: true
+---
+
+# LuminaStudio Web
+
+Use `AGENTS.md` as the primary rule file.
+
+This is an npm-workspaces monorepo with a Next.js/React frontend and a NestJS/Mongoose backend. The canonical product design is `docs/tdd/ls-web-tdd.md`.
+
+Important docs:
+- `README.md`
+- `docs/tdd/ls-web-tdd.md`
+- `docs/api/ls-web-api_specification.md`
+- `docs/database/ls-web-database-schema.md`
+- `docs/project-structure/ls-web-project-structure.md`
+- `docs/testing/ls-web-test-specification.md`

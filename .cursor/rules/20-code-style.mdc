@@ -1,0 +1,14 @@
+---
+description: TypeScript, naming, error handling, and folder discipline.
+alwaysApply: true
+---
+
+# Code Style
+
+Follow existing TypeScript patterns before adding abstractions.
+
+Use canonical values from `frontend/src/shared/constants/lumina.ts` and `backend/src/contracts/lumina.ts`: `encryptedHuggingFaceToken`, `huggingFaceTokenConfigured`, `browser`, `cloud_ai`, `restore_face`, `text_overlay`.
+
+Frontend API clients should throw typed API errors. Backend errors must use user-safe messages and must not expose secrets, tokens, stack traces, or provider response bodies.
+
+Keep edits small and scoped. Do not move modules or rewrite architecture unless the task requires it.

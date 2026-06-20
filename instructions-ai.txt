@@ -1,0 +1,1028 @@
+You are Codex acting as a senior AI engineering architect and repository automation engineer.
+
+Your task is to convert this existing development project into an AI-driven development setup that works well with Codex first, but remains portable to Claude Code, Cursor, Google Antigravity, Gemini CLI, Cline, Windsurf, GitHub Copilot-style tools, and other agentic coding assistants.
+
+Do not make random large application changes. This task is about adding an AI development control plane around the project: agent instructions, reusable skills, role/persona files, tool policies, context strategy, verification commands, and documentation.
+
+## Main Goal
+
+Create a maintainable, scalable, token-efficient AI-assisted development structure for this repository.
+
+The final setup must support:
+
+1. Custom agents/personas/roles
+2. Reusable skills/workflows
+3. Tool usage policies
+4. Context and token-efficiency strategy
+5. Graphify-based codebase navigation
+6. Optional Aider repo-map guidance
+7. Optional Understand Anything onboarding/deep-inspection guidance
+8. Optional Caveman concise-output mode
+9. Multi-tool compatibility:
+
+   * Codex
+   * Claude Code
+   * Cursor
+   * Google Antigravity
+   * Gemini CLI
+   * Cline
+   * Windsurf
+   * GitHub Copilot-style coding assistants
+   * OpenCode/OpenClaw-style agents where applicable
+
+## Important Philosophy
+
+Use this model:
+
+* Rules define behavior.
+* Skills define repeatable workflows.
+* Agents define responsibilities.
+* Tools provide capabilities.
+* Docs provide truth.
+* Graphs help navigation.
+* Source files remain the final truth.
+* Tests verify correctness.
+
+Graphify, Aider repo maps, and similar tools should reduce wasted context, but they must not replace reading exact source files before editing code.
+
+The correct workflow is:
+
+1. Use Graphify or repo-map tools to identify relevant files.
+2. Read exact files before making changes.
+3. Make small, reviewable edits.
+4. Run tests, lint, typecheck, and build where available.
+5. Update docs if behavior changes.
+
+## First Step: Inspect the Repository
+
+Before creating files, inspect the repo and determine:
+
+1. Project type
+2. Package manager
+3. Frameworks
+4. Backend/frontend split
+5. Existing docs
+6. Existing test/lint/typecheck/build commands
+7. Existing AI instruction files, if any
+8. Existing `.cursor`, `.claude`, `.agents`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.clinerules`, or `.windsurfrules` files
+9. Whether this repo appears to be a monorepo
+10. Whether this repo appears to use Next.js, NestJS, MongoDB, TypeScript, or another stack
+
+If this is the LuminaStudio-style project, assume this likely involves:
+
+* Next.js frontend
+* NestJS backend
+* MongoDB/MongoDB Atlas
+* TypeScript
+* REST APIs
+* Browser-based image editing
+* AI face restoration through Hugging Face CodeFormer
+* Guest sessions
+* Authenticated accounts
+* User-provided Hugging Face tokens
+* Browser-first manual edits
+* Backend as API/proxy/metadata layer
+
+But do not blindly assume. Confirm from the repo.
+
+## Do Not Do These Things
+
+Do not:
+
+* Rewrite application architecture unless needed for the AI setup.
+* Modify business logic unless necessary for verification scripts or docs references.
+* Add secrets.
+* Add real API keys.
+* Add paid services.
+* Install global tools automatically.
+* Run destructive commands.
+* Delete existing user docs or rules.
+* Replace existing configuration without preserving useful content.
+* Create noisy boilerplate that no agent will actually use.
+* Add huge generated graph outputs to git by default.
+* Create fake commands that do not exist.
+* Claim tests passed unless they actually ran.
+
+If a command is not available, document that clearly and add TODO notes.
+
+## Required Output Structure
+
+Create or update the following structure where appropriate:
+
+```txt
+/
+├── AGENTS.md
+├── CLAUDE.md
+├── GEMINI.md
+├── .cursor/
+│   └── rules/
+│       ├── 00-project.mdc
+│       ├── 10-architecture.mdc
+│       ├── 20-code-style.mdc
+│       ├── 30-testing.mdc
+│       └── 40-ai-workflow.mdc
+├── .clinerules/
+│   ├── project.md
+│   └── workflow.md
+├── .windsurfrules
+├── .agents/
+│   ├── README.md
+│   ├── roles/
+│   │   ├── product-manager.md
+│   │   ├── system-architect.md
+│   │   ├── frontend-engineer.md
+│   │   ├── backend-engineer.md
+│   │   ├── database-engineer.md
+│   │   ├── sqa-engineer.md
+│   │   ├── devops-engineer.md
+│   │   ├── security-reviewer.md
+│   │   └── ai-integration-engineer.md
+│   ├── skills/
+│   │   ├── use-context-tools/
+│   │   │   └── SKILL.md
+│   │   ├── implement-feature/
+│   │   │   └── SKILL.md
+│   │   ├── fix-bug/
+│   │   │   └── SKILL.md
+│   │   ├── code-review/
+│   │   │   └── SKILL.md
+│   │   ├── write-tests/
+│   │   │   └── SKILL.md
+│   │   ├── update-docs/
+│   │   │   └── SKILL.md
+│   │   ├── api-contract-check/
+│   │   │   └── SKILL.md
+│   │   ├── database-change/
+│   │   │   └── SKILL.md
+│   │   ├── security-review/
+│   │   │   └── SKILL.md
+│   │   └── release-check/
+│   │       └── SKILL.md
+│   ├── workflows/
+│   │   ├── feature-development.md
+│   │   ├── bugfix.md
+│   │   ├── pull-request-review.md
+│   │   ├── refactor.md
+│   │   └── release.md
+│   └── tools/
+│       ├── context-strategy.md
+│       ├── graphify.md
+│       ├── aider-repomap.md
+│       ├── understand-anything.md
+│       ├── caveman.md
+│       ├── repomix.md
+│       ├── mcp-policy.md
+│       ├── allowed-commands.md
+│       └── verification-commands.md
+├── .claude/
+│   └── agents/
+│       ├── system-architect.md
+│       ├── frontend-engineer.md
+│       ├── backend-engineer.md
+│       ├── database-engineer.md
+│       ├── sqa-engineer.md
+│       ├── devops-engineer.md
+│       ├── security-reviewer.md
+│       └── ai-integration-engineer.md
+└── docs/
+    └── ai/
+        ├── README.md
+        ├── agent-map.md
+        ├── context-strategy.md
+        ├── prompt-recipes.md
+        ├── codex-setup.md
+        ├── claude-code-setup.md
+        ├── cursor-setup.md
+        ├── antigravity-setup.md
+        └── maintenance.md
+```
+
+If some directories already exist, merge carefully instead of overwriting blindly.
+
+## AGENTS.md Requirements
+
+Create or update `AGENTS.md` as the primary universal instruction file.
+
+It must include:
+
+1. Project overview
+2. Tech stack discovered from the repo
+3. Repository map
+4. Core operating rules
+5. Context strategy
+6. Code editing rules
+7. Testing rules
+8. Documentation rules
+9. Security rules
+10. Git/PR rules
+11. Tool usage policy
+12. AI role usage guide
+13. Skill usage guide
+14. Verification commands
+15. Forbidden behaviors
+
+Make `AGENTS.md` concise but useful. It should not become a huge manual. Deep instructions should live in `.agents/skills/`, `.agents/tools/`, and `docs/ai/`.
+
+AGENTS.md must tell agents:
+
+* Prefer project docs as source of intent.
+* Prefer exact source files as source of implementation truth.
+* Use Graphify/Aider-style context tools only for discovery and navigation.
+* Do not edit based only on graph summaries.
+* Read exact files before changing them.
+* Run verification before claiming success.
+* Ask for approval before destructive or high-risk operations.
+
+## CLAUDE.md Requirements
+
+Create `CLAUDE.md` as a lightweight adapter.
+
+It should:
+
+* Point Claude Code to `AGENTS.md`
+* Explain that reusable workflows live in `.agents/skills/`
+* Explain that Claude-specific subagents live in `.claude/agents/`
+* Tell Claude not to duplicate rules
+* Tell Claude to use the same source-confirmed workflow
+
+## GEMINI.md Requirements
+
+Create `GEMINI.md` as a lightweight adapter.
+
+It should:
+
+* Point Gemini/Antigravity-style agents to `AGENTS.md`
+* Reference `.agents/skills/`
+* Reference `.agents/roles/`
+* Explain the context strategy
+* Avoid duplicating every rule
+
+## Cursor Rules Requirements
+
+Create `.cursor/rules/*.mdc`.
+
+Each file should be concise and scoped:
+
+1. `00-project.mdc`
+
+   * Project overview
+   * Main stack
+   * Source of truth docs
+
+2. `10-architecture.mdc`
+
+   * Architecture constraints
+   * Layering rules
+   * Frontend/backend/data boundaries
+
+3. `20-code-style.mdc`
+
+   * TypeScript style
+   * Error handling
+   * Naming
+   * Folder discipline
+
+4. `30-testing.mdc`
+
+   * Test expectations
+   * Verification commands
+   * No fake pass claims
+
+5. `40-ai-workflow.mdc`
+
+   * Context tools
+   * Skills
+   * Role usage
+   * Source-confirmed editing
+
+Use Cursor-compatible markdown rule style.
+
+## Cline and Windsurf Requirements
+
+Create:
+
+```txt
+.clinerules/project.md
+.clinerules/workflow.md
+.windsurfrules
+```
+
+These should point to `AGENTS.md` and summarize the most important workflow rules.
+
+## Role Files Requirements
+
+Create portable role prompts in `.agents/roles/`.
+
+Each role file must include:
+
+1. Purpose
+2. Responsibilities
+3. What to inspect first
+4. What not to do
+5. Expected output format
+6. Handoff notes to other roles
+
+Create these roles:
+
+### product-manager.md
+
+Responsibilities:
+
+* Turn vague requests into requirements
+* Define acceptance criteria
+* Identify user flows
+* Protect scope
+* Avoid implementation details unless necessary
+
+### system-architect.md
+
+Responsibilities:
+
+* Analyze architecture impact
+* Protect boundaries
+* Identify affected modules
+* Create implementation plans
+* Avoid unnecessary rewrites
+
+### frontend-engineer.md
+
+Responsibilities:
+
+* UI components
+* Routing
+* State management
+* Forms
+* Client-side validation
+* Accessibility
+* API client usage
+* Browser-side behavior
+
+### backend-engineer.md
+
+Responsibilities:
+
+* Controllers/routes
+* Services
+* DTOs/request validation
+* Auth guards
+* Error handling
+* API contracts
+* Integration boundaries
+
+### database-engineer.md
+
+Responsibilities:
+
+* Schemas/models
+* Indexes
+* Data integrity
+* Migrations if applicable
+* Query patterns
+* Backward compatibility
+
+### sqa-engineer.md
+
+Responsibilities:
+
+* Test plans
+* Unit/integration/e2e coverage
+* Regression checks
+* Edge cases
+* Acceptance criteria verification
+
+### devops-engineer.md
+
+Responsibilities:
+
+* CI/CD
+* Environment variables
+* Deployment docs
+* Build scripts
+* Runtime configuration
+* Secrets handling
+
+### security-reviewer.md
+
+Responsibilities:
+
+* Secrets
+* Auth
+* Authorization
+* Injection
+* Unsafe file operations
+* Dependency risks
+* Token handling
+* Logging risks
+
+### ai-integration-engineer.md
+
+Responsibilities:
+
+* AI model/API integration
+* Token handling
+* Rate limits
+* Timeouts
+* Retries
+* User-provided tokens
+* External API safety
+* Fallback behavior
+
+## Claude Subagent Files
+
+Create Claude-specific subagent files in `.claude/agents/` for:
+
+* system-architect
+* frontend-engineer
+* backend-engineer
+* database-engineer
+* sqa-engineer
+* devops-engineer
+* security-reviewer
+* ai-integration-engineer
+
+Each file should have frontmatter:
+
+```md
+---
+name: role-name
+description: When to use this subagent.
+tools: Read, Grep, Glob, Bash
+---
+```
+
+Only include tools that are appropriate. For high-risk roles like security reviewer, prefer read/search/bash verification tools, not broad editing tools unless necessary.
+
+## Skills Requirements
+
+Create reusable skills in `.agents/skills/`.
+
+Each skill must use this structure:
+
+```txt
+skill-name/
+└── SKILL.md
+```
+
+Each `SKILL.md` must have frontmatter:
+
+```md
+---
+name: skill-name
+description: Clear trigger condition for when to use this skill.
+---
+```
+
+Create these skills:
+
+### use-context-tools
+
+Purpose:
+
+Use Graphify, Aider repo maps, Understand Anything, Repomix, grep, and exact file reads efficiently.
+
+Must include:
+
+* Graphify is for navigation, not final truth.
+* Aider repo map is for token-efficient coding context when using Aider.
+* Understand Anything is for onboarding and deep project exploration.
+* Repomix is for portable repo snapshots, not always token-efficient.
+* Exact source files must be read before edits.
+* Tests verify correctness.
+
+### implement-feature
+
+Purpose:
+
+Turn a request/ticket into a safe implementation.
+
+Must include:
+
+1. Read AGENTS.md
+2. Read relevant docs
+3. Use context tools to find candidate files
+4. Read exact files
+5. Plan implementation
+6. Implement small changes
+7. Add/update tests
+8. Run verification
+9. Update docs
+10. Summarize
+
+### fix-bug
+
+Purpose:
+
+Debug and fix defects.
+
+Must include:
+
+1. Reproduce or understand expected behavior
+2. Locate relevant files
+3. Trace likely cause
+4. Make minimal fix
+5. Add regression test
+6. Run verification
+7. Document root cause
+
+### code-review
+
+Purpose:
+
+Review changed code.
+
+Must include checks for:
+
+* Correctness
+* Architecture
+* Security
+* Tests
+* API contract
+* Type safety
+* Error handling
+* Maintainability
+* Overengineering
+
+### write-tests
+
+Purpose:
+
+Add or improve tests.
+
+Must include:
+
+* Unit tests
+* Integration tests
+* E2E tests where applicable
+* Regression tests
+* Edge cases
+* Test naming
+* Verification commands
+
+### update-docs
+
+Purpose:
+
+Update docs when behavior or architecture changes.
+
+Must include:
+
+* README
+* docs/architecture.md
+* docs/api-specification.md
+* docs/database-schema.md
+* docs/user-flows.md
+* docs/ai/
+* Decision records when needed
+
+### api-contract-check
+
+Purpose:
+
+Protect API contracts.
+
+Must include:
+
+* Routes/controllers
+* Request DTOs
+* Response shapes
+* Error formats
+* Auth requirements
+* Guest/session behavior if applicable
+* Frontend API client compatibility
+
+### database-change
+
+Purpose:
+
+Safely change database schema/models.
+
+Must include:
+
+* Schema/model updates
+* Indexes
+* Migration/backfill notes
+* Backward compatibility
+* Query impact
+* Tests
+
+### security-review
+
+Purpose:
+
+Perform security review.
+
+Must include:
+
+* Secrets
+* Auth
+* Authorization
+* Token storage
+* Logging
+* File upload validation
+* External API calls
+* Dependency risks
+* Injection
+* XSS/CSRF where applicable
+
+### release-check
+
+Purpose:
+
+Prepare code for merge/release.
+
+Must include:
+
+* Lint
+* Typecheck
+* Tests
+* Build
+* Docs
+* Changelog if applicable
+* Environment variable checklist
+* Deployment notes
+
+## Workflow Docs Requirements
+
+Create `.agents/workflows/` docs:
+
+### feature-development.md
+
+Include end-to-end feature workflow using:
+
+* Product Manager
+* System Architect
+* Relevant engineer role
+* SQA Engineer
+* Security Reviewer if needed
+* Release Check
+
+### bugfix.md
+
+Include debugging workflow.
+
+### pull-request-review.md
+
+Include code review workflow.
+
+### refactor.md
+
+Include safe refactor workflow.
+
+### release.md
+
+Include release readiness workflow.
+
+## Tool Docs Requirements
+
+Create `.agents/tools/`.
+
+### context-strategy.md
+
+Explain:
+
+* Graphify = navigation layer
+* Aider repo map = coding context layer
+* Understand Anything = onboarding/deep understanding layer
+* Repomix = portable snapshot layer
+* Source files = truth layer
+* Tests = verification layer
+* Docs = intent layer
+
+Include this rule:
+
+Never edit based only on a graph, summary, or embedding result. Always read the exact source file first.
+
+### graphify.md
+
+Document:
+
+* What Graphify is for
+* When to use it
+* When not to use it
+* Suggested commands
+* Generated output policy
+* Staleness risks
+* `.gitignore` recommendation
+
+Do not assume Graphify is installed. Provide install instructions as documentation only.
+
+### aider-repomap.md
+
+Document:
+
+* Aider repo map purpose
+* Why it can be more token-efficient for coding loops
+* When to use it
+* Limitations
+* How it differs from Graphify
+
+Do not force Aider into the project.
+
+### understand-anything.md
+
+Document:
+
+* Purpose
+* When to use
+* When not to use
+* Install notes
+* Generated output policy
+
+Do not assume installed.
+
+### caveman.md
+
+Document:
+
+* Purpose as concise-output/style skill
+* When to use
+* When not to use
+* Install notes
+* Risk of being too terse for architecture/security work
+
+### repomix.md
+
+Document:
+
+* Purpose as repo snapshot/export tool
+* When useful
+* Token cost risk
+* When not to use
+
+### mcp-policy.md
+
+Document:
+
+* MCP safety policy
+* Allowed MCP use cases
+* Disallowed risky behavior
+* Filesystem/network/secrets warnings
+* Approval requirements
+
+### allowed-commands.md
+
+Document safe command categories:
+
+* package manager install only when requested or necessary
+* lint
+* typecheck
+* tests
+* build
+* grep/search
+* git status/diff/log
+* non-destructive inspection commands
+
+Document risky commands requiring approval:
+
+* rm/rmdir/delete
+* reset/clean
+* force push
+* migration execution
+* production deployment
+* secret/config changes
+* global installs
+* Docker prune
+* database destructive operations
+
+### verification-commands.md
+
+Detect and document actual repo commands.
+
+Examples:
+
+```txt
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+```
+
+But do not invent. Inspect `package.json`, workspace files, backend/frontend package files, and CI config.
+
+If commands are missing, write:
+
+```txt
+TODO: No typecheck command found.
+TODO: No test command found.
+```
+
+## Docs Requirements
+
+Create `docs/ai/`.
+
+### docs/ai/README.md
+
+Explain the AI-driven development setup.
+
+### docs/ai/agent-map.md
+
+Show:
+
+* Which role to use for which task
+* Which skill to use for which workflow
+* Suggested handoff order
+
+### docs/ai/context-strategy.md
+
+Mirror the context strategy in a user-friendly way.
+
+### docs/ai/prompt-recipes.md
+
+Add reusable prompts, including:
+
+1. Implement a feature
+2. Fix a bug
+3. Review a PR
+4. Add tests
+5. Update API contract
+6. Review security
+7. Use Graphify to find relevant files
+8. Use Aider repo map if available
+9. Prepare release checklist
+
+### docs/ai/codex-setup.md
+
+Explain how this repo is intended to work with Codex:
+
+* AGENTS.md
+* .agents/skills/
+* context strategy
+* verification expectations
+
+### docs/ai/claude-code-setup.md
+
+Explain:
+
+* CLAUDE.md
+* .claude/agents/
+* .agents/skills/
+
+### docs/ai/cursor-setup.md
+
+Explain:
+
+* .cursor/rules/
+* AGENTS.md
+* workflow expectations
+
+### docs/ai/antigravity-setup.md
+
+Explain:
+
+* GEMINI.md
+* AGENTS.md
+* .agents/skills/
+
+### docs/ai/maintenance.md
+
+Explain:
+
+* How to update rules
+* How to add a new skill
+* How to add a new role
+* How to update verification commands
+* When to regenerate Graphify/Understand Anything outputs
+* What generated files should not be committed
+
+## Package Scripts
+
+Inspect package files.
+
+If appropriate, add or suggest scripts for:
+
+```json
+{
+  "ai:check": "...",
+  "ai:graph": "...",
+  "ai:context": "...",
+  "verify": "..."
+}
+```
+
+Only add scripts if they are safe and accurate.
+
+If Graphify, Understand Anything, Aider, or Repomix are not project dependencies, do not add commands that will fail by default unless clearly documented as optional.
+
+A safer option is to create scripts that print guidance or use `npx` only when appropriate.
+
+Prefer documentation over brittle scripts.
+
+## .gitignore Updates
+
+Inspect `.gitignore`.
+
+Add generated AI/tool outputs if appropriate:
+
+```gitignore
+# AI/codebase analysis generated outputs
+graphify-out/
+.graphify/
+.understand-anything/
+repomix-output.*
+.repo-map/
+```
+
+Only add entries that make sense. Do not remove existing ignore rules.
+
+## Existing Docs Integration
+
+If these files exist, reference them from AGENTS.md and docs/ai:
+
+```txt
+docs/architecture.md
+docs/api-specification.md
+docs/database-schema.md
+docs/user-flows.md
+docs/tdd.md
+docs/erd.md
+docs/dfd.md
+docs/flowcharts.md
+README.md
+```
+
+If they do not exist, do not invent their contents. Mention them as optional recommended docs.
+
+## LuminaStudio-Specific Guidance If Applicable
+
+If this repository is LuminaStudio Web or similar, include these rules in the relevant docs:
+
+* Manual image editing should remain browser-side.
+* Backend should not perform heavy offline image processing for the web MVP.
+* AI face restoration should use external API integration, likely Hugging Face CodeFormer.
+* User-provided Hugging Face tokens must never be logged.
+* Guest tokens must not be persisted.
+* Saved authenticated tokens must be encrypted.
+* File uploads must validate type and size.
+* History records should store metadata, not necessarily permanent image files for MVP.
+* Guest access should use session IDs where applicable.
+* API contract changes must update docs/api-specification.md.
+* Database changes must update docs/database-schema.md.
+
+Only add this if the repo context confirms this project.
+
+## Quality Bar
+
+The final setup should be practical.
+
+Avoid:
+
+* motivational fluff
+* vague “be a good engineer” statements
+* giant walls of duplicated rules
+* rules that conflict across tools
+* fake install claims
+* fake test claims
+* unnecessary dependencies
+* generated files committed by default
+
+Prefer:
+
+* short, enforceable rules
+* clear workflows
+* exact command references
+* role boundaries
+* small reusable skills
+* clear context/token policy
+* source-confirmed editing
+* verification-first development
+
+## Implementation Order
+
+Follow this order:
+
+1. Inspect repo structure and existing config.
+2. Identify stack and actual commands.
+3. Create/update AGENTS.md.
+4. Create `.agents/` roles, skills, workflows, and tools docs.
+5. Create tool-specific adapter files:
+
+   * CLAUDE.md
+   * GEMINI.md
+   * .cursor/rules/
+   * .clinerules/
+   * .windsurfrules
+6. Create `.claude/agents/` files.
+7. Create `docs/ai/` documentation.
+8. Update `.gitignore` if needed.
+9. Optionally update package scripts only if safe.
+10. Run formatting/lint checks if available.
+11. Summarize all created/modified files.
+12. Report verification results honestly.
+
+## Final Response Required
+
+When done, provide:
+
+1. Summary of what changed
+2. File tree of AI setup files created/updated
+3. Detected project stack
+4. Detected package manager
+5. Verification commands found
+6. Commands actually run
+7. Commands not run and why
+8. Any TODOs
+9. Recommended next step
+
+Do not claim the setup is complete if key files failed to write.
+
+Start now by inspecting the repository.

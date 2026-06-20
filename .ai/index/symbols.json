@@ -1,0 +1,1399 @@
+{
+  "description": "Exported and high-value local symbols for navigation.",
+  "regenerate": "npm run ai:index",
+  "symbols": [
+    {
+      "name": "AppController",
+      "kind": "class",
+      "file": "backend/src/app.controller.ts",
+      "line": 5,
+      "exported": true
+    },
+    {
+      "name": "AppModule",
+      "kind": "class",
+      "file": "backend/src/app.module.ts",
+      "line": 26,
+      "exported": true
+    },
+    {
+      "name": "AppService",
+      "kind": "class",
+      "file": "backend/src/app.service.ts",
+      "line": 16,
+      "exported": true
+    },
+    {
+      "name": "AppStatus",
+      "kind": "type",
+      "file": "backend/src/app.service.ts",
+      "line": 4,
+      "exported": true
+    },
+    {
+      "name": "DeploymentConfig",
+      "kind": "interface",
+      "file": "backend/src/common/deployment-config.ts",
+      "line": 1,
+      "exported": true
+    },
+    {
+      "name": "CorsCallback",
+      "kind": "interface",
+      "file": "backend/src/common/deployment-config.ts",
+      "line": 14,
+      "exported": true
+    },
+    {
+      "name": "DEFAULT_FRONTEND_ORIGIN",
+      "kind": "const",
+      "file": "backend/src/common/deployment-config.ts",
+      "line": 18,
+      "exported": true
+    },
+    {
+      "name": "DEFAULT_MONGODB_URI",
+      "kind": "const",
+      "file": "backend/src/common/deployment-config.ts",
+      "line": 19,
+      "exported": true
+    },
+    {
+      "name": "DEFAULT_PORT",
+      "kind": "const",
+      "file": "backend/src/common/deployment-config.ts",
+      "line": 20,
+      "exported": true
+    },
+    {
+      "name": "DEFAULT_RATE_LIMIT_MAX_REQUESTS",
+      "kind": "const",
+      "file": "backend/src/common/deployment-config.ts",
+      "line": 21,
+      "exported": true
+    },
+    {
+      "name": "DEFAULT_RATE_LIMIT_WINDOW_MS",
+      "kind": "const",
+      "file": "backend/src/common/deployment-config.ts",
+      "line": 22,
+      "exported": true
+    },
+    {
+      "name": "DEFAULT_MAX_UPLOAD_SIZE_MB",
+      "kind": "const",
+      "file": "backend/src/common/deployment-config.ts",
+      "line": 23,
+      "exported": true
+    },
+    {
+      "name": "getDeploymentConfig",
+      "kind": "function",
+      "file": "backend/src/common/deployment-config.ts",
+      "line": 31,
+      "exported": true
+    },
+    {
+      "name": "buildCorsOptions",
+      "kind": "function",
+      "file": "backend/src/common/deployment-config.ts",
+      "line": 61,
+      "exported": true
+    },
+    {
+      "name": "getMaxUploadSizeBytes",
+      "kind": "function",
+      "file": "backend/src/common/deployment-config.ts",
+      "line": 78,
+      "exported": true
+    },
+    {
+      "name": "readFrontendOrigins",
+      "kind": "function",
+      "file": "backend/src/common/deployment-config.ts",
+      "line": 82,
+      "exported": true
+    },
+    {
+      "name": "RateLimitEntry",
+      "kind": "interface",
+      "file": "backend/src/common/rate-limit.middleware.ts",
+      "line": 1,
+      "exported": false
+    },
+    {
+      "name": "RateLimitedRequest",
+      "kind": "interface",
+      "file": "backend/src/common/rate-limit.middleware.ts",
+      "line": 12,
+      "exported": true
+    },
+    {
+      "name": "RateLimitedResponse",
+      "kind": "interface",
+      "file": "backend/src/common/rate-limit.middleware.ts",
+      "line": 23,
+      "exported": true
+    },
+    {
+      "name": "RateLimitNext",
+      "kind": "type",
+      "file": "backend/src/common/rate-limit.middleware.ts",
+      "line": 29,
+      "exported": true
+    },
+    {
+      "name": "createRateLimitMiddleware",
+      "kind": "function",
+      "file": "backend/src/common/rate-limit.middleware.ts",
+      "line": 31,
+      "exported": true
+    },
+    {
+      "name": "RateLimitOptions",
+      "kind": "interface",
+      "file": "backend/src/common/rate-limit.middleware.ts",
+      "line": 6,
+      "exported": true
+    },
+    {
+      "name": "redactSecrets",
+      "kind": "function",
+      "file": "backend/src/common/safe-logger.ts",
+      "line": 38,
+      "exported": true
+    },
+    {
+      "name": "SafeLogger",
+      "kind": "class",
+      "file": "backend/src/common/safe-logger.ts",
+      "line": 6,
+      "exported": true
+    },
+    {
+      "name": "ACCOUNT_FIELD_NAMES",
+      "kind": "const",
+      "file": "backend/src/contracts/lumina.ts",
+      "line": 1,
+      "exported": true
+    },
+    {
+      "name": "OPERATION_TYPES",
+      "kind": "const",
+      "file": "backend/src/contracts/lumina.ts",
+      "line": 11,
+      "exported": true
+    },
+    {
+      "name": "WEB_MVP_IMAGE_PROCESSING_ROUTES",
+      "kind": "const",
+      "file": "backend/src/contracts/lumina.ts",
+      "line": 22,
+      "exported": true
+    },
+    {
+      "name": "DISALLOWED_WEB_MVP_IMAGE_PROCESSING_ROUTES",
+      "kind": "const",
+      "file": "backend/src/contracts/lumina.ts",
+      "line": 26,
+      "exported": true
+    },
+    {
+      "name": "ERROR_RESPONSE_FIELDS",
+      "kind": "const",
+      "file": "backend/src/contracts/lumina.ts",
+      "line": 31,
+      "exported": true
+    },
+    {
+      "name": "AccountFieldName",
+      "kind": "type",
+      "file": "backend/src/contracts/lumina.ts",
+      "line": 37,
+      "exported": true
+    },
+    {
+      "name": "ProcessingMode",
+      "kind": "type",
+      "file": "backend/src/contracts/lumina.ts",
+      "line": 38,
+      "exported": true
+    },
+    {
+      "name": "OperationType",
+      "kind": "type",
+      "file": "backend/src/contracts/lumina.ts",
+      "line": 39,
+      "exported": true
+    },
+    {
+      "name": "PROCESSING_MODES",
+      "kind": "const",
+      "file": "backend/src/contracts/lumina.ts",
+      "line": 6,
+      "exported": true
+    },
+    {
+      "name": "HuggingFaceTokenEncryptionService",
+      "kind": "class",
+      "file": "backend/src/domains/account/account-token-encryption.service.ts",
+      "line": 10,
+      "exported": true
+    },
+    {
+      "name": "AccountController",
+      "kind": "class",
+      "file": "backend/src/domains/account/account.controller.ts",
+      "line": 20,
+      "exported": true
+    },
+    {
+      "name": "AccountModule",
+      "kind": "class",
+      "file": "backend/src/domains/account/account.module.ts",
+      "line": 14,
+      "exported": true
+    },
+    {
+      "name": "AccountService",
+      "kind": "class",
+      "file": "backend/src/domains/account/account.service.ts",
+      "line": 15,
+      "exported": true
+    },
+    {
+      "name": "SaveHuggingFaceTokenRequestDto",
+      "kind": "interface",
+      "file": "backend/src/domains/account/account.types.ts",
+      "line": 1,
+      "exported": true
+    },
+    {
+      "name": "HuggingFaceTokenStatusResponseDto",
+      "kind": "interface",
+      "file": "backend/src/domains/account/account.types.ts",
+      "line": 5,
+      "exported": true
+    },
+    {
+      "name": "AiRestoreController",
+      "kind": "class",
+      "file": "backend/src/domains/ai/ai-restore.controller.ts",
+      "line": 12,
+      "exported": true
+    },
+    {
+      "name": "AiRestoreModule",
+      "kind": "class",
+      "file": "backend/src/domains/ai/ai-restore.module.ts",
+      "line": 15,
+      "exported": true
+    },
+    {
+      "name": "ValidatedImage",
+      "kind": "interface",
+      "file": "backend/src/domains/ai/ai-restore.service.ts",
+      "line": 23,
+      "exported": false
+    },
+    {
+      "name": "RestoreSettings",
+      "kind": "interface",
+      "file": "backend/src/domains/ai/ai-restore.service.ts",
+      "line": 28,
+      "exported": false
+    },
+    {
+      "name": "AiRestoreService",
+      "kind": "class",
+      "file": "backend/src/domains/ai/ai-restore.service.ts",
+      "line": 43,
+      "exported": true
+    },
+    {
+      "name": "RestoreFaceOwnerDto",
+      "kind": "interface",
+      "file": "backend/src/domains/ai/ai-restore.types.ts",
+      "line": 12,
+      "exported": true
+    },
+    {
+      "name": "RestoreFaceResponseDto",
+      "kind": "interface",
+      "file": "backend/src/domains/ai/ai-restore.types.ts",
+      "line": 17,
+      "exported": true
+    },
+    {
+      "name": "RestoreFaceRequestDto",
+      "kind": "interface",
+      "file": "backend/src/domains/ai/ai-restore.types.ts",
+      "line": 4,
+      "exported": true
+    },
+    {
+      "name": "AuthPasswordService",
+      "kind": "class",
+      "file": "backend/src/domains/auth/auth-password.service.ts",
+      "line": 11,
+      "exported": true
+    },
+    {
+      "name": "JwtClaims",
+      "kind": "interface",
+      "file": "backend/src/domains/auth/auth-token.service.ts",
+      "line": 10,
+      "exported": false
+    },
+    {
+      "name": "AuthTokenService",
+      "kind": "class",
+      "file": "backend/src/domains/auth/auth-token.service.ts",
+      "line": 18,
+      "exported": true
+    },
+    {
+      "name": "AuthController",
+      "kind": "class",
+      "file": "backend/src/domains/auth/auth.controller.ts",
+      "line": 14,
+      "exported": true
+    },
+    {
+      "name": "AuthModule",
+      "kind": "class",
+      "file": "backend/src/domains/auth/auth.module.ts",
+      "line": 15,
+      "exported": true
+    },
+    {
+      "name": "AuthService",
+      "kind": "class",
+      "file": "backend/src/domains/auth/auth.service.ts",
+      "line": 21,
+      "exported": true
+    },
+    {
+      "name": "RegisterRequestDto",
+      "kind": "interface",
+      "file": "backend/src/domains/auth/auth.types.ts",
+      "line": 1,
+      "exported": true
+    },
+    {
+      "name": "AccountSummaryDto",
+      "kind": "interface",
+      "file": "backend/src/domains/auth/auth.types.ts",
+      "line": 12,
+      "exported": true
+    },
+    {
+      "name": "AccountProfileDto",
+      "kind": "interface",
+      "file": "backend/src/domains/auth/auth.types.ts",
+      "line": 19,
+      "exported": true
+    },
+    {
+      "name": "AuthResponseDto",
+      "kind": "interface",
+      "file": "backend/src/domains/auth/auth.types.ts",
+      "line": 24,
+      "exported": true
+    },
+    {
+      "name": "LogoutResponseDto",
+      "kind": "interface",
+      "file": "backend/src/domains/auth/auth.types.ts",
+      "line": 31,
+      "exported": true
+    },
+    {
+      "name": "CurrentUserResponseDto",
+      "kind": "interface",
+      "file": "backend/src/domains/auth/auth.types.ts",
+      "line": 36,
+      "exported": true
+    },
+    {
+      "name": "AuthTokenPayload",
+      "kind": "interface",
+      "file": "backend/src/domains/auth/auth.types.ts",
+      "line": 41,
+      "exported": true
+    },
+    {
+      "name": "AuthenticatedRequest",
+      "kind": "interface",
+      "file": "backend/src/domains/auth/auth.types.ts",
+      "line": 47,
+      "exported": true
+    },
+    {
+      "name": "LoginRequestDto",
+      "kind": "interface",
+      "file": "backend/src/domains/auth/auth.types.ts",
+      "line": 7,
+      "exported": true
+    },
+    {
+      "name": "JwtAuthGuard",
+      "kind": "class",
+      "file": "backend/src/domains/auth/jwt-auth.guard.ts",
+      "line": 6,
+      "exported": true
+    },
+    {
+      "name": "HistoryController",
+      "kind": "class",
+      "file": "backend/src/domains/history/history.controller.ts",
+      "line": 15,
+      "exported": true
+    },
+    {
+      "name": "HistoryModule",
+      "kind": "class",
+      "file": "backend/src/domains/history/history.module.ts",
+      "line": 13,
+      "exported": true
+    },
+    {
+      "name": "HistoryService",
+      "kind": "class",
+      "file": "backend/src/domains/history/history.service.ts",
+      "line": 34,
+      "exported": true
+    },
+    {
+      "name": "CreateHistoryRequestDto",
+      "kind": "interface",
+      "file": "backend/src/domains/history/history.types.ts",
+      "line": 15,
+      "exported": true
+    },
+    {
+      "name": "HistoryDto",
+      "kind": "interface",
+      "file": "backend/src/domains/history/history.types.ts",
+      "line": 25,
+      "exported": true
+    },
+    {
+      "name": "HistoryListResponseDto",
+      "kind": "interface",
+      "file": "backend/src/domains/history/history.types.ts",
+      "line": 39,
+      "exported": true
+    },
+    {
+      "name": "HistoryOwnerDto",
+      "kind": "interface",
+      "file": "backend/src/domains/history/history.types.ts",
+      "line": 4,
+      "exported": true
+    },
+    {
+      "name": "CreateHistoryResponseDto",
+      "kind": "interface",
+      "file": "backend/src/domains/history/history.types.ts",
+      "line": 44,
+      "exported": true
+    },
+    {
+      "name": "DeleteHistoryResponseDto",
+      "kind": "interface",
+      "file": "backend/src/domains/history/history.types.ts",
+      "line": 50,
+      "exported": true
+    },
+    {
+      "name": "HistoryListQueryDto",
+      "kind": "interface",
+      "file": "backend/src/domains/history/history.types.ts",
+      "line": 9,
+      "exported": true
+    },
+    {
+      "name": "PresetController",
+      "kind": "class",
+      "file": "backend/src/domains/presets/preset.controller.ts",
+      "line": 29,
+      "exported": true
+    },
+    {
+      "name": "PresetModule",
+      "kind": "class",
+      "file": "backend/src/domains/presets/preset.module.ts",
+      "line": 13,
+      "exported": true
+    },
+    {
+      "name": "PresetService",
+      "kind": "class",
+      "file": "backend/src/domains/presets/preset.service.ts",
+      "line": 27,
+      "exported": true
+    },
+    {
+      "name": "PresetRequestDto",
+      "kind": "interface",
+      "file": "backend/src/domains/presets/preset.types.ts",
+      "line": 1,
+      "exported": true
+    },
+    {
+      "name": "ImportPresetRequestDto",
+      "kind": "type",
+      "file": "backend/src/domains/presets/preset.types.ts",
+      "line": 10,
+      "exported": true
+    },
+    {
+      "name": "PresetDto",
+      "kind": "interface",
+      "file": "backend/src/domains/presets/preset.types.ts",
+      "line": 12,
+      "exported": true
+    },
+    {
+      "name": "PresetListResponseDto",
+      "kind": "interface",
+      "file": "backend/src/domains/presets/preset.types.ts",
+      "line": 20,
+      "exported": true
+    },
+    {
+      "name": "PresetResponseDto",
+      "kind": "interface",
+      "file": "backend/src/domains/presets/preset.types.ts",
+      "line": 25,
+      "exported": true
+    },
+    {
+      "name": "DeletePresetResponseDto",
+      "kind": "interface",
+      "file": "backend/src/domains/presets/preset.types.ts",
+      "line": 31,
+      "exported": true
+    },
+    {
+      "name": "ExportPresetResponseDto",
+      "kind": "interface",
+      "file": "backend/src/domains/presets/preset.types.ts",
+      "line": 36,
+      "exported": true
+    },
+    {
+      "name": "CreatePresetRequestDto",
+      "kind": "type",
+      "file": "backend/src/domains/presets/preset.types.ts",
+      "line": 6,
+      "exported": true
+    },
+    {
+      "name": "UpdatePresetRequestDto",
+      "kind": "type",
+      "file": "backend/src/domains/presets/preset.types.ts",
+      "line": 8,
+      "exported": true
+    },
+    {
+      "name": "CodeFormerProvider",
+      "kind": "class",
+      "file": "backend/src/integrations/huggingface/codeformer.provider.ts",
+      "line": 11,
+      "exported": true
+    },
+    {
+      "name": "HuggingFaceTokenService",
+      "kind": "class",
+      "file": "backend/src/integrations/huggingface/hugging-face-token.service.ts",
+      "line": 6,
+      "exported": true
+    },
+    {
+      "name": "GradioCallResponse",
+      "kind": "interface",
+      "file": "backend/src/integrations/huggingface/hugging-face.client.ts",
+      "line": 27,
+      "exported": false
+    },
+    {
+      "name": "GradioFileData",
+      "kind": "interface",
+      "file": "backend/src/integrations/huggingface/hugging-face.client.ts",
+      "line": 31,
+      "exported": false
+    },
+    {
+      "name": "CodeFormerEndpoint",
+      "kind": "interface",
+      "file": "backend/src/integrations/huggingface/hugging-face.client.ts",
+      "line": 37,
+      "exported": false
+    },
+    {
+      "name": "CodeFormerProviderEventError",
+      "kind": "class",
+      "file": "backend/src/integrations/huggingface/hugging-face.client.ts",
+      "line": 43,
+      "exported": false
+    },
+    {
+      "name": "HuggingFaceClient",
+      "kind": "class",
+      "file": "backend/src/integrations/huggingface/hugging-face.client.ts",
+      "line": 50,
+      "exported": true
+    },
+    {
+      "name": "HuggingFaceModule",
+      "kind": "class",
+      "file": "backend/src/integrations/huggingface/hugging-face.module.ts",
+      "line": 10,
+      "exported": true
+    },
+    {
+      "name": "HuggingFaceInferenceRequest",
+      "kind": "interface",
+      "file": "backend/src/integrations/huggingface/hugging-face.types.ts",
+      "line": 1,
+      "exported": true
+    },
+    {
+      "name": "CodeFormerRestoreFaceRequest",
+      "kind": "interface",
+      "file": "backend/src/integrations/huggingface/hugging-face.types.ts",
+      "line": 14,
+      "exported": true
+    },
+    {
+      "name": "CodeFormerRestoreFaceResponse",
+      "kind": "interface",
+      "file": "backend/src/integrations/huggingface/hugging-face.types.ts",
+      "line": 22,
+      "exported": true
+    },
+    {
+      "name": "HuggingFaceInferenceResponse",
+      "kind": "interface",
+      "file": "backend/src/integrations/huggingface/hugging-face.types.ts",
+      "line": 9,
+      "exported": true
+    },
+    {
+      "name": "AccountPersistenceModule",
+      "kind": "class",
+      "file": "backend/src/persistence/account-persistence.module.ts",
+      "line": 11,
+      "exported": true
+    },
+    {
+      "name": "HistoryPersistenceModule",
+      "kind": "class",
+      "file": "backend/src/persistence/history-persistence.module.ts",
+      "line": 11,
+      "exported": true
+    },
+    {
+      "name": "Account",
+      "kind": "class",
+      "file": "backend/src/persistence/mongodb/schemas/account.schema.ts",
+      "line": 12,
+      "exported": true
+    },
+    {
+      "name": "AccountDocument",
+      "kind": "type",
+      "file": "backend/src/persistence/mongodb/schemas/account.schema.ts",
+      "line": 39,
+      "exported": true
+    },
+    {
+      "name": "AccountSchema",
+      "kind": "const",
+      "file": "backend/src/persistence/mongodb/schemas/account.schema.ts",
+      "line": 41,
+      "exported": true
+    },
+    {
+      "name": "ACCOUNT_COLLECTION",
+      "kind": "const",
+      "file": "backend/src/persistence/mongodb/schemas/account.schema.ts",
+      "line": 5,
+      "exported": true
+    },
+    {
+      "name": "HistoryStatus",
+      "kind": "type",
+      "file": "backend/src/persistence/mongodb/schemas/history.schema.ts",
+      "line": 13,
+      "exported": true
+    },
+    {
+      "name": "HistorySettings",
+      "kind": "type",
+      "file": "backend/src/persistence/mongodb/schemas/history.schema.ts",
+      "line": 14,
+      "exported": true
+    },
+    {
+      "name": "History",
+      "kind": "class",
+      "file": "backend/src/persistence/mongodb/schemas/history.schema.ts",
+      "line": 24,
+      "exported": true
+    },
+    {
+      "name": "HISTORY_COLLECTION",
+      "kind": "const",
+      "file": "backend/src/persistence/mongodb/schemas/history.schema.ts",
+      "line": 6,
+      "exported": true
+    },
+    {
+      "name": "HistoryDocument",
+      "kind": "type",
+      "file": "backend/src/persistence/mongodb/schemas/history.schema.ts",
+      "line": 66,
+      "exported": true
+    },
+    {
+      "name": "HistorySchema",
+      "kind": "const",
+      "file": "backend/src/persistence/mongodb/schemas/history.schema.ts",
+      "line": 68,
+      "exported": true
+    },
+    {
+      "name": "HISTORY_STATUSES",
+      "kind": "const",
+      "file": "backend/src/persistence/mongodb/schemas/history.schema.ts",
+      "line": 8,
+      "exported": true
+    },
+    {
+      "name": "Preset",
+      "kind": "class",
+      "file": "backend/src/persistence/mongodb/schemas/preset.schema.ts",
+      "line": 14,
+      "exported": true
+    },
+    {
+      "name": "PresetDocument",
+      "kind": "type",
+      "file": "backend/src/persistence/mongodb/schemas/preset.schema.ts",
+      "line": 34,
+      "exported": true
+    },
+    {
+      "name": "PresetSchema",
+      "kind": "const",
+      "file": "backend/src/persistence/mongodb/schemas/preset.schema.ts",
+      "line": 36,
+      "exported": true
+    },
+    {
+      "name": "PRESET_COLLECTION",
+      "kind": "const",
+      "file": "backend/src/persistence/mongodb/schemas/preset.schema.ts",
+      "line": 5,
+      "exported": true
+    },
+    {
+      "name": "PresetEnhancementSettings",
+      "kind": "type",
+      "file": "backend/src/persistence/mongodb/schemas/preset.schema.ts",
+      "line": 7,
+      "exported": true
+    },
+    {
+      "name": "PresetPersistenceModule",
+      "kind": "class",
+      "file": "backend/src/persistence/preset-persistence.module.ts",
+      "line": 11,
+      "exported": true
+    },
+    {
+      "name": "UpdateAccountInput",
+      "kind": "interface",
+      "file": "backend/src/persistence/repositories/account.repository.ts",
+      "line": 14,
+      "exported": true
+    },
+    {
+      "name": "FindAccountOptions",
+      "kind": "interface",
+      "file": "backend/src/persistence/repositories/account.repository.ts",
+      "line": 20,
+      "exported": true
+    },
+    {
+      "name": "HuggingFaceTokenStatus",
+      "kind": "interface",
+      "file": "backend/src/persistence/repositories/account.repository.ts",
+      "line": 24,
+      "exported": true
+    },
+    {
+      "name": "AccountRepository",
+      "kind": "class",
+      "file": "backend/src/persistence/repositories/account.repository.ts",
+      "line": 30,
+      "exported": true
+    },
+    {
+      "name": "CreateAccountInput",
+      "kind": "interface",
+      "file": "backend/src/persistence/repositories/account.repository.ts",
+      "line": 7,
+      "exported": true
+    },
+    {
+      "name": "CreateHistoryInput",
+      "kind": "interface",
+      "file": "backend/src/persistence/repositories/history.repository.ts",
+      "line": 12,
+      "exported": true
+    },
+    {
+      "name": "HistoryRepository",
+      "kind": "class",
+      "file": "backend/src/persistence/repositories/history.repository.ts",
+      "line": 27,
+      "exported": true
+    },
+    {
+      "name": "CreatePresetInput",
+      "kind": "interface",
+      "file": "backend/src/persistence/repositories/preset.repository.ts",
+      "line": 10,
+      "exported": true
+    },
+    {
+      "name": "UpdatePresetInput",
+      "kind": "interface",
+      "file": "backend/src/persistence/repositories/preset.repository.ts",
+      "line": 16,
+      "exported": true
+    },
+    {
+      "name": "PresetRepository",
+      "kind": "class",
+      "file": "backend/src/persistence/repositories/preset.repository.ts",
+      "line": 22,
+      "exported": true
+    },
+    {
+      "name": "metadata",
+      "kind": "const",
+      "file": "frontend/src/app/layout.tsx",
+      "line": 6,
+      "exported": true
+    },
+    {
+      "name": "AppProviders",
+      "kind": "function",
+      "file": "frontend/src/app/providers.tsx",
+      "line": 10,
+      "exported": true
+    },
+    {
+      "name": "AccountSettingsPage",
+      "kind": "function",
+      "file": "frontend/src/domains/account/components/AccountSettingsPage.tsx",
+      "line": 22,
+      "exported": true
+    },
+    {
+      "name": "accountApi",
+      "kind": "const",
+      "file": "frontend/src/domains/account/services/account-api.ts",
+      "line": 7,
+      "exported": true
+    },
+    {
+      "name": "HuggingFaceTokenStatus",
+      "kind": "interface",
+      "file": "frontend/src/domains/account/types/account.ts",
+      "line": 1,
+      "exported": true
+    },
+    {
+      "name": "SaveHuggingFaceTokenRequest",
+      "kind": "interface",
+      "file": "frontend/src/domains/account/types/account.ts",
+      "line": 7,
+      "exported": true
+    },
+    {
+      "name": "AuthFormProps",
+      "kind": "interface",
+      "file": "frontend/src/domains/authentication/components/AuthForm.tsx",
+      "line": 18,
+      "exported": false
+    },
+    {
+      "name": "AuthForm",
+      "kind": "function",
+      "file": "frontend/src/domains/authentication/components/AuthForm.tsx",
+      "line": 57,
+      "exported": true
+    },
+    {
+      "name": "authApi",
+      "kind": "const",
+      "file": "frontend/src/domains/authentication/services/auth-api.ts",
+      "line": 4,
+      "exported": true
+    },
+    {
+      "name": "AccountSummary",
+      "kind": "interface",
+      "file": "frontend/src/domains/authentication/types/auth.ts",
+      "line": 1,
+      "exported": true
+    },
+    {
+      "name": "AuthResponse",
+      "kind": "interface",
+      "file": "frontend/src/domains/authentication/types/auth.ts",
+      "line": 13,
+      "exported": true
+    },
+    {
+      "name": "LogoutResponse",
+      "kind": "interface",
+      "file": "frontend/src/domains/authentication/types/auth.ts",
+      "line": 20,
+      "exported": true
+    },
+    {
+      "name": "CurrentUserResponse",
+      "kind": "interface",
+      "file": "frontend/src/domains/authentication/types/auth.ts",
+      "line": 25,
+      "exported": true
+    },
+    {
+      "name": "LoginRequest",
+      "kind": "interface",
+      "file": "frontend/src/domains/authentication/types/auth.ts",
+      "line": 30,
+      "exported": true
+    },
+    {
+      "name": "RegisterRequest",
+      "kind": "interface",
+      "file": "frontend/src/domains/authentication/types/auth.ts",
+      "line": 35,
+      "exported": true
+    },
+    {
+      "name": "AccountProfile",
+      "kind": "interface",
+      "file": "frontend/src/domains/authentication/types/auth.ts",
+      "line": 8,
+      "exported": true
+    },
+    {
+      "name": "FreeCropState",
+      "kind": "interface",
+      "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
+      "line": 108,
+      "exported": false
+    },
+    {
+      "name": "FreeCropDragState",
+      "kind": "interface",
+      "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
+      "line": 117,
+      "exported": false
+    },
+    {
+      "name": "RgbColor",
+      "kind": "interface",
+      "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
+      "line": 126,
+      "exported": false
+    },
+    {
+      "name": "EditorWorkspace",
+      "kind": "function",
+      "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
+      "line": 1302,
+      "exported": true
+    },
+    {
+      "name": "HslColor",
+      "kind": "interface",
+      "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
+      "line": 132,
+      "exported": false
+    },
+    {
+      "name": "CmykColor",
+      "kind": "interface",
+      "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
+      "line": 138,
+      "exported": false
+    },
+    {
+      "name": "EyeDropperResult",
+      "kind": "interface",
+      "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
+      "line": 57,
+      "exported": false
+    },
+    {
+      "name": "EyeDropperInstance",
+      "kind": "interface",
+      "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
+      "line": 61,
+      "exported": false
+    },
+    {
+      "name": "EyeDropperConstructor",
+      "kind": "interface",
+      "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
+      "line": 65,
+      "exported": false
+    },
+    {
+      "name": "Window",
+      "kind": "interface",
+      "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
+      "line": 70,
+      "exported": false
+    },
+    {
+      "name": "Adjustments",
+      "kind": "interface",
+      "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
+      "line": 75,
+      "exported": false
+    },
+    {
+      "name": "FilterPreset",
+      "kind": "interface",
+      "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
+      "line": 86,
+      "exported": false
+    },
+    {
+      "name": "CropPreset",
+      "kind": "interface",
+      "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
+      "line": 92,
+      "exported": false
+    },
+    {
+      "name": "TextOverlayState",
+      "kind": "interface",
+      "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
+      "line": 99,
+      "exported": false
+    },
+    {
+      "name": "restoreFace",
+      "kind": "function",
+      "file": "frontend/src/domains/enhancement/services/restore-face-api.ts",
+      "line": 4,
+      "exported": true
+    },
+    {
+      "name": "RestoreFaceRequest",
+      "kind": "interface",
+      "file": "frontend/src/domains/enhancement/types/restore-face.ts",
+      "line": 1,
+      "exported": true
+    },
+    {
+      "name": "RestoreFaceResponse",
+      "kind": "interface",
+      "file": "frontend/src/domains/enhancement/types/restore-face.ts",
+      "line": 12,
+      "exported": true
+    },
+    {
+      "name": "HistoryPage",
+      "kind": "function",
+      "file": "frontend/src/domains/history/components/HistoryPage.tsx",
+      "line": 35,
+      "exported": true
+    },
+    {
+      "name": "DeleteHistoryResponse",
+      "kind": "interface",
+      "file": "frontend/src/domains/history/services/history-api.ts",
+      "line": 10,
+      "exported": false
+    },
+    {
+      "name": "historyApi",
+      "kind": "const",
+      "file": "frontend/src/domains/history/services/history-api.ts",
+      "line": 15,
+      "exported": true
+    },
+    {
+      "name": "HistoryListResponse",
+      "kind": "interface",
+      "file": "frontend/src/domains/history/services/history-api.ts",
+      "line": 5,
+      "exported": false
+    },
+    {
+      "name": "CreateHistoryRequest",
+      "kind": "interface",
+      "file": "frontend/src/domains/history/types/history.ts",
+      "line": 17,
+      "exported": true
+    },
+    {
+      "name": "CreateHistoryResponse",
+      "kind": "interface",
+      "file": "frontend/src/domains/history/types/history.ts",
+      "line": 27,
+      "exported": true
+    },
+    {
+      "name": "HistoryRecord",
+      "kind": "interface",
+      "file": "frontend/src/domains/history/types/history.ts",
+      "line": 3,
+      "exported": true
+    },
+    {
+      "name": "LandingPage",
+      "kind": "function",
+      "file": "frontend/src/domains/landing/components/LandingPage.tsx",
+      "line": 175,
+      "exported": true
+    },
+    {
+      "name": "PresetsPage",
+      "kind": "function",
+      "file": "frontend/src/domains/presets/components/PresetsPage.tsx",
+      "line": 26,
+      "exported": true
+    },
+    {
+      "name": "DeletePresetResponse",
+      "kind": "interface",
+      "file": "frontend/src/domains/presets/services/presets-api.ts",
+      "line": 15,
+      "exported": false
+    },
+    {
+      "name": "presetsApi",
+      "kind": "const",
+      "file": "frontend/src/domains/presets/services/presets-api.ts",
+      "line": 20,
+      "exported": true
+    },
+    {
+      "name": "PresetListResponse",
+      "kind": "interface",
+      "file": "frontend/src/domains/presets/services/presets-api.ts",
+      "line": 4,
+      "exported": false
+    },
+    {
+      "name": "PresetResponse",
+      "kind": "interface",
+      "file": "frontend/src/domains/presets/services/presets-api.ts",
+      "line": 9,
+      "exported": false
+    },
+    {
+      "name": "Preset",
+      "kind": "interface",
+      "file": "frontend/src/domains/presets/types/preset.ts",
+      "line": 1,
+      "exported": true
+    },
+    {
+      "name": "SavePresetRequest",
+      "kind": "interface",
+      "file": "frontend/src/domains/presets/types/preset.ts",
+      "line": 9,
+      "exported": true
+    },
+    {
+      "name": "API_AUTH_TOKEN_STORAGE_KEY",
+      "kind": "const",
+      "file": "frontend/src/infrastructure/api/api-client.ts",
+      "line": 10,
+      "exported": true
+    },
+    {
+      "name": "ApiError",
+      "kind": "class",
+      "file": "frontend/src/infrastructure/api/api-client.ts",
+      "line": 16,
+      "exported": true
+    },
+    {
+      "name": "getApiAuthToken",
+      "kind": "function",
+      "file": "frontend/src/infrastructure/api/api-client.ts",
+      "line": 30,
+      "exported": true
+    },
+    {
+      "name": "setApiAuthToken",
+      "kind": "function",
+      "file": "frontend/src/infrastructure/api/api-client.ts",
+      "line": 38,
+      "exported": true
+    },
+    {
+      "name": "clearApiAuthToken",
+      "kind": "function",
+      "file": "frontend/src/infrastructure/api/api-client.ts",
+      "line": 46,
+      "exported": true
+    },
+    {
+      "name": "apiRequest",
+      "kind": "function",
+      "file": "frontend/src/infrastructure/api/api-client.ts",
+      "line": 54,
+      "exported": true
+    },
+    {
+      "name": "BrandMark",
+      "kind": "function",
+      "file": "frontend/src/shared/components/AppHeader.tsx",
+      "line": 120,
+      "exported": true
+    },
+    {
+      "name": "AppHeaderProps",
+      "kind": "interface",
+      "file": "frontend/src/shared/components/AppHeader.tsx",
+      "line": 14,
+      "exported": false
+    },
+    {
+      "name": "AppHeader",
+      "kind": "function",
+      "file": "frontend/src/shared/components/AppHeader.tsx",
+      "line": 18,
+      "exported": true
+    },
+    {
+      "name": "MobileViewportGate",
+      "kind": "function",
+      "file": "frontend/src/shared/components/MobileViewportGate.tsx",
+      "line": 5,
+      "exported": true
+    },
+    {
+      "name": "ACCOUNT_FIELD_NAMES",
+      "kind": "const",
+      "file": "frontend/src/shared/constants/lumina.ts",
+      "line": 1,
+      "exported": true
+    },
+    {
+      "name": "OPERATION_TYPES",
+      "kind": "const",
+      "file": "frontend/src/shared/constants/lumina.ts",
+      "line": 11,
+      "exported": true
+    },
+    {
+      "name": "EDITOR_FILTERS",
+      "kind": "const",
+      "file": "frontend/src/shared/constants/lumina.ts",
+      "line": 22,
+      "exported": true
+    },
+    {
+      "name": "TRANSFORM_TOOLS",
+      "kind": "const",
+      "file": "frontend/src/shared/constants/lumina.ts",
+      "line": 24,
+      "exported": true
+    },
+    {
+      "name": "WEB_MVP_IMAGE_PROCESSING_ROUTES",
+      "kind": "const",
+      "file": "frontend/src/shared/constants/lumina.ts",
+      "line": 26,
+      "exported": true
+    },
+    {
+      "name": "DISALLOWED_WEB_MVP_IMAGE_PROCESSING_ROUTES",
+      "kind": "const",
+      "file": "frontend/src/shared/constants/lumina.ts",
+      "line": 30,
+      "exported": true
+    },
+    {
+      "name": "ERROR_RESPONSE_FIELDS",
+      "kind": "const",
+      "file": "frontend/src/shared/constants/lumina.ts",
+      "line": 35,
+      "exported": true
+    },
+    {
+      "name": "AccountFieldName",
+      "kind": "type",
+      "file": "frontend/src/shared/constants/lumina.ts",
+      "line": 41,
+      "exported": true
+    },
+    {
+      "name": "ProcessingMode",
+      "kind": "type",
+      "file": "frontend/src/shared/constants/lumina.ts",
+      "line": 42,
+      "exported": true
+    },
+    {
+      "name": "OperationType",
+      "kind": "type",
+      "file": "frontend/src/shared/constants/lumina.ts",
+      "line": 43,
+      "exported": true
+    },
+    {
+      "name": "PROCESSING_MODES",
+      "kind": "const",
+      "file": "frontend/src/shared/constants/lumina.ts",
+      "line": 6,
+      "exported": true
+    },
+    {
+      "name": "APP_ROUTES",
+      "kind": "const",
+      "file": "frontend/src/shared/constants/routes.ts",
+      "line": 1,
+      "exported": true
+    },
+    {
+      "name": "GUEST_SESSION_STORAGE_KEY",
+      "kind": "const",
+      "file": "frontend/src/shared/guest-session.ts",
+      "line": 1,
+      "exported": true
+    },
+    {
+      "name": "getOrCreateGuestSessionId",
+      "kind": "function",
+      "file": "frontend/src/shared/guest-session.ts",
+      "line": 3,
+      "exported": true
+    },
+    {
+      "name": "appTheme",
+      "kind": "const",
+      "file": "frontend/src/shared/theme.ts",
+      "line": 3,
+      "exported": true
+    }
+  ]
+}

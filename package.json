@@ -12,9 +12,17 @@
     "build": "npm run build --workspace frontend && npm run build --workspace backend",
     "lint": "npm run lint --workspace frontend && npm run lint --workspace backend",
     "typecheck": "npm run typecheck --workspace frontend && npm run typecheck --workspace backend",
-    "test": "npm run test --workspace frontend && npm run test --workspace backend"
+    "test": "npm run test --workspace frontend && npm run test --workspace backend",
+    "verify": "npm run lint && npm run typecheck && npm run test && npm run build",
+    "ai:check": "npm run verify",
+    "ai:index": "node scripts/generate-ai-index.mjs",
+    "ai:context": "npm run ai:index",
+    "ai:graph": "graphify update . --no-description --no-label"
   },
   "devDependencies": {
-    "jsdom": "^25.0.1"
+    "@juliusbrussee/caveman-code": "^0.65.2",
+    "@sentropic/graphify": "^0.14.0",
+    "jsdom": "^25.0.1",
+    "likecu-understand-anything": "^1.0.0"
   }
 }

@@ -1,0 +1,14 @@
+---
+description: LuminaStudio Web architecture boundaries.
+alwaysApply: true
+---
+
+# Architecture
+
+Manual image editing, filters, crop, rotate, flip, text overlay, and export stay in the frontend.
+
+The backend handles authentication, optional encrypted Hugging Face token storage, preset CRUD, metadata-only history, and `POST /api/v1/ai/restore-face`.
+
+Do not add backend offline AI models, Real-ESRGAN, local CodeFormer, server-side manual enhancement, `POST /api/v1/enhance/offline`, or `POST /api/v1/enhance/manual`.
+
+Keep code in the established folders under `frontend/src/app`, `frontend/src/domains`, `frontend/src/shared`, `frontend/src/infrastructure`, `backend/src/domains`, `backend/src/contracts`, `backend/src/common`, `backend/src/integrations`, and `backend/src/persistence`.

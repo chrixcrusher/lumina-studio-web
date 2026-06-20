@@ -107,7 +107,7 @@ describe("frontend API contract", () => {
 });
 
 function calledContracts(fetchMock: ReturnType<typeof vi.fn>) {
-  return fetchMock.mock.calls.map(([path, init]) => `${(init as RequestInit | undefined)?.method ?? "GET"} ${path}`);
+  return fetchMock.mock.calls.map(([path, init]) => `${(init as RequestInit | undefined)?.method ?? "GET"} ${apiPath(String(path))}`);
 }
 
 function jsonResponse(body: unknown, status = 200): Response {
@@ -120,6 +120,8 @@ function jsonResponse(body: unknown, status = 200): Response {
 }
 
 function responseFor(path: string, method: string): unknown {
+  path = apiPath(path);
+
   if (path === "/api/v1/auth/register" || path === "/api/v1/auth/login") {
     return {
       success: true,
@@ -235,6 +237,14 @@ function responseFor(path: string, method: string): unknown {
   }
 
   throw new Error(`Missing mocked API contract response for ${method} ${path}`);
+}
+
+function apiPath(path: string): string {
+  try {
+    return new URL(path).pathname;
+  } catch {
+    return path;
+  }
 }
 
 function account() {

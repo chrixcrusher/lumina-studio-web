@@ -39,8 +39,146 @@ textarea {
   background: rgba(124, 102, 255, 0.35);
 }
 
-.mobile-viewport-gate {
-  display: none;
+.driver-popover.lumina-driver-tour {
+  box-sizing: border-box !important;
+  min-width: min(310px, calc(100vw - 28px)) !important;
+  max-width: min(380px, calc(100vw - 28px)) !important;
+  padding: 20px !important;
+  border: 1px solid rgba(167, 139, 250, 0.42) !important;
+  border-radius: 8px !important;
+  background:
+    linear-gradient(180deg, rgba(25, 22, 48, 0.98), rgba(12, 12, 24, 0.99)) !important;
+  background-color: #111020 !important;
+  color: #e9e6ff !important;
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.72),
+    0 0 0 1px rgba(124, 102, 255, 0.12),
+    0 0 28px rgba(124, 102, 255, 0.18) !important;
+}
+
+.driver-popover.lumina-driver-tour * {
+  font-family: "Outfit", ui-sans-serif, system-ui, sans-serif !important;
+}
+
+.driver-popover.lumina-driver-tour .driver-popover-title {
+  color: #f5f2ff !important;
+  font-size: 20px !important;
+  font-weight: 900 !important;
+  line-height: 1.15 !important;
+  letter-spacing: 0 !important;
+}
+
+.driver-popover.lumina-driver-tour .driver-popover-description {
+  margin-top: 10px !important;
+  color: #c9c4ff !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  line-height: 1.55 !important;
+}
+
+.driver-popover.lumina-driver-tour .driver-popover-footer {
+  margin-top: 20px !important;
+  gap: 14px !important;
+}
+
+.driver-popover.lumina-driver-tour .driver-popover-progress-text {
+  color: #b7adff !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+}
+
+.driver-popover.lumina-driver-tour .driver-popover-close-btn {
+  top: 10px !important;
+  right: 10px !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 8px !important;
+  color: #b7adff !important;
+  font-size: 22px !important;
+  line-height: 32px !important;
+}
+
+.driver-popover.lumina-driver-tour .driver-popover-close-btn:hover,
+.driver-popover.lumina-driver-tour .driver-popover-close-btn:focus {
+  background: rgba(124, 102, 255, 0.18) !important;
+  color: #ffffff !important;
+}
+
+.driver-popover.lumina-driver-tour .driver-popover-footer button {
+  min-width: 74px !important;
+  min-height: 34px !important;
+  padding: 8px 13px !important;
+  border: 1px solid rgba(167, 139, 250, 0.42) !important;
+  border-radius: 8px !important;
+  background: rgba(124, 102, 255, 0.14) !important;
+  color: #e9e6ff !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+}
+
+.driver-popover.lumina-driver-tour .driver-popover-next-btn {
+  border-color: rgba(196, 181, 253, 0.7) !important;
+  background: linear-gradient(135deg, #7c66ff, #9333ea) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 18px rgba(124, 102, 255, 0.35) !important;
+}
+
+.driver-popover.lumina-driver-tour .driver-popover-prev-btn {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #d8d2ff !important;
+}
+
+.driver-popover.lumina-driver-tour .driver-popover-footer .driver-popover-btn-disabled {
+  border-color: rgba(167, 139, 250, 0.2) !important;
+  background: rgba(255, 255, 255, 0.045) !important;
+  color: #8f88c8 !important;
+  opacity: 0.78 !important;
+}
+
+.driver-popover.lumina-driver-tour .driver-popover-footer button:hover,
+.driver-popover.lumina-driver-tour .driver-popover-footer button:focus {
+  border-color: rgba(221, 214, 254, 0.78) !important;
+  background: rgba(124, 102, 255, 0.26) !important;
+  color: #ffffff !important;
+}
+
+.driver-popover.lumina-driver-tour .driver-popover-next-btn:hover,
+.driver-popover.lumina-driver-tour .driver-popover-next-btn:focus {
+  background: linear-gradient(135deg, #8b78ff, #a855f7) !important;
+}
+
+.driver-popover.lumina-driver-tour .driver-popover-arrow {
+  border-color: #111020 !important;
+}
+
+.driver-popover.lumina-driver-tour .driver-popover-arrow-side-left {
+  border-top-color: transparent !important;
+  border-right-color: transparent !important;
+  border-bottom-color: transparent !important;
+}
+
+.driver-popover.lumina-driver-tour .driver-popover-arrow-side-right {
+  border-top-color: transparent !important;
+  border-bottom-color: transparent !important;
+  border-left-color: transparent !important;
+}
+
+.driver-popover.lumina-driver-tour .driver-popover-arrow-side-top {
+  border-right-color: transparent !important;
+  border-bottom-color: transparent !important;
+  border-left-color: transparent !important;
+}
+
+.driver-popover.lumina-driver-tour .driver-popover-arrow-side-bottom {
+  border-top-color: transparent !important;
+  border-right-color: transparent !important;
+  border-left-color: transparent !important;
 }
 
 @media (max-width: 767px) {
@@ -48,29 +186,7 @@ textarea {
   body {
     width: 100%;
     min-height: 100%;
-    overflow: hidden;
-  }
-
-  .desktop-tablet-viewport {
-    display: none !important;
-  }
-
-  .mobile-viewport-gate {
-    position: fixed;
-    inset: 0;
-    z-index: 2147483647;
-    display: grid;
-    place-items: center;
-    width: 100vw;
-    height: 100vh;
-    padding: 24px;
-    background: #08080e;
-    color: #e4e4f2;
-    font-family: "Outfit", ui-sans-serif, system-ui, sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 1.35;
-    text-align: center;
+    overflow-x: hidden;
   }
 }
 

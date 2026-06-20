@@ -175,11 +175,63 @@ presets
   "accountId": "65f1a2b3c4d5e6f7a8b9c0d1",
   "presetName": "Warm Vintage",
   "enhancementSettings": {
-    "exposure": 5,
-    "contrast": -5,
-    "saturation": 25,
-    "temperature": 8,
-    "filter": "vintage"
+    "schemaVersion": "2.0.0",
+    "light": {
+      "exposure": 5,
+      "contrast": -5,
+      "highlights": -12,
+      "shadows": 10,
+      "whites": 4,
+      "blacks": -8
+    },
+    "color": {
+      "temperature": 8,
+      "tint": 0,
+      "saturation": 25,
+      "vibrance": 16
+    },
+    "effects": {
+      "texture": 6,
+      "clarity": 8,
+      "vignette": {
+        "amount": -20,
+        "midpoint": 50,
+        "roundness": 0,
+        "feather": 50,
+        "highlights": 0
+      },
+      "grain": {
+        "amount": 0,
+        "size": 25,
+        "roughness": 50
+      }
+    },
+    "detail": {
+      "sharpening": {
+        "amount": 20,
+        "radius": 1,
+        "detail": 25,
+        "masking": 0
+      }
+    },
+    "geometry": {
+      "crop": {
+        "x": 0,
+        "y": 0,
+        "width": 100,
+        "height": 100,
+        "aspectRatio": "none"
+      },
+      "rotate90": 0,
+      "flipHorizontal": false,
+      "flipVertical": false
+    },
+    "textOverlay": {
+      "items": []
+    },
+    "filter": {
+      "id": "vintage"
+    }
   },
   "createdAt": "2026-06-06T08:30:00.000Z",
   "updatedAt": "2026-06-06T08:30:00.000Z"
@@ -191,6 +243,7 @@ presets
 * Presets are only persisted for authenticated users.
 * Guest users may import and apply preset JSON during the active session, but guest presets are not stored in MongoDB.
 * Presets should store browser-side editing settings, not image files.
+* `enhancementSettings.schemaVersion` identifies the browser preset settings model. Legacy flat payloads are migrated by the frontend before save/import.
 
 ---
 

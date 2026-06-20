@@ -1,0 +1,9 @@
+# LuminaStudio Web Windsurf Rules
+
+Use `AGENTS.md` as the primary instruction file and keep all changes aligned with `docs/tdd/ls-web-tdd.md`.
+
+Manual editing stays browser-side. Backend image processing is limited to the Hugging Face CodeFormer proxy route `POST /api/v1/ai/restore-face`.
+
+Use `.agents/skills/` for workflows and `.agents/roles/` for responsibilities. Context tools can guide navigation, but exact source files must be read before edits.
+
+Verify honestly with the actual npm commands documented in `.agents/tools/verification-commands.md`.
