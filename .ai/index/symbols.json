@@ -1,5 +1,6 @@
 {
   "description": "Exported and high-value local symbols for navigation.",
+  "config": ".ai/context-config.json",
   "regenerate": "npm run ai:index",
   "symbols": [
     {
@@ -930,14 +931,14 @@
       "name": "AuthFormProps",
       "kind": "interface",
       "file": "frontend/src/domains/authentication/components/AuthForm.tsx",
-      "line": 18,
+      "line": 21,
       "exported": false
     },
     {
       "name": "AuthForm",
       "kind": "function",
       "file": "frontend/src/domains/authentication/components/AuthForm.tsx",
-      "line": 57,
+      "line": 60,
       "exported": true
     },
     {
@@ -997,101 +998,94 @@
       "exported": true
     },
     {
+      "name": "TextOverlayState",
+      "kind": "interface",
+      "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
+      "line": 104,
+      "exported": false
+    },
+    {
       "name": "FreeCropState",
       "kind": "interface",
       "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
-      "line": 108,
+      "line": 113,
       "exported": false
     },
     {
       "name": "FreeCropDragState",
       "kind": "interface",
       "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
-      "line": 117,
+      "line": 122,
       "exported": false
     },
     {
       "name": "RgbColor",
       "kind": "interface",
       "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
-      "line": 126,
+      "line": 131,
       "exported": false
-    },
-    {
-      "name": "EditorWorkspace",
-      "kind": "function",
-      "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
-      "line": 1302,
-      "exported": true
     },
     {
       "name": "HslColor",
       "kind": "interface",
       "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
-      "line": 132,
+      "line": 137,
       "exported": false
     },
     {
       "name": "CmykColor",
       "kind": "interface",
       "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
-      "line": 138,
+      "line": 143,
       "exported": false
+    },
+    {
+      "name": "EditorWorkspace",
+      "kind": "function",
+      "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
+      "line": 1456,
+      "exported": true
     },
     {
       "name": "EyeDropperResult",
-      "kind": "interface",
-      "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
-      "line": 57,
-      "exported": false
-    },
-    {
-      "name": "EyeDropperInstance",
-      "kind": "interface",
-      "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
-      "line": 61,
-      "exported": false
-    },
-    {
-      "name": "EyeDropperConstructor",
-      "kind": "interface",
-      "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
-      "line": 65,
-      "exported": false
-    },
-    {
-      "name": "Window",
       "kind": "interface",
       "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
       "line": 70,
       "exported": false
     },
     {
-      "name": "Adjustments",
+      "name": "EyeDropperInstance",
       "kind": "interface",
       "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
-      "line": 75,
+      "line": 74,
+      "exported": false
+    },
+    {
+      "name": "EyeDropperConstructor",
+      "kind": "interface",
+      "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
+      "line": 78,
+      "exported": false
+    },
+    {
+      "name": "Window",
+      "kind": "interface",
+      "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
+      "line": 83,
       "exported": false
     },
     {
       "name": "FilterPreset",
       "kind": "interface",
       "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
-      "line": 86,
+      "line": 90,
       "exported": false
     },
     {
       "name": "CropPreset",
       "kind": "interface",
       "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
-      "line": 92,
-      "exported": false
-    },
-    {
-      "name": "TextOverlayState",
-      "kind": "interface",
-      "file": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
-      "line": 99,
+      "line": 97,
       "exported": false
     },
     {
@@ -1176,6 +1170,76 @@
       "kind": "function",
       "file": "frontend/src/domains/presets/components/PresetsPage.tsx",
       "line": 26,
+      "exported": true
+    },
+    {
+      "name": "createPresetEnhancementSettings",
+      "kind": "function",
+      "file": "frontend/src/domains/presets/services/preset-schema.ts",
+      "line": 124,
+      "exported": true
+    },
+    {
+      "name": "toEditorPresetSettings",
+      "kind": "function",
+      "file": "frontend/src/domains/presets/services/preset-schema.ts",
+      "line": 206,
+      "exported": true
+    },
+    {
+      "name": "migratePresetEnhancementSettings",
+      "kind": "function",
+      "file": "frontend/src/domains/presets/services/preset-schema.ts",
+      "line": 270,
+      "exported": true
+    },
+    {
+      "name": "PRESET_SCHEMA_VERSION",
+      "kind": "const",
+      "file": "frontend/src/domains/presets/services/preset-schema.ts",
+      "line": 3,
+      "exported": true
+    },
+    {
+      "name": "parsePresetJsonPayload",
+      "kind": "function",
+      "file": "frontend/src/domains/presets/services/preset-schema.ts",
+      "line": 324,
+      "exported": true
+    },
+    {
+      "name": "EditorPresetFreeCrop",
+      "kind": "interface",
+      "file": "frontend/src/domains/presets/services/preset-schema.ts",
+      "line": 34,
+      "exported": true
+    },
+    {
+      "name": "EditorPresetTextOverlay",
+      "kind": "interface",
+      "file": "frontend/src/domains/presets/services/preset-schema.ts",
+      "line": 41,
+      "exported": true
+    },
+    {
+      "name": "EditorPresetAdjustments",
+      "kind": "interface",
+      "file": "frontend/src/domains/presets/services/preset-schema.ts",
+      "line": 5,
+      "exported": true
+    },
+    {
+      "name": "EditorPresetSettings",
+      "kind": "interface",
+      "file": "frontend/src/domains/presets/services/preset-schema.ts",
+      "line": 50,
+      "exported": true
+    },
+    {
+      "name": "PresetSchemaError",
+      "kind": "class",
+      "file": "frontend/src/domains/presets/services/preset-schema.ts",
+      "line": 61,
       "exported": true
     },
     {

@@ -5,6 +5,8 @@ alwaysApply: true
 
 # Testing
 
+<!-- Generated from AGENTS.md and .agents sources. Keep canonical updates there first. -->
+
 Add or update focused tests when behavior changes. Use regression tests for bug fixes and contract tests for API shape changes.
 
 Actual commands:

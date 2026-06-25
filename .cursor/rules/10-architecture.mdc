@@ -5,6 +5,8 @@ alwaysApply: true
 
 # Architecture
 
+<!-- Generated from AGENTS.md and .agents sources. Keep canonical updates there first. -->
+
 Manual image editing, filters, crop, rotate, flip, text overlay, and export stay in the frontend.
 
 The backend handles authentication, optional encrypted Hugging Face token storage, preset CRUD, metadata-only history, and `POST /api/v1/ai/restore-face`.

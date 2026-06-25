@@ -1,0 +1,74 @@
+{
+  "index": {
+    "outDir": ".ai/index",
+    "sourceRoots": [
+      "backend/src",
+      "frontend/src"
+    ],
+    "extensions": [
+      ".ts",
+      ".tsx"
+    ],
+    "ignoredDirectories": [
+      ".git",
+      ".next",
+      "coverage",
+      "dist",
+      "node_modules",
+      "out"
+    ],
+    "areaRules": [
+      {
+        "prefix": "backend/src/domains/",
+        "area": "backend:{3}"
+      },
+      {
+        "prefix": "backend/src/persistence/",
+        "area": "backend:persistence"
+      },
+      {
+        "prefix": "backend/src/integrations/",
+        "area": "backend:integrations"
+      },
+      {
+        "prefix": "backend/src/common/",
+        "area": "backend:common"
+      },
+      {
+        "prefix": "backend/src/contracts/",
+        "area": "backend:contracts"
+      },
+      {
+        "prefix": "frontend/src/domains/",
+        "area": "frontend:{3}"
+      },
+      {
+        "prefix": "frontend/src/app/",
+        "area": "frontend:app"
+      },
+      {
+        "prefix": "frontend/src/shared/",
+        "area": "frontend:shared"
+      },
+      {
+        "prefix": "frontend/src/infrastructure/",
+        "area": "frontend:infrastructure"
+      },
+      {
+        "prefix": "frontend/src/tests/",
+        "area": "frontend:tests"
+      }
+    ],
+    "routes": {
+      "decoratedControllerSource": "backend",
+      "decoratedControllerApiPrefix": "api/v1",
+      "decoratedControllerSuffix": ".controller.ts",
+      "clientApiSource": "frontend",
+      "clientApiIncludeSegments": [
+        "/services/",
+        "/infrastructure/api/"
+      ],
+      "clientApiFunction": "apiRequest"
+    }
+  }
+}

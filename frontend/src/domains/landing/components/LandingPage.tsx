@@ -366,8 +366,17 @@ export function LandingPage() {
         </Container>
       </Box>
 
-      <Box component="section" sx={{ minHeight: "100vh", display: "flex", alignItems: "center", py: 8 }}>
-        <Container maxWidth="xl">
+      <Box
+        component="section"
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          py: { xs: 6, md: 8 },
+          overflowX: "hidden",
+        }}
+      >
+        <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3, md: 3 } }}>
           <Reveal>
             <Stack spacing={4}>
               <Box>
@@ -387,15 +396,22 @@ export function LandingPage() {
                   storage, presets, metadata history, and the Hugging Face restore proxy.
                 </Typography>
               </Box>
-              <Grid container spacing={2.5}>
+              <Grid
+                container
+                rowSpacing={{ xs: 2, md: 2.5 }}
+                columnSpacing={{ xs: 0, md: 2.5 }}
+                sx={{ width: "100%", m: 0 }}
+              >
                 {featureHighlights.map((feature, index) => (
-                  <Grid item xs={12} md={3} key={feature.title}>
+                  <Grid item xs={12} md={3} key={feature.title} sx={{ minWidth: 0, pl: { xs: "0 !important" } }}>
                     <Reveal delay={index * 90}>
                       <Paper
                         sx={{
-                          p: 3.25,
+                          boxSizing: "border-box",
+                          width: "100%",
+                          p: { xs: 2.4, sm: 3, md: 3.25 },
                           height: "100%",
-                          minHeight: 264,
+                          minHeight: { xs: 220, md: 264 },
                           border: "1px solid rgba(255,255,255,0.08)",
                           bgcolor: "#111118",
                           color: "#e4e4f2",

@@ -53,7 +53,7 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import type { Driver } from "driver.js";
 import Link from "next/link";
-import type { ChangeEvent, CSSProperties, MouseEvent, PointerEvent, ReactNode, WheelEvent } from "react";
+import type { ChangeEvent, CSSProperties, MouseEvent, PointerEvent, ReactNode, SyntheticEvent } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { createEditorDriverSteps } from "@/domains/editor/tour/editor-tour";
@@ -124,6 +124,11 @@ interface TextOverlayState {
   size: number;
   x: number;
   y: number;
+}
+
+interface ImageDimensions {
+  width: number;
+  height: number;
 }
 
 interface FreeCropState {
@@ -232,8 +237,12 @@ const EDITOR_LAYOUT = {
     md: "min(480px, calc(100% - 48px))",
     lg: "min(520px, calc(100% - 64px))",
   },
-  filterCardWidth: { xs: "108px", sm: "122px", md: "124px", lg: "132px", xl: "138px" },
+  filterCardWidth: { xs: "96px", sm: "112px", md: "124px", lg: "132px", xl: "138px" },
 } as const;
+
+const MIN_ZOOM = 40;
+const MAX_ZOOM = 240;
+const ZOOM_STEP = 10;
 
 const CROP_PRESETS = [
   { id: "none", label: "No Crop", ratio: null, exportRatio: null },
@@ -978,18 +987,18 @@ function Brand() {
         <Typography
           sx={{
             fontFamily: '"Playfair Display", Georgia, serif',
-            fontSize: { xs: 22, sm: 26, md: 27, lg: 30 },
+            fontSize: { xs: 20, sm: 24, md: 27, lg: 30 },
             fontWeight: 700,
             color: "#e4e4f2",
             lineHeight: 1,
-            maxWidth: { xs: 88, sm: 118, md: "none" },
+            maxWidth: { xs: 78, sm: 112, md: "none" },
             overflow: "hidden",
             textOverflow: "ellipsis",
           }}
         >
           Lumina
         </Typography>
-        <Typography sx={{ fontSize: { xs: 11, sm: 13, md: 13, lg: 14 }, color: "#6868a0", letterSpacing: { xs: "0.2em", md: "0.12em" }, lineHeight: 1 }}>
+        <Typography sx={{ fontSize: { xs: 9.5, sm: 12, md: 13, lg: 14 }, color: "#6868a0", letterSpacing: { xs: "0.16em", md: "0.12em" }, lineHeight: 1 }}>
           STUDIO
         </Typography>
       </Stack>
@@ -1022,15 +1031,15 @@ function ToolButton({
       onClick={onClick}
       sx={{
         display: { xs: hideOnMobile ? "none" : "inline-flex", md: "inline-flex" },
-        width: { xs: 70, md: 50, lg: 52 },
-        height: { xs: 64, md: 50, lg: 52 },
+        width: { xs: 58, sm: 64, md: 50, lg: 52 },
+        height: { xs: 54, sm: 58, md: 50, lg: 52 },
         borderRadius: { xs: 2, md: 1.7 },
         flexDirection: { xs: "column", md: "row" },
-        gap: { xs: 0.55, md: 0 },
+        gap: { xs: 0.35, md: 0 },
         color: active ? "#a78bfa" : "#52527a",
         bgcolor: active ? "rgba(124,102,255,0.18)" : "transparent",
         outline: active ? "1px solid rgba(124,102,255,0.35)" : "none",
-        "& svg": { fontSize: { xs: 24, md: 26, lg: 28 } },
+        "& svg": { fontSize: { xs: 21, sm: 23, md: 26, lg: 28 } },
         "&:hover": { bgcolor: "rgba(124,102,255,0.12)", color: "#a78bfa" },
       }}
     >
@@ -1040,7 +1049,7 @@ function ToolButton({
         sx={{
           display: { xs: "block", md: "none" },
           color: active ? "#c4b5fd" : "#8888b8",
-          fontSize: 11,
+          fontSize: { xs: 10, sm: 10.5 },
           fontWeight: active ? 800 : 600,
           lineHeight: 1,
         }}
@@ -1813,6 +1822,7 @@ function Histogram({ adjustments }: { adjustments: Adjustments }) {
 export function EditorWorkspace() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [imageDimensions, setImageDimensions] = useState<ImageDimensions | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [imageLoading, setImageLoading] = useState(false);
   const [guestSessionId, setGuestSessionId] = useState<string | null>(null);
@@ -1981,6 +1991,12 @@ export function EditorWorkspace() {
   const activeCropRatio = showOriginal || cropPreset.id === "none" || cropPreset.id === "free" ? null : cropPreset.ratio;
   const appliedFreeCropRatio = freeCropPreviewActive ? `${freeCrop.width} / ${freeCrop.height}` : null;
   const previewCropRatio = activeCropRatio ?? appliedFreeCropRatio;
+  const sourceAspectRatio = imageDimensions && imageDimensions.height > 0 ? imageDimensions.width / imageDimensions.height : null;
+  const previewAspectRatioValue = previewCropRatio
+    ? cropPreset.exportRatio ?? (freeCropPreviewActive ? freeCrop.width / freeCrop.height : null)
+    : sourceAspectRatio;
+  const sourceAspectRatioText = imageDimensions && sourceAspectRatio ? `${imageDimensions.width} / ${imageDimensions.height}` : null;
+  const previewAspectRatio = previewCropRatio ?? sourceAspectRatioText ?? "auto";
   const cropMode = showOriginal ? "none" : freeCropPreviewActive ? "free-applied" : cropPreset.id === "free" ? "free-editing" : activeCropRatio ?? "none";
   const previewTransform = showOriginal ? "none" : buildPreviewTransform(rotation, flipHorizontal, flipVertical);
   const selectedTextOverlay = textOverlays.find((overlay) => overlay.id === selectedTextId) ?? null;
@@ -2387,11 +2403,20 @@ export function EditorWorkspace() {
     aiStatusTimeoutRef.current = window.setTimeout(() => setAiStatus("Ready"), 2500);
   };
 
-  const handleWorkspaceWheel = (event: WheelEvent<HTMLElement>) => {
-    if (selectedTool !== "select") return;
+  const handleZoomIn = () => {
+    setZoom((current) => Math.min(MAX_ZOOM, current + ZOOM_STEP));
+  };
 
-    event.preventDefault();
-    setZoom((current) => clamp(current + (event.deltaY < 0 ? 10 : -10), 20, 300));
+  const handleZoomOut = () => {
+    setZoom((current) => Math.max(MIN_ZOOM, current - ZOOM_STEP));
+  };
+
+  const handleImageLoad = (event: SyntheticEvent<HTMLImageElement>) => {
+    const { naturalWidth, naturalHeight } = event.currentTarget;
+
+    if (naturalWidth > 0 && naturalHeight > 0) {
+      setImageDimensions({ width: naturalWidth, height: naturalHeight });
+    }
   };
 
   const handleWorkspacePreviewPointerDown = (event: PointerEvent<HTMLElement>) => {
@@ -2477,6 +2502,8 @@ export function EditorWorkspace() {
 
       setUploadedImage(reader.result);
       setUploadedFileName(file.name);
+      setImageDimensions(null);
+      setZoom(100);
       setSelectedPreset(FILTER_PRESETS[0]);
       resetManualState();
       setImageLoading(false);
@@ -2519,6 +2546,8 @@ export function EditorWorkspace() {
       });
 
       setUploadedImage(toRestoredDataUrl(response.restoredImage, response.outputFormat));
+      setImageDimensions(null);
+      setZoom(100);
       resetManualState();
       setAiStatus("Restoration Complete");
       scheduleAiStatusReset();
@@ -2648,7 +2677,7 @@ export function EditorWorkspace() {
         overflowX: "hidden",
         overflowY: { xs: "visible", md: "hidden" },
         fontFamily: '"Outfit", sans-serif',
-        pb: { xs: 12, md: 0 },
+        pb: { xs: "calc(96px + env(safe-area-inset-bottom))", md: 0 },
       }}
     >
       <Box
@@ -2667,8 +2696,8 @@ export function EditorWorkspace() {
           width: "100%",
           maxWidth: "100dvw",
           overflow: "hidden",
-          px: { xs: 1.25, sm: 2, md: 0 },
-          py: { xs: 1.25, sm: 2, md: 0 },
+          px: { xs: 1, sm: 1.5, md: 0 },
+          py: { xs: 1, sm: 1.35, md: 0 },
           bgcolor: { xs: "#08080e", md: "#0d0d18" },
           borderBottom: { xs: 0, md: "1px solid rgba(255,255,255,0.06)" },
         }}
@@ -2875,18 +2904,18 @@ export function EditorWorkspace() {
           minHeight: 0,
           display: "grid",
           gridTemplateColumns: EDITOR_LAYOUT.shellColumns,
-          gridTemplateRows: { xs: "auto minmax(460px, 1fr) auto", md: "1fr" },
+          gridTemplateRows: { xs: "auto auto auto", md: "1fr" },
           overflow: { xs: "visible", md: "hidden" },
-          rowGap: { xs: 2.2, md: 0 },
+          rowGap: { xs: 1.4, sm: 1.8, md: 0 },
         }}
       >
         <Box
           aria-label="Mobile tool navigation"
           sx={{
             position: { xs: "fixed", md: "static" },
-            left: { xs: 16, md: "auto" },
-            right: { xs: 16, md: "auto" },
-            bottom: { xs: 12, md: "auto" },
+            left: { xs: 10, sm: 16, md: "auto" },
+            right: { xs: 10, sm: 16, md: "auto" },
+            bottom: { xs: "calc(10px + env(safe-area-inset-bottom))", md: "auto" },
             zIndex: { xs: 30, md: "auto" },
             bgcolor: { xs: "rgba(13,13,24,0.94)", md: "#0d0d18" },
             backdropFilter: { xs: "blur(18px)", md: "none" },
@@ -2899,9 +2928,9 @@ export function EditorWorkspace() {
             flexDirection: { xs: "row", md: "column" },
             alignItems: "center",
             justifyContent: { xs: "space-between", md: "flex-start" },
-            gap: { xs: 0.25, md: 0.7 },
-            py: { xs: 1, md: 2 },
-            px: { xs: 0.6, md: 0.55 },
+            gap: { xs: 0.15, md: 0.7 },
+            py: { xs: 0.65, md: 2 },
+            px: { xs: 0.35, md: 0.55 },
             overflowX: { xs: "hidden", md: "visible" },
           }}
         >
@@ -2935,13 +2964,13 @@ export function EditorWorkspace() {
           >
             <PersonOutlineIcon />
           </IconButton>
-          <ToolButton label="Zoom in" hideOnMobile onClick={() => setZoom((current) => Math.min(300, current + 10))}>
+          <ToolButton label="Zoom in" hideOnMobile onClick={handleZoomIn}>
             <ZoomInIcon />
           </ToolButton>
           <Typography sx={{ display: { xs: "none", md: "block" }, color: "#4a4a72", fontSize: 11, fontFamily: '"JetBrains Mono", monospace', fontWeight: 700 }}>
             {zoom}%
           </Typography>
-          <ToolButton label="Zoom out" hideOnMobile onClick={() => setZoom((current) => Math.max(20, current - 10))}>
+          <ToolButton label="Zoom out" hideOnMobile onClick={handleZoomOut}>
             <ZoomOutIcon />
           </ToolButton>
         </Box>
@@ -2955,20 +2984,19 @@ export function EditorWorkspace() {
           }}
         >
           <Box
-            onWheel={handleWorkspaceWheel}
             sx={{
               position: "relative",
-              minHeight: { xs: 460, md: 0 },
-              height: { xs: "min(62vh, 500px)", md: "auto" },
+              minHeight: { xs: 330, sm: 380, md: 0 },
+              height: { xs: "clamp(340px, 54svh, 460px)", sm: "clamp(380px, 56svh, 500px)", md: "auto" },
               display: "grid",
               placeItems: "center",
               overflow: "hidden",
-              width: { xs: "calc(100dvw - 32px)", md: "auto" },
+              width: { xs: "calc(100dvw - 20px)", sm: "calc(100dvw - 32px)", md: "auto" },
               maxWidth: "100%",
               justifySelf: "center",
               mx: { xs: 0, md: 0 },
-              mb: { xs: 2.4, md: 0 },
-              borderRadius: { xs: 3, md: 0 },
+              mb: { xs: 1.4, sm: 1.8, md: 0 },
+              borderRadius: { xs: 2.2, md: 0 },
               border: { xs: imageUrl ? "1px solid rgba(255,255,255,0.08)" : "1px dashed rgba(167,139,250,0.52)", md: 0 },
               bgcolor: { xs: "rgba(13,13,24,0.72)", md: "#06060c" },
               backgroundImage: {
@@ -2986,6 +3014,48 @@ export function EditorWorkspace() {
                 background: "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(124,102,255,0.04) 0%, transparent 70%)",
               }}
             />
+            {imageUrl && (
+              <Stack
+                direction="row"
+                alignItems="center"
+                spacing={0.5}
+                aria-label="Mobile zoom controls"
+                sx={{
+                  display: { xs: "flex", md: "none" },
+                  position: "absolute",
+                  top: 10,
+                  right: 10,
+                  zIndex: 3,
+                  px: 0.65,
+                  py: 0.45,
+                  borderRadius: 2,
+                  bgcolor: "rgba(13,13,24,0.86)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  boxShadow: "0 12px 34px rgba(0,0,0,0.36)",
+                  backdropFilter: "blur(14px)",
+                }}
+              >
+                <IconButton
+                  size="small"
+                  aria-label="Zoom out"
+                  onClick={handleZoomOut}
+                  sx={{ color: "#a9a5ff", width: 30, height: 30, "& svg": { fontSize: 19 } }}
+                >
+                  <ZoomOutIcon />
+                </IconButton>
+                <Typography sx={{ color: "#c4b5fd", fontSize: 11, fontFamily: '"JetBrains Mono", monospace', fontWeight: 800, minWidth: 34, textAlign: "center" }}>
+                  {zoom}%
+                </Typography>
+                <IconButton
+                  size="small"
+                  aria-label="Zoom in"
+                  onClick={handleZoomIn}
+                  sx={{ color: "#a9a5ff", width: 30, height: 30, "& svg": { fontSize: 19 } }}
+                >
+                  <ZoomInIcon />
+                </IconButton>
+              </Stack>
+            )}
             {uploadError && (
               <Box
                 role="alert"
@@ -3024,10 +3094,10 @@ export function EditorWorkspace() {
                 sx={{
                   zIndex: 1,
                   width: EDITOR_LAYOUT.uploadCardWidth,
-                  maxWidth: { xs: "calc(100dvw - 56px)", md: EDITOR_LAYOUT.uploadCardWidth },
-                  minHeight: { xs: 300, md: 340, lg: 370 },
+                  maxWidth: { xs: "calc(100dvw - 44px)", md: EDITOR_LAYOUT.uploadCardWidth },
+                  minHeight: { xs: 220, sm: 250, md: 340, lg: 370 },
                   boxSizing: "border-box",
-                  p: { xs: 3, md: 5, lg: 5.5 },
+                  p: { xs: 2.2, sm: 2.8, md: 5, lg: 5.5 },
                   border: "1px dashed rgba(167,139,250,0.5)",
                   borderRadius: 2.5,
                   bgcolor: "rgba(13,13,24,0.82)",
@@ -3036,12 +3106,12 @@ export function EditorWorkspace() {
                   boxShadow: "0 24px 90px rgba(0,0,0,0.38), inset 0 0 40px rgba(124,102,255,0.05)",
                 }}
               >
-                <UploadFileIcon sx={{ color: "#a78bfa", fontSize: { xs: 46, md: 58 } }} />
+                <UploadFileIcon sx={{ color: "#a78bfa", fontSize: { xs: 38, sm: 42, md: 58 } }} />
                 <Box>
-                  <Typography sx={{ color: "#e4e4f2", fontSize: { xs: 24, md: 30 }, fontWeight: 800 }}>
+                  <Typography sx={{ color: "#e4e4f2", fontSize: { xs: 21, sm: 23, md: 30 }, fontWeight: 800, lineHeight: 1.08 }}>
                     Upload an image to start
                   </Typography>
-                  <Typography sx={{ color: "#8888b8", fontSize: { xs: 14, md: 16 }, mt: 0.9 }}>
+                  <Typography sx={{ color: "#8888b8", fontSize: { xs: 12.5, sm: 13.5, md: 16 }, mt: 0.8 }}>
                     JPEG, PNG, or WebP up to {MAX_UPLOAD_SIZE_MB} MB.
                   </Typography>
                 </Box>
@@ -3053,9 +3123,9 @@ export function EditorWorkspace() {
                     color: "#ffffff",
                     background: "linear-gradient(135deg, #7c66ff, #9333ea)",
                     boxShadow: "0 0 22px rgba(124,102,255,0.3)",
-                    px: { xs: 2.8, md: 3.4 },
-                    minHeight: { xs: 46, md: 50 },
-                    fontSize: { xs: 14, md: 15.5 },
+                    px: { xs: 2.3, md: 3.4 },
+                    minHeight: { xs: 42, md: 50 },
+                    fontSize: { xs: 13, md: 15.5 },
                     fontWeight: 800,
                   }}
                 >
@@ -3074,13 +3144,21 @@ export function EditorWorkspace() {
             {!imageLoading && imageUrl && (
               <Box
                 sx={{
+                  "--preview-aspect-ratio": previewAspectRatioValue ?? 1,
                   transform: `scale(${zoom / 100})`,
                   transformOrigin: "center center",
                   transition: "transform 0.15s ease",
                   position: "relative",
-                  width: { xs: "100%", md: "auto" },
-                  height: { xs: "100%", md: "auto" },
-                  maxWidth: { xs: "calc(100dvw - 56px)", md: "calc(100% - 72px)" },
+                  width: previewAspectRatioValue
+                    ? {
+                        xs: "min(calc(100% - 28px), calc((54svh - 64px) * var(--preview-aspect-ratio)))",
+                        sm: "min(calc(100% - 40px), calc((56svh - 72px) * var(--preview-aspect-ratio)))",
+                        md: "min(calc(100% - 72px), calc((100vh - 310px) * var(--preview-aspect-ratio)))",
+                      }
+                    : { xs: "calc(100% - 28px)", md: "calc(100% - 72px)" },
+                  maxWidth: { xs: "calc(100% - 28px)", md: "calc(100% - 72px)" },
+                  maxHeight: { xs: "calc(100% - 56px)", md: "calc(100% - 72px)" },
+                  aspectRatio: previewAspectRatio,
                 }}
               >
                 <Box
@@ -3093,13 +3171,13 @@ export function EditorWorkspace() {
                   onPointerDown={handleWorkspacePreviewPointerDown}
                   sx={{
                     position: "relative",
-                    display: { xs: "flex", md: previewCropRatio ? "inline-block" : "inline-flex" },
+                    display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    width: previewCropRatio ? { xs: "100%", md: "min(72vw, 860px)" } : { xs: "100%", md: "auto" },
-                    height: previewCropRatio ? "auto" : { xs: "100%", md: "auto" },
+                    width: "100%",
+                    height: "100%",
                     maxWidth: "100%",
-                    aspectRatio: previewCropRatio ?? "auto",
+                    aspectRatio: previewAspectRatio,
                     overflow: "hidden",
                     transform: previewTransform,
                     transformOrigin: "center center",
@@ -3115,21 +3193,22 @@ export function EditorWorkspace() {
                     data-testid="workspace-image"
                     data-filter={cssFilter}
                     src={imageUrl}
-                      alt={imageAlt}
-                      sx={{
-                        display: "block",
-                        width: freeCropPreviewActive ? `${10000 / freeCrop.width}%` : activeCropRatio ? "100%" : "auto",
-                        height: freeCropPreviewActive ? `${10000 / freeCrop.height}%` : activeCropRatio ? "100%" : { xs: "100%", md: "auto" },
-                        maxHeight: previewCropRatio ? "none" : { xs: "100%", md: "calc(100vh - 310px)" },
-                        maxWidth: previewCropRatio ? "none" : "100%",
-                        objectFit: freeCropPreviewActive ? "fill" : activeCropRatio ? "cover" : "contain",
-                        objectPosition: "center center",
-                        filter: cssFilter,
-                        transform: freeCropPreviewActive ? `translate(-${freeCrop.x}%, -${freeCrop.y}%)` : "none",
-                        transformOrigin: "top left",
-                        transition: "filter 0.08s linear, transform 0.15s ease",
-                      }}
-                    />
+                    alt={imageAlt}
+                    onLoad={handleImageLoad}
+                    sx={{
+                      display: "block",
+                      width: freeCropPreviewActive ? `${10000 / freeCrop.width}%` : "100%",
+                      height: freeCropPreviewActive ? `${10000 / freeCrop.height}%` : "100%",
+                      maxHeight: previewCropRatio ? "none" : "100%",
+                      maxWidth: previewCropRatio ? "none" : "100%",
+                      objectFit: freeCropPreviewActive ? "fill" : activeCropRatio ? "cover" : "contain",
+                      objectPosition: "center center",
+                      filter: cssFilter,
+                      transform: freeCropPreviewActive ? `translate(-${freeCrop.x}%, -${freeCrop.y}%)` : "none",
+                      transformOrigin: "top left",
+                      transition: "filter 0.08s linear, transform 0.15s ease",
+                    }}
+                  />
                   {filterEffectOverlaySx && <Box data-testid="filter-effect-overlay" sx={filterEffectOverlaySx} />}
                   {!showOriginal && cropPreset.id === "free" && freeCropEditing && (
                     <Box

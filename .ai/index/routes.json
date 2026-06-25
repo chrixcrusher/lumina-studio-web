@@ -1,5 +1,6 @@
 {
-  "description": "Backend routes and frontend API call sites.",
+  "description": "Server routes and client API call sites where configured.",
+  "config": ".ai/context-config.json",
   "regenerate": "npm run ai:index",
   "routes": [
     {

@@ -1,5 +1,6 @@
 {
   "description": "Lightweight source file map for token-efficient navigation.",
+  "config": ".ai/context-config.json",
   "regenerate": "npm run ai:index",
   "files": [
     {
@@ -528,18 +529,18 @@
       "chars": 801
     },
     {
+      "path": "frontend/src/domains/account/services/account-api.ts",
+      "area": "frontend:account",
+      "kind": "api-client",
+      "lines": 20,
+      "chars": 548
+    },
+    {
       "path": "frontend/src/domains/account/components/AccountSettingsPage.tsx",
       "area": "frontend:account",
       "kind": "component",
       "lines": 181,
       "chars": 6374
-    },
-    {
-      "path": "frontend/src/domains/account/services/account-api.ts",
-      "area": "frontend:account",
-      "kind": "frontend-api-service",
-      "lines": 20,
-      "chars": 548
     },
     {
       "path": "frontend/src/domains/account/services/account-api.spec.ts",
@@ -619,18 +620,18 @@
       "chars": 166
     },
     {
+      "path": "frontend/src/domains/authentication/services/auth-api.ts",
+      "area": "frontend:authentication",
+      "kind": "api-client",
+      "lines": 34,
+      "chars": 1079
+    },
+    {
       "path": "frontend/src/domains/authentication/components/AuthForm.tsx",
       "area": "frontend:authentication",
       "kind": "component",
-      "lines": 274,
-      "chars": 8896
-    },
-    {
-      "path": "frontend/src/domains/authentication/services/auth-api.ts",
-      "area": "frontend:authentication",
-      "kind": "frontend-api-service",
-      "lines": 34,
-      "chars": 1079
+      "lines": 326,
+      "chars": 10522
     },
     {
       "path": "frontend/src/domains/authentication/services/auth-api.spec.ts",
@@ -650,13 +651,13 @@
       "path": "frontend/src/domains/editor/components/EditorWorkspace.tsx",
       "area": "frontend:editor",
       "kind": "component",
-      "lines": 3058,
-      "chars": 112362
+      "lines": 3668,
+      "chars": 139793
     },
     {
       "path": "frontend/src/domains/enhancement/services/restore-face-api.ts",
       "area": "frontend:enhancement",
-      "kind": "frontend-api-service",
+      "kind": "api-client",
       "lines": 17,
       "chars": 643
     },
@@ -665,7 +666,7 @@
       "area": "frontend:enhancement",
       "kind": "test",
       "lines": 64,
-      "chars": 1815
+      "chars": 1843
     },
     {
       "path": "frontend/src/domains/enhancement/types/restore-face.ts",
@@ -675,18 +676,18 @@
       "chars": 532
     },
     {
+      "path": "frontend/src/domains/history/services/history-api.ts",
+      "area": "frontend:history",
+      "kind": "api-client",
+      "lines": 47,
+      "chars": 1183
+    },
+    {
       "path": "frontend/src/domains/history/components/HistoryPage.tsx",
       "area": "frontend:history",
       "kind": "component",
       "lines": 186,
       "chars": 7917
-    },
-    {
-      "path": "frontend/src/domains/history/services/history-api.ts",
-      "area": "frontend:history",
-      "kind": "frontend-api-service",
-      "lines": 47,
-      "chars": 1183
     },
     {
       "path": "frontend/src/domains/history/services/history-api.spec.ts",
@@ -705,7 +706,7 @@
     {
       "path": "frontend/src/infrastructure/api/api-client.ts",
       "area": "frontend:infrastructure",
-      "kind": "source",
+      "kind": "api-client",
       "lines": 115,
       "chars": 2841
     },
@@ -717,6 +718,13 @@
       "chars": 14231
     },
     {
+      "path": "frontend/src/domains/presets/services/presets-api.ts",
+      "area": "frontend:presets",
+      "kind": "api-client",
+      "lines": 59,
+      "chars": 1395
+    },
+    {
       "path": "frontend/src/domains/presets/components/PresetsPage.tsx",
       "area": "frontend:presets",
       "kind": "component",
@@ -724,11 +732,18 @@
       "chars": 3728
     },
     {
-      "path": "frontend/src/domains/presets/services/presets-api.ts",
+      "path": "frontend/src/domains/presets/services/preset-schema.ts",
       "area": "frontend:presets",
-      "kind": "frontend-api-service",
-      "lines": 59,
-      "chars": 1395
+      "kind": "source",
+      "lines": 341,
+      "chars": 11399
+    },
+    {
+      "path": "frontend/src/domains/presets/services/preset-schema.spec.ts",
+      "area": "frontend:presets",
+      "kind": "test",
+      "lines": 116,
+      "chars": 3686
     },
     {
       "path": "frontend/src/domains/presets/services/presets-api.spec.ts",
@@ -755,8 +770,8 @@
       "path": "frontend/src/shared/components/MobileViewportGate.tsx",
       "area": "frontend:shared",
       "kind": "component",
-      "lines": 13,
-      "chars": 356
+      "lines": 8,
+      "chars": 160
     },
     {
       "path": "frontend/src/shared/constants/lumina.ts",
@@ -790,15 +805,15 @@
       "path": "frontend/src/tests/component/mvp-ui.test.tsx",
       "area": "frontend:tests",
       "kind": "test",
-      "lines": 417,
-      "chars": 17620
+      "lines": 724,
+      "chars": 29346
     },
     {
       "path": "frontend/src/tests/contracts/api-contract.test.ts",
       "area": "frontend:tests",
       "kind": "test",
-      "lines": 258,
-      "chars": 7391
+      "lines": 268,
+      "chars": 7553
     },
     {
       "path": "frontend/src/tests/e2e/workspace-upload.spec.ts",

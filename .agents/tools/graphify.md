@@ -1,47 +1,34 @@
-# Graphify Guidance
+# Graphify
 
-Graphify is useful for codebase navigation, dependency discovery, and module relationship exploration.
+## Role
 
-## Use When
+Graphify is an optional repository relationship/navigation map.
 
-- You need a quick map of related files.
-- You are onboarding to an unfamiliar area.
-- You want to identify likely call paths before reading source.
+## Use when
 
-## Do Not Use When
+- exploring unfamiliar code areas
+- finding dependencies or call paths
+- planning refactors
+- onboarding an agent to a module
+- identifying likely files before exact reads
 
-- You need exact implementation details.
-- You are deciding final behavior.
-- The graph is stale or generated before recent changes.
+## Do not use when
 
-## Suggested Commands
+- the target files are already known
+- simple search is enough
+- exact implementation behavior is needed
+- the generated graph may be stale and no source verification will follow
 
-Graphify is installed in this repo as `@sentropic/graphify`.
+## Context rule
 
-Run it through the local package binary:
+Graphify output is navigation only.
+Exact source files and tests are truth.
 
-```text
-npx graphify --help
-node_modules/.bin/graphify --version
-```
+## Invocation rule
 
-Generate output into an ignored directory such as:
+Do not run Graphify for every prompt.
+Run it only when relationship discovery is useful.
 
-```text
-graphify-out/
-.graphify/
-```
+## Generated output policy
 
-Use the tool's current documentation for exact graph generation and query syntax.
-
-## Generated Output Policy
-
-Do not commit large generated graph output by default. Regenerate it when source changes meaningfully.
-
-## Staleness Risk
-
-Graphs can miss dynamic relationships, generated files, runtime configuration, and recent edits. Read exact files before editing.
-
-## .gitignore Recommendation
-
-Keep `graphify-out/` and `.graphify/` ignored.
+Ignore generated graph output by default unless the project intentionally commits a small reviewed summary.

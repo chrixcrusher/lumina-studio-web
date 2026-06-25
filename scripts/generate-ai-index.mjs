@@ -1,19 +1,59 @@
-import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 const root = process.cwd();
-const outDir = path.join(root, ".ai", "index");
-const sourceRoots = ["backend/src", "frontend/src"];
-const extensions = [".ts", ".tsx"];
+const configPath = path.join(root, ".ai", "context-config.json");
 
-const ignoredDirectories = new Set([
-  ".git",
-  ".next",
-  "coverage",
-  "dist",
-  "node_modules",
-  "out",
-]);
+const defaultConfig = {
+  index: {
+    outDir: ".ai/index",
+    sourceRoots: ["src"],
+    extensions: [".ts", ".tsx", ".js", ".jsx"],
+    ignoredDirectories: [".git", ".next", "coverage", "dist", "node_modules", "out"],
+    areaRules: [],
+    routes: {
+      decoratedControllerSource: "server",
+      decoratedControllerApiPrefix: "",
+      decoratedControllerSuffix: ".controller.ts",
+      clientApiSource: "client",
+      clientApiIncludeSegments: ["/services/", "/api/"],
+      clientApiFunction: "apiRequest",
+    },
+  },
+};
+
+function readConfig() {
+  if (!existsSync(configPath)) {
+    return defaultConfig;
+  }
+
+  try {
+    const parsed = JSON.parse(readFileSync(configPath, "utf8"));
+    return {
+      ...defaultConfig,
+      ...parsed,
+      index: {
+        ...defaultConfig.index,
+        ...(parsed.index || {}),
+        routes: {
+          ...defaultConfig.index.routes,
+          ...(parsed.index?.routes || {}),
+        },
+      },
+    };
+  } catch (error) {
+    throw new Error(`Failed to parse .ai/context-config.json: ${error.message}`);
+  }
+}
+
+const config = readConfig();
+const indexConfig = config.index;
+const outDir = path.join(root, indexConfig.outDir);
+const sourceRoots = indexConfig.sourceRoots;
+const extensions = new Set(indexConfig.extensions);
+const ignoredDirectories = new Set(indexConfig.ignoredDirectories);
+const areaRules = indexConfig.areaRules || [];
+const routeConfig = indexConfig.routes || {};
 
 function toPosix(filePath) {
   return filePath.split(path.sep).join("/");
@@ -21,6 +61,10 @@ function toPosix(filePath) {
 
 function walk(directory) {
   const files = [];
+
+  if (!existsSync(directory)) {
+    return files;
+  }
 
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
     if (ignoredDirectories.has(entry.name)) {
@@ -34,7 +78,7 @@ function walk(directory) {
       continue;
     }
 
-    if (entry.isFile() && extensions.includes(path.extname(entry.name))) {
+    if (entry.isFile() && extensions.has(path.extname(entry.name))) {
       files.push(fullPath);
     }
   }
@@ -42,63 +86,32 @@ function walk(directory) {
   return files;
 }
 
-function detectArea(relativePath) {
+function interpolateArea(template, relativePath) {
   const parts = relativePath.split("/");
+  return template.replace(/\{(\d+)\}/g, (_, index) => parts[Number(index)] || "unknown");
+}
 
-  if (relativePath.startsWith("backend/src/domains/")) {
-    return `backend:${parts[3]}`;
+function detectArea(relativePath) {
+  const matchingRule = areaRules.find((rule) => relativePath.startsWith(rule.prefix));
+
+  if (matchingRule) {
+    return interpolateArea(matchingRule.area, relativePath);
   }
 
-  if (relativePath.startsWith("backend/src/persistence/")) {
-    return "backend:persistence";
-  }
-
-  if (relativePath.startsWith("backend/src/integrations/")) {
-    return "backend:integrations";
-  }
-
-  if (relativePath.startsWith("backend/src/common/")) {
-    return "backend:common";
-  }
-
-  if (relativePath.startsWith("backend/src/contracts/")) {
-    return "backend:contracts";
-  }
-
-  if (relativePath.startsWith("frontend/src/domains/")) {
-    return `frontend:${parts[3]}`;
-  }
-
-  if (relativePath.startsWith("frontend/src/app/")) {
-    return "frontend:app";
-  }
-
-  if (relativePath.startsWith("frontend/src/shared/")) {
-    return "frontend:shared";
-  }
-
-  if (relativePath.startsWith("frontend/src/infrastructure/")) {
-    return "frontend:infrastructure";
-  }
-
-  if (relativePath.startsWith("frontend/src/tests/")) {
-    return "frontend:tests";
-  }
-
-  return parts[0];
+  return relativePath.split("/")[0] || "source";
 }
 
 function detectKind(relativePath) {
   const name = path.posix.basename(relativePath);
 
-  if (name.endsWith(".spec.ts") || relativePath.includes("/tests/")) return "test";
+  if (name.endsWith(".spec.ts") || name.endsWith(".test.ts") || relativePath.includes("/tests/")) return "test";
   if (name.endsWith(".controller.ts")) return "controller";
   if (name.endsWith(".service.ts")) return "service";
   if (name.endsWith(".module.ts")) return "module";
   if (name.endsWith(".repository.ts")) return "repository";
   if (name.endsWith(".schema.ts")) return "schema";
   if (name.endsWith(".types.ts") || relativePath.includes("/types/")) return "types";
-  if (name.endsWith("api.ts")) return "frontend-api-service";
+  if (name.endsWith("api.ts") || relativePath.includes("/api/")) return "api-client";
   if (name.endsWith(".tsx") && relativePath.includes("/app/")) return "route-page";
   if (name.endsWith(".tsx") && relativePath.includes("/components/")) return "component";
   if (relativePath.includes("/integrations/")) return "integration";
@@ -123,8 +136,8 @@ function joinRoute(...segments) {
   return `/${joined}`;
 }
 
-function extractBackendRoutes(relativePath, text) {
-  if (!relativePath.endsWith(".controller.ts")) return [];
+function extractDecoratedRoutes(relativePath, text) {
+  if (!relativePath.endsWith(routeConfig.decoratedControllerSuffix || ".controller.ts")) return [];
 
   const controllerMatch = text.match(/@Controller\(([^)]*)\)/);
   const basePath = normalizeRouteSegment(controllerMatch?.[1] || "");
@@ -132,7 +145,7 @@ function extractBackendRoutes(relativePath, text) {
   let pendingRoute = null;
 
   for (const line of text.split(/\r?\n/)) {
-    const routeMatch = line.match(/@(Get|Post|Put|Patch|Delete)\(([^)]*)\)/);
+    const routeMatch = line.match(/@(Get|Post|Put|Patch|Delete|Options|Head)\(([^)]*)\)/);
 
     if (routeMatch) {
       pendingRoute = {
@@ -146,9 +159,9 @@ function extractBackendRoutes(relativePath, text) {
       const handlerMatch = line.match(/^\s*(?:async\s+)?([A-Za-z0-9_]+)\s*\(/);
       if (handlerMatch) {
         routes.push({
-          source: "backend",
+          source: routeConfig.decoratedControllerSource || "server",
           method: pendingRoute.method,
-          path: joinRoute("api/v1", basePath, pendingRoute.segment),
+          path: joinRoute(routeConfig.decoratedControllerApiPrefix, basePath, pendingRoute.segment),
           handler: handlerMatch[1],
           file: relativePath,
         });
@@ -160,13 +173,19 @@ function extractBackendRoutes(relativePath, text) {
   return routes;
 }
 
-function extractFrontendApiCalls(relativePath, text) {
-  if (!relativePath.includes("/services/") && !relativePath.includes("/infrastructure/api/")) {
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function extractClientApiCalls(relativePath, text) {
+  const includeSegments = routeConfig.clientApiIncludeSegments || [];
+  if (!includeSegments.some((segment) => relativePath.includes(segment))) {
     return [];
   }
 
   const calls = [];
-  const regex = /apiRequest(?:<[\s\S]*?>)?\(\s*(`[^`]+`|"[^"]+"|'[^']+')/g;
+  const functionName = escapeRegExp(routeConfig.clientApiFunction || "apiRequest");
+  const regex = new RegExp(`${functionName}(?:<[\\s\\S]*?>)?\\(\\s*(\`[^\`]+\`|"[^"]+"|'[^']+')`, "g");
   let match;
 
   while ((match = regex.exec(text))) {
@@ -176,7 +195,7 @@ function extractFrontendApiCalls(relativePath, text) {
     const methodMatch = nearby.match(/method:\s*["']([A-Z]+)["']/);
     const line = text.slice(0, match.index).split(/\r?\n/).length;
     calls.push({
-      source: "frontend",
+      source: routeConfig.clientApiSource || "client",
       method: methodMatch ? methodMatch[1] : "GET",
       pathExpression: rawPath,
       file: relativePath,
@@ -235,8 +254,12 @@ function resolveRelativeImport(fromRelativePath, specifier) {
     base,
     `${base}.ts`,
     `${base}.tsx`,
+    `${base}.js`,
+    `${base}.jsx`,
     `${base}/index.ts`,
     `${base}/index.tsx`,
+    `${base}/index.js`,
+    `${base}/index.jsx`,
   ];
 
   return candidates.find((candidate) => allRelativeFiles.has(candidate)) || base;
@@ -265,10 +288,7 @@ function extractImports(relativePath, text) {
   return imports;
 }
 
-const absoluteFiles = sourceRoots.flatMap((sourceRoot) => {
-  const absoluteRoot = path.join(root, sourceRoot);
-  return walk(absoluteRoot);
-});
+const absoluteFiles = sourceRoots.flatMap((sourceRoot) => walk(path.join(root, sourceRoot)));
 
 const allRelativeFiles = new Set(
   absoluteFiles.map((file) => toPosix(path.relative(root, file))).sort(),
@@ -292,8 +312,8 @@ for (const absoluteFile of absoluteFiles) {
     chars: stats.size,
   });
 
-  routes.push(...extractBackendRoutes(relativePath, text));
-  routes.push(...extractFrontendApiCalls(relativePath, text));
+  routes.push(...extractDecoratedRoutes(relativePath, text));
+  routes.push(...extractClientApiCalls(relativePath, text));
   symbols.push(...extractSymbols(relativePath, text));
   imports.push(...extractImports(relativePath, text));
 }
@@ -315,6 +335,7 @@ writeFileSync(
   `${JSON.stringify(
     {
       description: "Lightweight source file map for token-efficient navigation.",
+      config: toPosix(path.relative(root, configPath)),
       regenerate: "npm run ai:index",
       files: sortObjectArray(fileEntries, ["area", "kind", "path"]),
     },
@@ -327,7 +348,8 @@ writeFileSync(
   path.join(outDir, "routes.json"),
   `${JSON.stringify(
     {
-      description: "Backend routes and frontend API call sites.",
+      description: "Server routes and client API call sites where configured.",
+      config: toPosix(path.relative(root, configPath)),
       regenerate: "npm run ai:index",
       routes: sortObjectArray(routes, ["source", "path", "method", "file"]),
     },
@@ -341,6 +363,7 @@ writeFileSync(
   `${JSON.stringify(
     {
       description: "Exported and high-value local symbols for navigation.",
+      config: toPosix(path.relative(root, configPath)),
       regenerate: "npm run ai:index",
       symbols: sortObjectArray(symbols, ["file", "line", "name"]),
     },
@@ -354,6 +377,7 @@ writeFileSync(
   `${JSON.stringify(
     {
       description: "Import relationships for source navigation.",
+      config: toPosix(path.relative(root, configPath)),
       regenerate: "npm run ai:index",
       imports: sortObjectArray(imports, ["from", "to"]),
     },

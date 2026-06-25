@@ -1,5 +1,6 @@
 {
   "description": "Import relationships for source navigation.",
+  "config": ".ai/context-config.json",
   "regenerate": "npm run ai:index",
   "imports": [
     {
@@ -933,6 +934,11 @@
       "kind": "internal"
     },
     {
+      "from": "frontend/src/domains/authentication/components/AuthForm.tsx",
+      "to": "frontend/src/domains/authentication/services/auth-api.ts",
+      "kind": "internal"
+    },
+    {
       "from": "frontend/src/domains/authentication/services/auth-api.spec.ts",
       "to": "frontend/src/domains/authentication/services/auth-api.ts",
       "kind": "internal"
@@ -970,6 +976,16 @@
     {
       "from": "frontend/src/domains/history/services/history-api.ts",
       "to": "frontend/src/domains/history/types/history.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "frontend/src/domains/presets/services/preset-schema.spec.ts",
+      "to": "frontend/src/domains/presets/services/preset-schema.ts",
+      "kind": "internal"
+    },
+    {
+      "from": "frontend/src/domains/presets/services/preset-schema.ts",
+      "to": "frontend/src/domains/presets/types/preset.ts",
       "kind": "internal"
     },
     {

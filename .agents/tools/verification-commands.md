@@ -1,36 +1,37 @@
 # Verification Commands
 
-Detected package manager: npm workspaces.
+LuminaStudio Web uses npm workspaces for the frontend and backend.
 
 ## Root Commands
 
-- `npm run dev:frontend`: start the Next.js dev server.
-- `npm run dev:backend`: build and start the NestJS backend.
-- `npm run build`: build frontend and backend workspaces.
-- `npm run lint`: run frontend and backend lint checks.
-- `npm run typecheck`: run TypeScript checks for both workspaces.
-- `npm run test`: run frontend and backend Vitest suites.
-- `npm run verify`: run lint, typecheck, test, and build.
-- `npm run ai:check`: alias for `npm run verify`.
-- `npm run ai:index`: regenerate `.ai/index` file, route, symbol, and dependency indexes.
-- `npm run ai:context`: alias for `npm run ai:index`.
-- `npm run ai:graph`: run Graphify update into ignored `.graphify` output.
+| Command | Purpose |
+| --- | --- |
+| `npm install` | Install workspace dependencies. |
+| `npm run dev:frontend` | Start the Next.js frontend development server. |
+| `npm run dev:backend` | Start the NestJS backend development server. |
+| `npm run lint` | Run frontend and backend lint checks. |
+| `npm run typecheck` | Run frontend and backend TypeScript checks. |
+| `npm run test` | Run frontend and backend Vitest suites. |
+| `npm run build` | Build frontend and backend workspaces. |
+| `npm run verify` | Run lint, typecheck, tests, and build. |
+| `npm run ai:check` | AI workflow alias for `npm run verify`. |
 
-## Frontend Workspace
+## Subsystem Commands
 
-- `npm run dev --workspace frontend`
-- `npm run build --workspace frontend`
-- `npm run lint --workspace frontend`
-- `npm run typecheck --workspace frontend`
-- `npm run test --workspace frontend`
-- `npm run test:e2e --workspace frontend`
+| Subsystem | Command | Purpose |
+| --- | --- | --- |
+| Frontend | `npm run dev --workspace frontend` | Start the frontend workspace dev server. |
+| Frontend | `npm run test:e2e --workspace frontend` | Run Playwright e2e tests. |
+| Backend | `npm run dev --workspace backend` | Start the backend workspace dev server. |
 
-## Backend Workspace
+## AI Context Commands
 
-- `npm run dev --workspace backend`
-- `npm run build --workspace backend`
-- `npm run lint --workspace backend`
-- `npm run typecheck --workspace backend`
-- `npm run test --workspace backend`
+| Command | Purpose |
+| --- | --- |
+| `npm run ai:index` | Regenerate `.ai/index` discovery files. |
+| `npm run ai:context` | Alias for `npm run ai:index`. |
+| `npm run ai:graph` | Build/update the ignored Graphify graph. |
 
-Graphify, Understand Anything, Aider, and Repomix are optional. Do not add failing required commands for them unless the tools become project dependencies.
+Generated maps, indexes, graphs, repo maps, embeddings, and snapshots are navigation aids only. Read exact source files before edits.
+
+Do not claim any command passed unless it actually ran.

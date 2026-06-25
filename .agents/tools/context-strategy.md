@@ -1,27 +1,35 @@
 # Context Strategy
 
-Use layers deliberately:
+Tools are escalation layers, not automatic defaults.
+Exact source files and tests are always the source of truth.
+Normal tasks should use routing docs, targeted search, and exact file reads first.
+Invoke Graphify, Repomix, Understand Anything, Aider, or Caveman only when the task specifically needs that capability.
 
-- Docs = intent layer.
-- `docs/ai/context-routing.md` = task routing layer.
-- `docs/ai/maps/` = compact orientation layer.
-- `.ai/index/*.json` = lightweight generated discovery layer.
-- Graphify = navigation layer.
-- Aider repo map = coding context layer when using Aider.
-- Understand Anything = onboarding/deep understanding layer.
-- Repomix = portable snapshot layer.
-- Source files = truth layer.
-- Tests = verification layer.
+## Decision table
 
-Rule: Never edit based only on a graph, summary, embedding result, repo map, or generated snapshot. Always read the exact source file first.
+| Task situation | Default action | Tool escalation |
+|---|---|---|
+| Small known-file edit | Read exact file(s), edit, test | No tool |
+| Unknown dependency/call path | Search first, then use relationship map if needed | Graphify |
+| Coding inside terminal AI workflow | Use exact files and repo map | Aider |
+| Need to send repo context to another AI/tool | Export small controlled snapshot | Repomix |
+| Large unfamiliar repo / onboarding | Use broad exploration aid | Understand Anything |
+| User asks for terse output / low-risk status | Use concise style | Caveman |
 
-Recommended flow:
+## Workflow
 
-1. Start with `AGENTS.md` and the relevant docs.
-2. Use `docs/ai/context-routing.md` to choose a route.
-3. Read only the matching compact map in `docs/ai/maps/`.
-4. Inspect `.ai/index/*.json` or search with `rg` for exact symbols, routes, and constants.
-5. Use optional context tools to find related files.
-6. Read exact files and tests.
-7. Edit narrowly.
-8. Run relevant verification.
+1. Read core project guidance (AGENTS.md, relevant wiki pages).
+2. Use context routing / maps / indexes if available.
+3. Use targeted search (rg) or exact file lookup.
+4. Invoke a tool only if the task needs that tool.
+5. Read exact source files before editing.
+6. Verify with tests or relevant checks.
+
+## Source of truth rule
+
+Generated graphs, repo maps, snapshots, summaries, and dashboards are navigation aids only.
+Exact source files and tests are the source of truth.
+
+Do not run Graphify, Repomix, Understand Anything, or Caveman for every prompt.
+Do not use Repomix as default coding context.
+Do not edit code based only on generated context.

@@ -1,7 +1,7 @@
-# Gemini And Antigravity Adapter
+# Google Gemini Project Instructions
 
-Use `AGENTS.md` as the primary repository instruction file.
+Generated adapter summary. Canonical sources live in `AGENTS.md` and `.agents/`.
 
-Reusable workflows live in `.agents/skills/`, and portable role prompts live in `.agents/roles/`. Use `docs/ai/context-strategy.md` for token-efficient navigation guidance.
+Read `AGENTS.md` first. Use roles from `.agents/roles/`. Use standalone skills from `.agents/skills/`. Overlays: Mentor and Coach in `.agents/overlays/`.
 
-Graphify, repo maps, summaries, and embeddings are discovery aids only. Read exact LuminaStudio source files before changing code, and verify with the actual npm commands documented in `.agents/tools/verification-commands.md`.
+Regenerate adapters: `pwsh scripts/sync-ai-adapters.ps1 -Target gemini`
