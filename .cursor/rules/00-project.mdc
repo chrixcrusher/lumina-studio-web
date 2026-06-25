@@ -5,14 +5,16 @@ alwaysApply: true
 
 # LuminaStudio Web
 
+<!-- Generated from AGENTS.md and .agents sources. Keep canonical updates there first. -->
+
 Use `AGENTS.md` as the primary rule file.
 
-This is an npm-workspaces monorepo with a Next.js/React frontend and a NestJS/Mongoose backend. The canonical product design is `docs/tdd/ls-web-tdd.md`.
+This is an npm-workspaces monorepo with a Next.js/React frontend and a NestJS/Mongoose backend. The canonical product design is `wiki/tdd/ls-web-tdd.md`.
 
 Important docs:
 - `README.md`
-- `docs/tdd/ls-web-tdd.md`
-- `docs/api/ls-web-api_specification.md`
-- `docs/database/ls-web-database-schema.md`
-- `docs/project-structure/ls-web-project-structure.md`
-- `docs/testing/ls-web-test-specification.md`
+- `wiki/tdd/ls-web-tdd.md`
+- `wiki/api/ls-web-api_specification.md`
+- `wiki/database/ls-web-database-schema.md`
+- `wiki/project-structure/ls-web-project-structure.md`
+- `wiki/testing/ls-web-test-specification.md`

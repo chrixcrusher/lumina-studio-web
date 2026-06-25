@@ -1,6 +1,6 @@
 # LuminaStudio Web Agent Rules
 
-Source of intent: `docs/tdd/ls-web-tdd.md`. Source files remain the final implementation truth.
+Source of intent: `wiki/tdd/ls-web-tdd.md`. Source files remain the final implementation truth.
 
 Agents working in this repository must keep every implementation and documentation change aligned with the LuminaStudio Web MVP goal:
 
@@ -43,15 +43,15 @@ POST /api/v1/enhance/manual
 - `backend/src/common`: reusable framework helpers.
 - `backend/src/integrations`: external service wrappers.
 - `backend/src/persistence`: persistence modules, repositories, and MongoDB schemas.
-- `docs/tdd/ls-web-tdd.md`: canonical design.
-- `docs/api/ls-web-api_specification.md`: API contract documentation.
-- `docs/database/ls-web-database-schema.md`: database schema documentation.
-- `docs/diagrams`: ERD, DFD, flowchart, and user-flow diagrams.
-- `docs/ai/context-routing.md`: token-efficient routing by task type.
-- `docs/ai/maps`: compact task maps for API, backend, frontend, database, testing, and deployment.
+- `wiki/tdd/ls-web-tdd.md`: canonical design.
+- `wiki/api/ls-web-api_specification.md`: API contract documentation.
+- `wiki/database/ls-web-database-schema.md`: database schema documentation.
+- `wiki/diagrams`: ERD, DFD, flowchart, and user-flow diagrams.
+- `.ai/context-routing.md`: token-efficient routing by task type.
+- `.ai/maps`: compact task maps for API, backend, frontend, database, testing, and deployment.
 - `.ai/index`: lightweight generated file, route, symbol, and dependency indexes.
 - `.agents`: portable AI roles, skills, workflows, and tool policies.
-- `docs/ai`: human-facing AI development setup docs.
+- `wiki/ai`: human-facing AI development setup docs.
 
 ## Core Operating Rules
 
@@ -67,8 +67,8 @@ POST /api/v1/enhance/manual
 ## Context Strategy
 
 - Docs are the intent layer.
-- `docs/ai/context-routing.md` is the task routing layer.
-- `docs/ai/maps` are compact orientation maps.
+- `.ai/context-routing.md` is the task routing layer.
+- `.ai/maps` are compact orientation maps.
 - `.ai/index` is the lightweight generated discovery layer.
 - Graphify is the navigation layer.
 - Aider repo maps are a coding context layer for Aider sessions.
@@ -99,9 +99,9 @@ Use maps and `.ai/index` before broad file reads. Use `rg`/file search for exact
 
 ## Documentation Rules
 
-- Keep `docs/tdd/ls-web-tdd.md` canonical.
+- Keep `wiki/tdd/ls-web-tdd.md` canonical.
 - Update API, database, diagram, flow, and project-structure docs when behavior or architecture changes.
-- If resolving work from `docs/development-plan/ls-web-development-plan.md`, update the matching ticket status with `pending`, `in_progress`, `done`, or `blocked`.
+- If resolving work from `wiki/development-plan/ls-web-development-plan.md`, update the matching ticket status with `pending`, `in_progress`, `done`, or `blocked`.
 - Avoid adding desktop/offline requirements to Web MVP docs.
 
 ## Security Rules
@@ -129,30 +129,35 @@ Use maps and `.ai/index` before broad file reads. Use `rg`/file search for exact
 
 ## AI Role Usage Guide
 
-Portable role prompts live in `.agents/roles/`.
+Portable role prompts live in `.agents/roles/`. This setup uses exactly 8 canonical agents from the reusable agent model:
 
-- Product Manager: requirements, acceptance criteria, user flows, scope.
-- Project Manager: task breakdown, role assignment, dependency tracking, progress coordination.
-- System Architect: module impact, boundaries, implementation plan.
-- Frontend Engineer: UI, routing, state, API clients, browser behavior.
-- Backend Engineer: controllers, services, DTOs, auth guards, contracts.
-- Database Engineer: schemas, indexes, data integrity, migrations.
-- SQA Engineer: tests, regressions, acceptance verification.
-- DevOps Engineer: CI/CD, env vars, deployment, runtime config.
-- Security Reviewer: secrets, auth, token handling, logging, dependency risk.
-- AI Integration Engineer: Hugging Face integration, user-provided token safety, timeouts, retries.
+- System Architect: architecture, module boundaries, dataflow, and technical risk.
+- Product & Planning Manager: requirements, acceptance criteria, task breakdown, owner assignment, dependencies, and progress coordination.
+- Frontend UI/UX Developer: UI, routing, state, accessibility, frontend API usage, browser behavior, and frontend tests.
+- Backend & Database Engineer: APIs, services, validation, auth, persistence, integrations, batch jobs, queues, CLI tools, and data ingestion.
+- DevOps Engineer: CI/CD, env vars, deployment, automation operations, runtime config, monitoring, and releases.
+- Security Engineer: secrets, auth, authorization, token handling, dependency risk, unsafe inputs, logging, and sensitive workflows.
+- SQA Engineer: test plans, unit/integration/e2e coverage, regressions, acceptance verification, and bug reports.
+- Technical Documentation Specialist: README, API docs, setup, onboarding, operations, workflow, integration, and changelog docs.
+
+Narrow concerns such as AI integration, fullstack coordination, batch jobs, MQTT, file processing, and API contract checks are handled through skills and handoffs rather than standalone roles.
 
 Claude-specific subagent adapters live in `.claude/agents/`.
 
 ## Skill Usage Guide
 
-Reusable workflows live in `.agents/skills/`.
+Reusable skills live in `.agents/skills/`.
 
+- `ask-repo-question`: answer repository questions without editing files.
+- `plan-code-change`: inspect and plan code changes without editing files.
+- `execute-code-change`: implement code changes with context routing, exact source reads, tests, docs, and verification.
 - `use-context-tools`: find files efficiently without treating summaries as truth.
 - `implement-feature`: deliver a ticket safely end to end.
 - `fix-bug`: reproduce, diagnose, minimally fix, and test a defect.
 - `code-review`: review changed code for correctness, architecture, security, contracts, and tests.
-- `write-tests`: add focused coverage and regression tests.
+- `write-automated-test-cases`: add focused automated coverage and regression tests.
+- `create-manual-test-cases`: create manual QA test cases from requirements, docs, templates, and previous samples.
+- `execute-manual-test-cases`: execute manual QA test cases from a named test case file using named setup/context files.
 - `update-docs`: keep docs aligned with changed behavior.
 - `api-contract-check`: protect backend/frontend contract compatibility.
 - `database-change`: make schema changes safely.

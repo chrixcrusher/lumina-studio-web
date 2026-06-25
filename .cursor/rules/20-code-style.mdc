@@ -5,6 +5,8 @@ alwaysApply: true
 
 # Code Style
 
+<!-- Generated from AGENTS.md and .agents sources. Keep canonical updates there first. -->
+
 Follow existing TypeScript patterns before adding abstractions.
 
 Use canonical values from `frontend/src/shared/constants/lumina.ts` and `backend/src/contracts/lumina.ts`: `encryptedHuggingFaceToken`, `huggingFaceTokenConfigured`, `browser`, `cloud_ai`, `restore_face`, `text_overlay`.

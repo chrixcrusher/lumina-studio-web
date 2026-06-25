@@ -1,7 +1,9 @@
-# LuminaStudio Web Project Rules
+# Cline Rules
 
-Use `AGENTS.md` as the primary rule file.
+Generated from `AGENTS.md`. Edit canonical sources, then run `scripts/sync-ai-adapters.ps1 -Target cline`.
 
-LuminaStudio Web is browser-first. Frontend manual editing stays in the browser. Backend responsibilities are authentication, encrypted user Hugging Face token storage, preset CRUD, metadata-only history, and `POST /api/v1/ai/restore-face`.
-
-Do not add backend offline AI, server-side manual enhancement, platform-owned Hugging Face tokens, or paid-service requirements for the MVP.
+- Read `AGENTS.md` and `.agents/README.md` first.
+- Use the smallest relevant role from `.agents/roles/`.
+- Use standalone skills from `.agents/skills/` only when a reusable workflow is needed.
+- Overlays Mentor/Coach change style, not ownership.
+- Exact source files are truth.

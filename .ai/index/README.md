@@ -1,18 +1,18 @@
-# AI Generated Index
+# Generated Indexes
 
-This folder contains lightweight generated navigation files for token-efficient agent work.
+This folder contains lightweight generated indexes for LuminaStudio Web source discovery.
 
-Regenerate with:
+Use these files as navigation aids only. They do not replace exact source reads.
+
+Regenerate them with:
 
 ```powershell
 npm run ai:index
 ```
 
-Files:
+Typical outputs:
 
-- `file-map.json`: source files grouped by area/kind.
-- `routes.json`: backend routes and frontend API call sites.
-- `symbols.json`: exported and local high-value symbols.
+- `file-map.json`: source files grouped by area and kind.
+- `routes.json`: API routes and frontend route files when detected.
+- `symbols.json`: exported classes, functions, constants, interfaces, and types.
 - `dependency-graph.json`: import relationships.
-
-These files are navigation aids only. Read exact source files before edits.

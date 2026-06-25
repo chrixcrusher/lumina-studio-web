@@ -1,32 +1,32 @@
-# Caveman Concise-Output Mode
+# Caveman
 
-Caveman mode is an optional concise-output style for situations where short answers are more valuable than explanation.
+## Role
 
-## Use When
+Caveman is an optional terse-output style mode.
 
-- The user asks for terse output.
-- You are reporting command status or a short checklist.
-- The task has low ambiguity and low risk.
+## Use when
 
-## Do Not Use When
+- the user asks for concise output
+- writing short status updates
+- writing compact review notes
+- writing commit summaries
+- summarizing low-risk tasks
 
-- Architecture, security, API contracts, or database changes need careful reasoning.
-- The user needs onboarding or tradeoff explanation.
-- A finding needs evidence and context.
+## Do not use when
 
-## Install Notes
+- explaining architecture
+- explaining security decisions
+- designing APIs or databases
+- onboarding a developer
+- documenting tradeoffs
+- debugging complex issues
 
-Caveman Code is installed in this repo as `@juliusbrussee/caveman-code`.
+## Context rule
 
-Run it through the local package binary:
+Caveman changes response style only.
+It does not replace analysis, source reading, tests, or documentation.
 
-```text
-npx caveman --help
-node_modules/.bin/caveman --version
-```
+## Invocation rule
 
-Treat concise-output mode as a style choice unless the user explicitly asks to use the Caveman agent.
-
-## Risk
-
-Being too terse can hide assumptions. For high-risk work, prefer concise but complete explanations.
+Do not enable Caveman by default.
+Use it only when terseness is requested or clearly beneficial.

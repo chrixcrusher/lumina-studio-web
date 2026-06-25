@@ -1,21 +1,29 @@
-# Repomix Guidance
+# Repomix
 
-Repomix can package repository content into a portable snapshot for sharing with AI tools.
+## Role
 
-## Useful When
+Repomix is an optional portable context snapshot exporter.
 
-- Moving context between tools.
-- Sharing a controlled subset of repo files.
-- Creating an offline review artifact.
+## Use when
 
-## Token Cost Risk
+- sending controlled repo context to another AI tool
+- creating an offline review artifact
+- preparing a compact handoff snapshot
+- sharing selected project files without giving direct repo access
 
-Snapshots can be very large and less token-efficient than targeted file reads. Prefer exact searches and selected files for normal coding work.
+## Do not use when
 
-## Do Not Use When
+- working on a small known-file change
+- targeted search and exact file reads are enough
+- the snapshot would include secrets, dependencies, build outputs, or generated junk
+- the snapshot is larger than the useful context needed
 
-- The task touches only a small set of known files.
-- Generated output would include secrets, logs, build artifacts, or dependencies.
-- A graph or snapshot would replace exact source reading.
+## Context rule
 
-Keep `repomix-output.*` ignored unless explicitly reviewed for commit.
+Repomix output is a snapshot, not truth.
+It may be stale immediately after source changes.
+
+## Invocation rule
+
+Do not use Repomix as default coding context.
+Use it only for controlled export/handoff.

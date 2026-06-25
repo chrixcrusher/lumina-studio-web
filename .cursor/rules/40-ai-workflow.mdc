@@ -5,6 +5,8 @@ alwaysApply: true
 
 # AI Workflow
 
+<!-- Generated from AGENTS.md and .agents sources. Keep canonical updates there first. -->
+
 Use `.agents/skills/` for repeatable workflows and `.agents/roles/` for role-specific reasoning.
 
 Graphify, Aider repo maps, Understand Anything, Repomix, and summaries are for discovery. Never edit from them alone. Read exact source files before changing code.

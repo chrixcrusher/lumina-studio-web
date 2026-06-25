@@ -14,6 +14,7 @@
     "typecheck": "npm run typecheck --workspace frontend && npm run typecheck --workspace backend",
     "test": "npm run test --workspace frontend && npm run test --workspace backend",
     "verify": "npm run lint && npm run typecheck && npm run test && npm run build",
+    "smoke:deploy": "node scripts/deployment-smoke.mjs",
     "ai:check": "npm run verify",
     "ai:index": "node scripts/generate-ai-index.mjs",
     "ai:context": "npm run ai:index",

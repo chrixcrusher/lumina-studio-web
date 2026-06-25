@@ -1,30 +1,34 @@
-# Understand Anything Guidance
+# Understand Anything
 
-Understand Anything can help with onboarding and deep inspection across a repository.
+## Role
 
-## Use When
+Understand Anything is an optional onboarding and broad exploration tool.
 
-- A new agent or developer needs a broad orientation.
-- You need to inspect unfamiliar workflows before planning.
-- You want a high-level reading guide before exact source reads.
+## Use when
 
-## Do Not Use When
+- the repository is large or unfamiliar
+- a new developer or AI agent needs onboarding
+- visual/domain exploration is helpful
+- broad business workflow understanding is needed
 
-- A simple `rg` search is enough.
-- You need exact implementation truth.
-- Generated output would be too large for the task.
+## Do not use when
 
-## Install Notes
+- simple search is enough
+- target files are already known
+- exact implementation truth is needed
+- Graphify already gives enough relationship context
 
-Understand Anything is installed in this repo as `likecu-understand-anything`, and its Codex skill links are installed under the user home:
+## Context rule
 
-```text
-C:\Users\christian.paje\.agents\skills\understand*
-C:\Users\christian.paje\.understand-anything-plugin
-```
+Understand Anything output is an exploration aid, not truth.
+Exact source files and tests are truth.
 
-On Windows, the package's direct PowerShell CLI wrapper may need UTF-8 handling. If `npx understand-anything` fails with PowerShell parse errors, use the already-linked skills or rerun the installer by loading `install.ps1` as UTF-8.
+## Invocation rule
 
-## Generated Output Policy
+Do not run Understand Anything by default.
+Do not run it alongside Graphify unless there is a clear reason.
 
-Store generated output under `.understand-anything/` or another ignored path. Do not commit large generated analysis by default.
+## Generated output policy
+
+Store generated output under `.understand-anything/` or another ignored path.
+Do not commit large generated analysis by default.

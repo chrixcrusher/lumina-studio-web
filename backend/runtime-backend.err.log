@@ -1,1 +1,8 @@
 [HuggingFaceClient] AI restore provider returned an error event.
+npm error Lifecycle script `start` failed with error:
+npm error code 1
+npm error path C:\Users\christian.paje\Documents\lumina-studio-web\backend
+npm error workspace lumina-studio-web-backend@0.1.0
+npm error location C:\Users\christian.paje\Documents\lumina-studio-web\backend
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c node dist/main.js

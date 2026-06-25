@@ -1,7 +1,7 @@
-# Claude Code Adapter
+# Claude Code Project Instructions
 
-Use `AGENTS.md` as the primary rule file for this repository. Do not duplicate or drift from those rules.
+Generated adapter summary. Canonical sources live in `AGENTS.md` and `.agents/`.
 
-Reusable workflows live in `.agents/skills/`. Portable role prompts live in `.agents/roles/`. Claude-specific subagent prompts live in `.claude/agents/`.
+Read `AGENTS.md` first. Use roles from `.agents/roles/`. Use standalone skills from `.agents/skills/`. Overlays: Mentor and Coach in `.agents/overlays/`.
 
-Before editing, confirm intent from the docs, use search/context tools only to find candidate files, then read exact source files. Run relevant verification before claiming success.
+Regenerate adapters: `pwsh scripts/sync-ai-adapters.ps1 -Target claude`
