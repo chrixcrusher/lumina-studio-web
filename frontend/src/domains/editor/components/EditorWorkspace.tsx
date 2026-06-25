@@ -3153,11 +3153,12 @@ export function EditorWorkspace() {
                     ? {
                         xs: "min(calc(100% - 28px), calc((54svh - 64px) * var(--preview-aspect-ratio)))",
                         sm: "min(calc(100% - 40px), calc((56svh - 72px) * var(--preview-aspect-ratio)))",
-                        md: "min(calc(100% - 72px), calc((100vh - 310px) * var(--preview-aspect-ratio)))",
+                        md: "min(calc(100% - 32px), calc((100vh - 272px) * var(--preview-aspect-ratio)))",
+                        lg: "min(calc(100% - 32px), calc((100vh - 264px) * var(--preview-aspect-ratio)))",
                       }
-                    : { xs: "calc(100% - 28px)", md: "calc(100% - 72px)" },
-                  maxWidth: { xs: "calc(100% - 28px)", md: "calc(100% - 72px)" },
-                  maxHeight: { xs: "calc(100% - 56px)", md: "calc(100% - 72px)" },
+                    : { xs: "calc(100% - 28px)", md: "calc(100% - 32px)" },
+                  maxWidth: { xs: "calc(100% - 28px)", md: "calc(100% - 32px)" },
+                  maxHeight: { xs: "calc(100% - 56px)", md: "calc(100% - 32px)" },
                   aspectRatio: previewAspectRatio,
                 }}
               >

@@ -400,10 +400,20 @@ export function LandingPage() {
                 container
                 rowSpacing={{ xs: 2, md: 2.5 }}
                 columnSpacing={{ xs: 0, md: 2.5 }}
-                sx={{ width: "100%", m: 0 }}
+                sx={{
+                  width: { xs: "100%", md: "calc(100% + 20px)" },
+                  m: 0,
+                  ml: { md: "-20px" },
+                }}
               >
                 {featureHighlights.map((feature, index) => (
-                  <Grid item xs={12} md={3} key={feature.title} sx={{ minWidth: 0, pl: { xs: "0 !important" } }}>
+                  <Grid
+                    item
+                    xs={12}
+                    md={3}
+                    key={feature.title}
+                    sx={{ minWidth: 0, pl: { xs: "0 !important", md: "20px !important" } }}
+                  >
                     <Reveal delay={index * 90}>
                       <Paper
                         sx={{
